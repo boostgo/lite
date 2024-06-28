@@ -1,0 +1,8 @@
+.idea
+cmd
+logs
+profiles
+.DS_Store
+cdn
+.env
+docs
