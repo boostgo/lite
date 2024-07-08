@@ -12,63 +12,52 @@ func String(value any) string {
 	return toString(value, false)
 }
 
-func toString(anyValue any, memory bool) string {
-	if anyValue == nil {
+func toString(value any, memory bool) string {
+	if value == nil {
 		return ""
 	}
 
-	// string type
-	if stringValue, isStr := anyValue.(string); isStr {
-		return stringValue
+	switch v := value.(type) {
+	case fmt.Stringer:
+		return v.String()
+	case []byte:
+		return BytesToString(v)
+	case error:
+		return v.Error()
+	case *string:
+		if v == nil {
+			return ""
+		}
+
+		return *v
+	case string:
+		return v
+	case bool:
+		return strconv.FormatBool(v)
 	}
 
-	// pointer string type
-	if ptrStringValue, isPtr := anyValue.(*string); isPtr {
-		return *ptrStringValue
-	}
+	valueReflect := reflect.ValueOf(value)
 
-	// try cast to error
-	if _, ok := anyValue.(error); ok {
-		return anyValue.(error).Error()
-	}
-
-	// try cast to bytes
-	if bytesBuffer, ok := anyValue.([]byte); ok {
-		return BytesToString(bytesBuffer)
-	}
-
-	// try get Stringer interface
-	if stringer, ok := anyValue.(fmt.Stringer); ok {
-		return stringer.String()
-	}
-
-	value := reflect.ValueOf(anyValue)
-
-	switch value.Kind() {
-	case reflect.String:
-		return anyValue.(string)
-	case reflect.Bool:
-		return strconv.FormatBool(anyValue.(bool))
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return strconv.FormatInt(value.Int(), 10)
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-		return strconv.FormatUint(value.Uint(), 10)
-	case reflect.Float32:
-		return fmt.Sprintf("%f", value.Float())
-	case reflect.Float64:
-		return fmt.Sprintf("%g", value.Float())
+	switch valueReflect.Kind() {
+	case reflect.Ptr:
+		if memory || valueReflect.IsZero() {
+			return fmt.Sprintf("%v", value)
+		}
+		return toString(valueReflect.Elem().Interface(), true)
 	case reflect.Struct, reflect.Map, reflect.Slice, reflect.Array:
-		valueInBytes, err := json.Marshal(anyValue)
+		valueInBytes, err := json.Marshal(value)
 		if err != nil {
 			return ""
 		}
 		return string(valueInBytes)
-	case reflect.Ptr:
-		if memory || value.IsZero() {
-			return fmt.Sprintf("%v", value)
-		}
-
-		return toString(value.Elem().Interface(), true)
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return strconv.FormatInt(valueReflect.Int(), 10)
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+		return strconv.FormatUint(valueReflect.Uint(), 10)
+	case reflect.Float32:
+		return fmt.Sprintf("%f", valueReflect.Float())
+	case reflect.Float64:
+		return fmt.Sprintf("%g", valueReflect.Float())
 	default:
 		return fmt.Sprintf("%v", value)
 	}

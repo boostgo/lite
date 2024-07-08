@@ -1,28 +1,24 @@
 package config
 
 import (
-	"context"
 	"github.com/boostgo/lite/types/param"
-	"github.com/sethvargo/go-envconfig"
+	"github.com/ilyakaznacheev/cleanenv"
 	"os"
 )
 
-func Read(export any) error {
-	return ReadContext(context.Background(), export)
+func Read(export any, path ...string) error {
+	var configPath string
+	if len(path) > 0 {
+		configPath = path[0]
+	}
+
+	return cleanenv.ReadConfig(configPath, export)
 }
 
-func ReadContext(ctx context.Context, export any) error {
-	return envconfig.ProcessWith(ctx, export, envconfig.OsLookuper())
-}
-
-func MustReadContext(ctx context.Context, export any) {
-	if err := ReadContext(ctx, export); err != nil {
+func MustRead(export any, path ...string) {
+	if err := Read(export, path...); err != nil {
 		panic(err)
 	}
-}
-
-func MustRead(export any) {
-	MustReadContext(context.Background(), export)
 }
 
 func Get(key string) param.Param {
