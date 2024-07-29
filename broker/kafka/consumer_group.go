@@ -1,7 +1,7 @@
 package kafka
 
 import (
-	"context"
+	"errors"
 	"github.com/IBM/sarama"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/life"
@@ -96,33 +96,41 @@ func (consumer *ConsumerGroup) Consume(handler GroupHandler) {
 	}()
 }
 
-type groupHandler struct {
-	ctx              context.Context
-	groupHandlerFunc GroupHandlerFunc
+type ConsumerGroupHandlerFunc func(
+	session sarama.ConsumerGroupSession,
+	claim sarama.ConsumerGroupClaim,
+	message *sarama.ConsumerMessage,
+)
+
+type consumerGroupHandler struct {
+	handler ConsumerGroupHandlerFunc
 }
 
-func NewHandler(groupHandlerFunc GroupHandlerFunc) GroupHandler {
-	return &groupHandler{
-		ctx:              life.Context(),
-		groupHandlerFunc: groupHandlerFunc,
+func ConsumerGroupHandler(handler ConsumerGroupHandlerFunc) sarama.ConsumerGroupHandler {
+	return &consumerGroupHandler{
+		handler: handler,
 	}
 }
 
-func (h *groupHandler) Setup(sarama.ConsumerGroupSession) error { return nil }
+func (handler *consumerGroupHandler) Setup(_ sarama.ConsumerGroupSession) error {
+	return nil
+}
 
-func (h *groupHandler) Cleanup(sarama.ConsumerGroupSession) error { return nil }
+func (handler *consumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error {
+	return nil
+}
 
-func (h *groupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+func (handler *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for {
 		select {
-		case <-h.ctx.Done():
-			return nil
 		case message, ok := <-claim.Messages():
 			if !ok {
-				return nil
+				return errors.New("kafka consumer channel closed")
 			}
 
-			h.groupHandlerFunc(message, session)
+			handler.handler(session, claim, message)
+		case <-session.Context().Done():
+			return nil
 		}
 	}
 }
