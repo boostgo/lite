@@ -293,12 +293,42 @@ func main() {
 ```
 
 ### Broker
-Example:
+#### Kafka
+Consumer group example:
 ```go
 package main
 
+import (
+	"fmt"
+	"github.com/IBM/sarama"
+	"github.com/boostgo/lite/broker/kafka"
+	"github.com/boostgo/lite/log"
+	"github.com/boostgo/lite/system/life"
+	"github.com/boostgo/lite/types/to"
+)
+
 func main() {
-	//
+	cfg := kafka.Config{
+		Brokers: []string{"localhost:19092"},
+		Topics:  []string{"some_topic"},
+		GroupID: "test.some_topic_group_id",
+	}
+
+	consumer, err := kafka.NewConsumerGroup("event", cfg)
+	if err != nil {
+		log.Fatal().Err(err).Msg("create kafka consumer")
+	}
+
+	fmt.Println("consuming started")
+	consumer.Consume(kafka.ConsumerGroupHandler(
+		func(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim, message *sarama.ConsumerMessage) {
+			fmt.Println(to.String(message.Value))
+			session.MarkMessage(message, "")
+		},
+		nil, nil,
+	))
+
+	life.Wait()
 }
 ```
 
