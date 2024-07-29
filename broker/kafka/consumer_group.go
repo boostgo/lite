@@ -74,7 +74,7 @@ func (consumer *ConsumerGroup) Consume(handler GroupHandler) {
 				return
 			default:
 				if err := consumer.group.Consume(life.Context(), consumer.topics, handler); err != nil {
-					logger.Error().Str("name", consumer.name).Err(err).Msg("Consume kafka handler")
+					logger.Error().Str("name", consumer.name).Err(err).Msg("Consume kafka claim")
 					life.Cancel()
 				}
 			}
@@ -96,27 +96,48 @@ func (consumer *ConsumerGroup) Consume(handler GroupHandler) {
 	}()
 }
 
-type ConsumerGroupHandlerFunc func(
-	session sarama.ConsumerGroupSession,
-	claim sarama.ConsumerGroupClaim,
-	message *sarama.ConsumerMessage,
+type (
+	ConsumerGroupClaim func(
+		session sarama.ConsumerGroupSession,
+		claim sarama.ConsumerGroupClaim,
+		message *sarama.ConsumerMessage,
+	)
+
+	ConsumerGroupSetup   func(session sarama.ConsumerGroupSession) error
+	ConsumerGroupCleanup func(session sarama.ConsumerGroupSession) error
 )
 
 type consumerGroupHandler struct {
-	handler ConsumerGroupHandlerFunc
+	claim   ConsumerGroupClaim
+	setup   ConsumerGroupSetup
+	cleanup ConsumerGroupCleanup
 }
 
-func ConsumerGroupHandler(handler ConsumerGroupHandlerFunc) sarama.ConsumerGroupHandler {
+func ConsumerGroupHandler(
+	handler ConsumerGroupClaim,
+	setup ConsumerGroupSetup,
+	cleanup ConsumerGroupCleanup,
+) sarama.ConsumerGroupHandler {
 	return &consumerGroupHandler{
-		handler: handler,
+		claim:   handler,
+		setup:   setup,
+		cleanup: cleanup,
 	}
 }
 
-func (handler *consumerGroupHandler) Setup(_ sarama.ConsumerGroupSession) error {
+func (handler *consumerGroupHandler) Setup(session sarama.ConsumerGroupSession) error {
+	if handler.setup != nil {
+		return handler.setup(session)
+	}
+
 	return nil
 }
 
-func (handler *consumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error {
+func (handler *consumerGroupHandler) Cleanup(session sarama.ConsumerGroupSession) error {
+	if handler.cleanup != nil {
+		return handler.cleanup(session)
+	}
+
 	return nil
 }
 
@@ -128,7 +149,7 @@ func (handler *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSe
 				return errors.New("kafka consumer channel closed")
 			}
 
-			handler.handler(session, claim, message)
+			handler.claim(session, claim, message)
 		case <-session.Context().Done():
 			return nil
 		}
