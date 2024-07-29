@@ -1,6 +1,7 @@
 package connector
 
 import (
+	"github.com/boostgo/lite/collections/concurrent"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"sync"
 )

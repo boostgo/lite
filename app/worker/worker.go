@@ -43,9 +43,11 @@ func (worker *Worker) ErrorHandler(handler func(error) bool) *Worker {
 }
 
 func (worker *Worker) Run() {
+	logger := log.Namespace("worker")
+
 	if worker.fromStart {
 		if err := try.Try(worker.action); err != nil {
-			log.Error("worker").Str("worker", worker.name).Err(err).Msg("Start worker action")
+			logger.Error().Str("worker", worker.name).Err(err).Msg("Start worker action")
 		}
 	}
 
@@ -65,14 +67,14 @@ func (worker *Worker) Run() {
 		for {
 			select {
 			case <-life.Context().Done():
-				log.Info("workers").Str("worker", worker.name).Msg("Stop worker by context")
+				logger.Info().Str("worker", worker.name).Msg("Stop worker by context")
 				return
 			case <-worker.stopper:
-				log.Info("workers").Str("worker", worker.name).Msg("Stop worker by stopper")
+				logger.Info().Str("worker", worker.name).Msg("Stop worker by stopper")
 				return
 			case <-ticker.C:
 				if err := try.Try(worker.action); err != nil {
-					log.Error("workers").Str("worker", worker.name).Err(err).Msg("Ticker worker action")
+					logger.Error().Str("worker", worker.name).Err(err).Msg("Ticker worker action")
 
 					if errs.IsType(err, "Panic") {
 						worker.stopper <- true

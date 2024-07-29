@@ -11,10 +11,6 @@ func NotFound(err error) bool {
 	return errors.Is(err, sql.ErrNoRows)
 }
 
-func EmptyCollection(err error) bool {
-	return errors.Is(err, ErrEmptyCollection)
-}
-
 type DB interface {
 	sqlx.ExecerContext
 	sqlx.QueryerContext

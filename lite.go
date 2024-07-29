@@ -1,7 +1,6 @@
 package lite
 
 import (
-	"context"
 	"errors"
 	"github.com/boostgo/lite/app/api"
 	"github.com/boostgo/lite/errs"
@@ -85,13 +84,13 @@ func Run(address string) {
 
 	go func() {
 		if err := run(address); err != nil {
-			log.Error(context.Background(), "handler").Err(err)
+			log.Error().Err(err).Namespace("handler")
 			life.Cancel()
 		}
 	}()
 
 	life.GracefulLog(func() {
-		log.Info(context.Background(), "lite").Msg("Graceful shutdown...")
+		log.Info().Msg("Graceful shutdown...").Namespace("lite")
 	})
 	life.Wait()
 }

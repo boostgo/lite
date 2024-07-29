@@ -30,6 +30,7 @@ type Event interface {
 	Obj(key string, obj any) Event
 	Bytes(key string, bytes []byte) Event
 	Type(key string, obj any) Event
+	Namespace(namespace string) Event
 }
 
 type event struct {
@@ -37,22 +38,17 @@ type event struct {
 	called byte
 }
 
-func newEvent(ctx context.Context, inner *zerolog.Event, namespace ...string) Event {
-	if len(namespace) > 0 && namespace[0] != "" {
-		inner.Str("namespace", namespace[0])
-	}
-
-	traceID := trace.Get(ctx)
-	if traceID != "" {
-		inner.Str("trace_id", traceID)
-	}
-
+func newEvent(inner *zerolog.Event) Event {
 	return &event{
 		inner: inner,
 	}
 }
 
 func (e *event) Ctx(ctx context.Context) Event {
+	if ctx == nil {
+		return e
+	}
+
 	e.inner.Ctx(ctx)
 
 	traceID := trace.Get(ctx)
@@ -182,5 +178,14 @@ func (e *event) Bytes(key string, bytes []byte) Event {
 
 func (e *event) Type(key string, obj any) Event {
 	e.inner.Type(key, obj)
+	return e
+}
+
+func (e *event) Namespace(namespace string) Event {
+	if namespace == "" {
+		return e
+	}
+
+	e.Str("namespace", namespace)
 	return e
 }

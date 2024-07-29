@@ -1,7 +1,6 @@
 package sql
 
 import (
-	"context"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/life"
 	"github.com/jmoiron/sqlx"
@@ -36,7 +35,7 @@ func Connect(connectionString string, options ...func(connection *sqlx.DB)) (*sq
 func MustConnect(connectionString string, options ...func(connection *sqlx.DB)) *sqlx.DB {
 	connection, err := Connect(connectionString, options...)
 	if err != nil {
-		log.Fatal(context.Background(), "storage.sql").Err(err).Msg("Connect to Database")
+		log.Fatal().Err(err).Msg("Connect to Database").Namespace("storage.sql")
 	}
 
 	return connection
