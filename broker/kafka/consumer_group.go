@@ -13,13 +13,12 @@ type GroupHandler sarama.ConsumerGroupHandler
 type GroupHandlerFunc func(msg *sarama.ConsumerMessage, session sarama.ConsumerGroupSession)
 
 type ConsumerGroup struct {
-	name   string
 	group  sarama.ConsumerGroup
 	topics []string
 }
 
-func NewConsumerGroup(name string, cfg Config, opts ...Option) (*ConsumerGroup, error) {
-	consumerGroup, err := newConsumerGroup(name, cfg, opts...)
+func NewConsumerGroup(cfg Config, opts ...Option) (*ConsumerGroup, error) {
+	consumerGroup, err := newConsumerGroup(cfg, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +27,7 @@ func NewConsumerGroup(name string, cfg Config, opts ...Option) (*ConsumerGroup, 
 	return consumerGroup, nil
 }
 
-func newConsumerGroup(name string, cfg Config, opts ...Option) (*ConsumerGroup, error) {
+func newConsumerGroup(cfg Config, opts ...Option) (*ConsumerGroup, error) {
 	if err := validateConsumerGroupConfig(cfg); err != nil {
 		return nil, err
 	}
@@ -63,7 +62,6 @@ func newConsumerGroup(name string, cfg Config, opts ...Option) (*ConsumerGroup, 
 	}
 
 	return &ConsumerGroup{
-		name:   name,
 		group:  consumerGroup,
 		topics: cfg.Topics,
 	}, nil
@@ -73,22 +71,22 @@ func (consumer *ConsumerGroup) Close() error {
 	return consumer.group.Close()
 }
 
-func (consumer *ConsumerGroup) Consume(handler GroupHandler) {
-	consumer.consume(life.Context(), handler, life.Cancel)
+func (consumer *ConsumerGroup) Consume(name string, handler GroupHandler) {
+	consumer.consume(life.Context(), name, handler, life.Cancel)
 }
 
-func (consumer *ConsumerGroup) consume(ctx context.Context, handler GroupHandler, cancel func()) {
+func (consumer *ConsumerGroup) consume(ctx context.Context, name string, handler GroupHandler, cancel func()) {
 	logger := log.Namespace("kafka.consumer.group")
 
 	go func() {
 		for {
 			select {
 			case <-ctx.Done():
-				logger.Info().Str("name", consumer.name).Msg("Stop kafka consumer group")
+				logger.Info().Str("name", name).Msg("Stop kafka consumer group")
 				return
 			default:
 				if err := consumer.group.Consume(life.Context(), consumer.topics, handler); err != nil {
-					logger.Error().Str("name", consumer.name).Err(err).Msg("Consume kafka claim")
+					logger.Error().Str("name", name).Err(err).Msg("Consume kafka claim")
 					cancel()
 				}
 			}
@@ -99,11 +97,11 @@ func (consumer *ConsumerGroup) consume(ctx context.Context, handler GroupHandler
 		for {
 			select {
 			case err := <-consumer.group.Errors():
-				logger.Error().Err(err).Str("name", consumer.name).Msg("Consumer group error")
+				logger.Error().Err(err).Str("name", name).Msg("Consumer group error")
 				cancel()
 				return
 			case <-ctx.Done():
-				logger.Info().Str("name", consumer.name).Msg("Stop worker from context")
+				logger.Info().Str("name", name).Msg("Stop worker from context")
 				return
 			}
 		}
