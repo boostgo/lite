@@ -3,6 +3,7 @@ package kafka
 import (
 	"context"
 	"github.com/IBM/sarama"
+	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/life"
 	"time"
 )
@@ -11,11 +12,16 @@ type GroupHandler sarama.ConsumerGroupHandler
 type GroupHandlerFunc func(msg *sarama.ConsumerMessage, session sarama.ConsumerGroupSession)
 
 type ConsumerGroup struct {
+	name   string
 	group  sarama.ConsumerGroup
 	topics []string
 }
 
-func NewConsumerGroup(cfg Config, opts ...Option) (*ConsumerGroup, error) {
+func NewConsumerGroup(name string, cfg Config, opts ...Option) (*ConsumerGroup, error) {
+	if err := validateConsumerGroupConfig(cfg); err != nil {
+		return nil, err
+	}
+
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true
 	config.Consumer.Offsets.Initial = sarama.OffsetNewest
@@ -47,21 +53,47 @@ func NewConsumerGroup(cfg Config, opts ...Option) (*ConsumerGroup, error) {
 	life.Tear(consumerGroup.Close)
 
 	return &ConsumerGroup{
+		name:   name,
 		group:  consumerGroup,
 		topics: cfg.Topics,
 	}, nil
-}
-
-func (consumer *ConsumerGroup) Errors() <-chan error {
-	return consumer.group.Errors()
 }
 
 func (consumer *ConsumerGroup) Close() error {
 	return consumer.group.Close()
 }
 
-func (consumer *ConsumerGroup) Consume(handler GroupHandler) error {
-	return consumer.group.Consume(life.Context(), consumer.topics, handler)
+func (consumer *ConsumerGroup) Consume(handler GroupHandler) {
+	logger := log.Namespace("kafka.consumer.group")
+
+	go func() {
+		for {
+			select {
+			case <-life.Context().Done():
+				logger.Info().Str("name", consumer.name).Msg("Stop kafka consumer group")
+				return
+			default:
+				if err := consumer.group.Consume(life.Context(), consumer.topics, handler); err != nil {
+					logger.Error().Str("name", consumer.name).Err(err).Msg("Consume kafka handler")
+					life.Cancel()
+				}
+			}
+		}
+	}()
+
+	go func() {
+		for {
+			select {
+			case err := <-consumer.group.Errors():
+				logger.Error().Err(err).Str("name", consumer.name).Msg("Consumer group error")
+				life.Cancel()
+				return
+			case <-life.Context().Done():
+				logger.Info().Str("name", consumer.name).Msg("Stop worker from context")
+				return
+			}
+		}
+	}()
 }
 
 type groupHandler struct {

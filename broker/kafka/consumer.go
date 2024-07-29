@@ -21,6 +21,10 @@ type Consumer struct {
 }
 
 func NewConsumer(handler ConsumeHandler, cfg Config, opts ...Option) (*Consumer, error) {
+	if err := validateConsumerConfig(cfg); err != nil {
+		return nil, err
+	}
+
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true
 	config.Consumer.Offsets.Initial = sarama.OffsetNewest
