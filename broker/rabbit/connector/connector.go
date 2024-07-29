@@ -1,13 +1,12 @@
 package connector
 
 import (
-	"github.com/boostgo/lite/collections/async"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"sync"
 )
 
 type Connector struct {
-	connections *async.Map[string, *amqp.Connection]
+	connections *concurrent.Map[string, *amqp.Connection]
 }
 
 var (
@@ -18,7 +17,7 @@ var (
 func Get() *Connector {
 	_once.Do(func() {
 		_connector = &Connector{
-			connections: async.NewMap[string, *amqp.Connection](),
+			connections: concurrent.NewMap[string, *amqp.Connection](),
 		}
 	})
 
