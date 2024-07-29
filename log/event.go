@@ -55,11 +55,9 @@ func newEvent(ctx context.Context, inner *zerolog.Event, namespace ...string) Ev
 func (e *event) Ctx(ctx context.Context) Event {
 	e.inner.Ctx(ctx)
 
-	if trace.AmIMaster() {
-		traceID := trace.Get(ctx)
-		if traceID != "" {
-			e.Str(trace.Key(), traceID)
-		}
+	traceID := trace.Get(ctx)
+	if traceID != "" {
+		e.Str("trace_id", traceID)
 	}
 
 	return e
