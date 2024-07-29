@@ -7,12 +7,11 @@ import (
 )
 
 func Read(export any, path ...string) error {
-	var configPath string
 	if len(path) > 0 {
-		configPath = path[0]
+		return cleanenv.ReadConfig(path[0], export)
 	}
 
-	return cleanenv.ReadConfig(configPath, export)
+	return cleanenv.ReadEnv(export)
 }
 
 func MustRead(export any, path ...string) {

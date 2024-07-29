@@ -32,12 +32,12 @@ func init() {
 		Skipper:      middleware.DefaultSkipper,
 		ErrorMessage: "Request reached timeout",
 		OnTimeoutRouteErrorHandler: func(err error, ctx echo.Context) {
-			_ = api.Error(ctx, errs.New("Request reached timeout").SetError(err).SetHttpCode(http.StatusRequestTimeout))
+			_ = api.Error(ctx, errs.New("Request reached timeout").SetError(err, errs.ErrTimeout))
 		},
 		Timeout: time.Second * 30,
 	}))
 	handler.RouteNotFound("*", func(ctx echo.Context) error {
-		return api.NotFound(ctx, "Route not found")
+		return api.Error(ctx, errs.New("Route not found").SetError(errs.ErrNotFound))
 	})
 }
 

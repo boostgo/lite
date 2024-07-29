@@ -1,10 +1,10 @@
 package validator
 
 import (
+	"errors"
 	"github.com/boostgo/lite/errs"
 	baseValidator "github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
-	"net/http"
 )
 
 const (
@@ -51,9 +51,10 @@ func (validator *Validator) Struct(object any) error {
 	err := errs.
 		New("Model validation error").
 		SetType(errorType).
-		SetHttpCode(http.StatusUnprocessableEntity)
+		SetError(errs.ErrUnprocessableEntity)
 
-	validationErrors, ok := validateError.(baseValidator.ValidationErrors)
+	var validationErrors baseValidator.ValidationErrors
+	ok := errors.As(validateError, &validationErrors)
 	if !ok {
 		return err.SetError(validateError)
 	}
@@ -78,14 +79,15 @@ func (validator *Validator) Var(variable any, tag string) error {
 	err := errs.
 		New("Variable validation error").
 		SetType(errorType).
-		SetHttpCode(http.StatusUnprocessableEntity)
+		SetError(errs.ErrUnprocessableEntity)
 
 	validateError := validator.Validate.Var(variable, tag)
 	if err == nil {
 		return err
 	}
 
-	validationErrors, ok := validateError.(baseValidator.ValidationErrors)
+	var validationErrors baseValidator.ValidationErrors
+	ok := errors.As(validateError, &validationErrors)
 	if !ok {
 		return err.AddContext(contextKey, validateError.Error())
 	}

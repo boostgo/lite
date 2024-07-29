@@ -37,7 +37,7 @@ func EveryTitle(text string) string {
 	return cases.Title(language.Und).String(strings.ToLower(text))
 }
 
-// Username makes given text to username standard.
+// Username makes provided text to username standard.
 // Example:
 //
 // Input: John Smith

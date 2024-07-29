@@ -70,9 +70,7 @@ func (e *event) Err(err error) Event {
 	if !ok {
 		e.inner.Err(err)
 	} else {
-		if custom.Type() != nil {
-			e.Str("errorType", *custom.Type())
-		}
+		e.Str("errorType", custom.Type())
 
 		if custom.InnerError() != nil {
 			e.Str("innerError", custom.InnerError().Error())
@@ -84,9 +82,7 @@ func (e *event) Err(err error) Event {
 			}
 		}
 
-		e.
-			Int("statusCode", custom.HttpCode()).
-			Msg(custom.Message())
+		e.Msg(custom.Message())
 	}
 	return e
 }

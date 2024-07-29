@@ -1,67 +1,42 @@
 package errs
 
 import (
-	"encoding/json"
 	"errors"
-	"github.com/boostgo/lite/types/content"
 	"github.com/boostgo/lite/types/to"
-	"net/http"
 	"strings"
+)
+
+const (
+	DefaultType = ""
 )
 
 type Error struct {
 	message    string
-	errorType  *string
-	httpCode   int
+	errorType  string
 	context    map[string]any
 	innerError error
 }
 
-type outputError struct {
-	Status  string         `json:"status"`
-	Message string         `json:"message"`
-	Type    *string        `json:"type,omitempty"`
-	Code    int            `json:"code"`
-	Context map[string]any `json:"context,omitempty"`
-}
-
-// New creates new Boost Error object with given message
+// New creates new Error object with provided message
 func New(message string) *Error {
 	return &Error{
-		message:  message,
-		httpCode: http.StatusInternalServerError,
-		context:  make(map[string]any),
+		message:   message,
+		errorType: DefaultType,
+		context:   make(map[string]any),
 	}
 }
-
-const (
-	status = "ERROR"
-)
 
 func (err *Error) Message() string {
 	return err.message
 }
 
-func (err *Error) SetHttpCode(code int) *Error {
-	err.httpCode = code
-	return err
-}
-
-func (err *Error) HttpCode() int {
-	return err.httpCode
-}
-
 func (err *Error) SetType(errorType string) *Error {
-	err.errorType = &errorType
+	err.errorType = errorType
 	return err
 }
 
-func (err *Error) Type() *string {
+func (err *Error) Type() string {
 	return err.errorType
-}
-
-func (err *Error) ContentType() string {
-	return content.JSON
 }
 
 func (err *Error) Context() map[string]any {
@@ -96,8 +71,18 @@ func (err *Error) InnerError() error {
 	return err.innerError
 }
 
-func (err *Error) SetError(innerError error) *Error {
-	err.innerError = innerError
+func (err *Error) SetError(innerError ...error) *Error {
+	if len(innerError) == 0 {
+		return err
+	}
+
+	var inner error
+	if len(innerError) == 1 {
+		inner = innerError[0]
+	} else {
+		inner = Join(innerError...)
+	}
+	err.innerError = inner
 	return err
 }
 
@@ -105,55 +90,45 @@ func (err *Error) Error() string {
 	return err.String()
 }
 
-func (err *Error) JSON() []byte {
-	errorMessage := err.message
-	if err.innerError != nil {
-		errorMessage += " | " + err.innerError.Error()
-	}
-
-	output := outputError{
-		Status:  status,
-		Message: errorMessage,
-		Type:    err.errorType,
-		Code:    err.httpCode,
-		Context: err.context,
-	}
-
-	outputInBytes, _ := json.Marshal(output)
-	return outputInBytes
-}
-
 func (err *Error) String() string {
 	builder := strings.Builder{}
-	builder.Grow(500)
-	if err.errorType != nil {
+	builder.Grow(len(err.message))
+	if err.errorType != DefaultType {
+		builder.Grow(len(err.errorType) + 2)
 		builder.WriteString("[")
-		builder.WriteString(*err.errorType)
+		builder.WriteString(err.errorType)
 		builder.WriteString("] ")
 	}
 	builder.WriteString(err.message)
 
 	if err.innerError != nil {
+		innerMessage := err.innerError.Error()
+		builder.Grow(len(innerMessage) + 2)
 		builder.WriteString(": ")
-		builder.WriteString(err.innerError.Error())
+		builder.WriteString(innerMessage)
 	}
 
 	if err.context != nil && len(err.context) > 0 {
+		builder.Grow(11)
 		builder.WriteString(". Context: ")
 		for key, value := range err.context {
 			if key == "trace" {
 				trace := value.([]string)
 
 				for _, traceLine := range trace {
+					builder.Grow(len(traceLine) + 5)
 					builder.WriteString("\n\t")
 					builder.WriteString(traceLine)
 				}
 				continue
 			}
 
+			valueString := to.String(value)
+			builder.Grow(len(key) + len(valueString) + 2)
+
 			builder.WriteString(key)
 			builder.WriteString("=")
-			builder.WriteString(to.String(value))
+			builder.WriteString(valueString)
 			builder.WriteString(";")
 		}
 	}
@@ -194,8 +169,7 @@ func (err *Error) Unwrap() []error {
 }
 
 func equals(err, target *Error) bool {
-	return err.HttpCode() == target.HttpCode() &&
-		err.Type() == target.Type() &&
+	return err.Type() == target.Type() &&
 		err.Error() == target.Error()
 }
 
@@ -220,8 +194,7 @@ func IsType(err error, errorType string) bool {
 		return false
 	}
 
-	customErrType := custom.Type()
-	return customErrType != nil && *customErrType == errorType
+	return custom.Type() == errorType
 }
 
 func Is(err, target error) bool {
@@ -242,48 +215,17 @@ func Is(err, target error) bool {
 	return errCustom.Is(targetCustom)
 }
 
-func Join(errors ...error) error {
-	return newJoin(errors...)
-}
-
-func Wrap(errType string, err error) error {
-	custom, ok := TryGet(err)
-	if !ok {
-		custom = New(err.Error()).SetType(errType)
-	} else {
-		_ = custom.SetType(errType)
+func Wrap(errType string, err *error, message string) {
+	if *err != nil {
+		*err = New(message).SetType(errType).SetError(*err)
 	}
-	return custom
 }
 
-func Type(err error) *string {
+func Type(err error) string {
 	custom, ok := TryGet(err)
 	if !ok {
-		return nil
+		return DefaultType
 	}
 
 	return custom.Type()
-}
-
-func HttpCode(err error) int {
-	custom, ok := TryGet(err)
-	if !ok {
-		return 0
-	}
-
-	return custom.httpCode
-}
-
-func FromBytes(response []byte) (*Error, bool) {
-	var output outputError
-	if err := json.Unmarshal(response, &output); err != nil {
-		return nil, false
-	}
-
-	return &Error{
-		message:   output.Message,
-		errorType: output.Type,
-		httpCode:  output.Code,
-		context:   output.Context,
-	}, true
 }

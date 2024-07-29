@@ -1,17 +1,47 @@
 package errs
 
-import (
-	"github.com/boostgo/lite/types/to"
-	"runtime/debug"
+import "errors"
+
+var (
+	ErrBadRequest                  = errors.New("bad request")
+	ErrUnauthorized                = errors.New("unauthorized")
+	ErrPaymentRequired             = errors.New("payment required")
+	ErrForbidden                   = errors.New("forbidden")
+	ErrNotFound                    = errors.New("not found")
+	ErrMethodNotAllowed            = errors.New("method not allowed")
+	ErrNotAcceptable               = errors.New("not acceptable")
+	ErrProxyAuthRequired           = errors.New("proxy auth required")
+	ErrTimeout                     = errors.New("timeout")
+	ErrConflict                    = errors.New("conflict")
+	ErrGone                        = errors.New("gone")
+	ErrLengthRequired              = errors.New("length required")
+	ErrPreconditionFailed          = errors.New("precondition failed")
+	ErrEntityTooLarge              = errors.New("entity too large")
+	ErrURITooLong                  = errors.New("URI too long")
+	ErrUnsupportedMediaType        = errors.New("unsupported media type")
+	ErrRangeNotSatisfiable         = errors.New("range not satisfiable")
+	ErrExpectationFailed           = errors.New("expectation failed")
+	ErrTeapot                      = errors.New("teapot")
+	ErrMisdirectedRequest          = errors.New("misdirected request")
+	ErrUnprocessableEntity         = errors.New("unprocessable entity")
+	ErrLocked                      = errors.New("locked")
+	ErrFailedDependency            = errors.New("failed dependency")
+	ErrTooEarly                    = errors.New("too early")
+	ErrUpgradeRequired             = errors.New("upgrade required")
+	ErrPreconditionRequired        = errors.New("precondition required")
+	ErrTooManyRequests             = errors.New("too many requests")
+	ErrRequestHeaderFieldsTooLarge = errors.New("request header fields too large")
+	ErrUnavailableForLegalReasons  = errors.New("unavailable for legal reasons")
+
+	ErrInternal                    = errors.New("internal")
+	ErrNotImplemented              = errors.New("not implemented")
+	ErrBadGateway                  = errors.New("bad gateway")
+	ErrServiceUnavailable          = errors.New("service unavailable")
+	ErrGatewayTimeout              = errors.New("gateway timeout")
+	ErrHTTPVersionNotSupported     = errors.New("http version not supported")
+	ErrVariantAlsoNegotiates       = errors.New("variant also negotiates")
+	ErrInsufficientStorage         = errors.New("insufficient storage")
+	ErrLoopDetected                = errors.New("loop detected")
+	ErrNotExtended                 = errors.New("not extended")
+	ErrNetworkAuthenticationFailed = errors.New("network authentication failed")
 )
-
-func Panic(err error) *Error {
-	if custom, ok := TryGet(err); ok {
-		return custom
-	}
-
-	return New("PANIC RECOVER").
-		SetError(err).
-		SetType("Panic").
-		AddContext("trace", to.String(debug.Stack()))
-}

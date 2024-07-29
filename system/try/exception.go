@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/boostgo/lite/errs"
 	"github.com/boostgo/lite/types/to"
+	"runtime/debug"
 )
 
 func Try(tryFunc func() error) (err error) {
@@ -25,5 +26,8 @@ func CatchPanic(err any) error {
 		return nil
 	}
 
-	return errs.Panic(errors.New(to.String(err)))
+	return errs.New("PANIC RECOVER").
+		SetError(errors.New(to.String(err))).
+		SetType("Panic").
+		AddContext("trace", to.String(debug.Stack()))
 }

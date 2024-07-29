@@ -4,7 +4,6 @@ import (
 	"github.com/boostgo/lite/errs"
 	"github.com/boostgo/lite/types/to"
 	"github.com/google/uuid"
-	"net/http"
 	"strconv"
 	"strings"
 )
@@ -13,8 +12,7 @@ func ErrorParseIntParam(err error, value string) error {
 	return errs.
 		New("Parse int param error").
 		SetType("ParseIntParamError").
-		SetHttpCode(http.StatusUnprocessableEntity).
-		SetError(err).
+		SetError(err, errs.ErrUnprocessableEntity).
 		AddContext("value", value)
 }
 
@@ -22,8 +20,7 @@ func ErrorParseUUIDParam(err error, value string) error {
 	return errs.
 		New("Parse UUID param error").
 		SetType("ParseUUIDParamError").
-		SetHttpCode(http.StatusUnprocessableEntity).
-		SetError(err).
+		SetError(err, errs.ErrUnprocessableEntity).
 		AddContext("value", value)
 }
 

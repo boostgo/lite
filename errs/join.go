@@ -6,7 +6,7 @@ type joinErrors struct {
 	errors []error
 }
 
-func newJoin(errors ...error) error {
+func Join(errors ...error) error {
 	return &joinErrors{
 		errors: errors,
 	}

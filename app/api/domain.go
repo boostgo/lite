@@ -9,3 +9,27 @@ func newCreatedID(id any) createdID {
 		ID: id,
 	}
 }
+
+const (
+	statusSuccess = "Success"
+	statusFailure = "Failure"
+)
+
+type errorOutput struct {
+	Status  string         `json:"status"`
+	Type    string         `json:"type,omitempty"`
+	Message string         `json:"message"`
+	Context map[string]any `json:"context,omitempty"`
+}
+
+type successOutput struct {
+	Status string `json:"status"`
+	Body   any    `json:"body"`
+}
+
+func newSuccess(body any) successOutput {
+	return successOutput{
+		Status: statusSuccess,
+		Body:   body,
+	}
+}

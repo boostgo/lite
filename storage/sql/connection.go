@@ -2,6 +2,7 @@ package sql
 
 import (
 	"github.com/boostgo/lite/log"
+	"github.com/boostgo/lite/system/life"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"time"
@@ -25,6 +26,8 @@ func Connect(connectionString string, options ...func(connection *sqlx.DB)) (*sq
 	if err = connection.Ping(); err != nil {
 		return nil, err
 	}
+
+	life.Tear(connection.Close)
 
 	return connection, nil
 }
