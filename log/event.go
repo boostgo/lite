@@ -37,9 +37,14 @@ type event struct {
 	called byte
 }
 
-func newEvent(inner *zerolog.Event, namespace ...string) Event {
+func newEvent(ctx context.Context, inner *zerolog.Event, namespace ...string) Event {
 	if len(namespace) > 0 && namespace[0] != "" {
 		inner.Str("namespace", namespace[0])
+	}
+
+	traceID := trace.Get(ctx)
+	if traceID != "" {
+		inner.Str("trace_id", traceID)
 	}
 
 	return &event{

@@ -1,29 +1,30 @@
 package log
 
 import (
+	"context"
 	"github.com/boostgo/lite/system/life"
 	"github.com/rs/zerolog/log"
 )
 
-func Debug(namespace ...string) Event {
-	return newEvent(log.Debug(), namespace...)
+func Debug(ctx context.Context, namespace ...string) Event {
+	return newEvent(ctx, log.Debug(), namespace...)
 }
 
-func Info(namespace ...string) Event {
-	return newEvent(log.Info(), namespace...)
+func Info(ctx context.Context, namespace ...string) Event {
+	return newEvent(ctx, log.Info(), namespace...)
 }
 
-func Warn(namespace ...string) Event {
-	return newEvent(log.Warn(), namespace...)
+func Warn(ctx context.Context, namespace ...string) Event {
+	return newEvent(ctx, log.Warn(), namespace...)
 }
 
-func Error(namespace ...string) Event {
-	return newEvent(log.Error(), namespace...)
+func Error(ctx context.Context, namespace ...string) Event {
+	return newEvent(ctx, log.Error(), namespace...)
 }
 
-func Fatal(namespace ...string) Event {
+func Fatal(ctx context.Context, namespace ...string) Event {
 	defer life.Cancel()
-	return newEvent(log.Error(), namespace...).Bool("fatal", true)
+	return newEvent(ctx, log.Error(), namespace...).Bool("fatal", true)
 }
 
 func Namespace(namespace string) Logger {
@@ -31,33 +32,33 @@ func Namespace(namespace string) Logger {
 }
 
 type Logger interface {
-	Debug() Event
-	Info() Event
-	Warn() Event
-	Error() Event
-	Fatal() Event
+	Debug(ctx context.Context) Event
+	Info(ctx context.Context) Event
+	Warn(ctx context.Context) Event
+	Error(ctx context.Context) Event
+	Fatal(ctx context.Context) Event
 }
 
 type namespaced struct {
 	namespace string
 }
 
-func (logger namespaced) Debug() Event {
-	return Debug(logger.namespace)
+func (logger namespaced) Debug(ctx context.Context) Event {
+	return Debug(ctx, logger.namespace)
 }
 
-func (logger namespaced) Info() Event {
-	return Info(logger.namespace)
+func (logger namespaced) Info(ctx context.Context) Event {
+	return Info(ctx, logger.namespace)
 }
 
-func (logger namespaced) Warn() Event {
-	return Warn(logger.namespace)
+func (logger namespaced) Warn(ctx context.Context) Event {
+	return Warn(ctx, logger.namespace)
 }
 
-func (logger namespaced) Error() Event {
-	return Error(logger.namespace)
+func (logger namespaced) Error(ctx context.Context) Event {
+	return Error(ctx, logger.namespace)
 }
 
-func (logger namespaced) Fatal() Event {
-	return Fatal(logger.namespace)
+func (logger namespaced) Fatal(ctx context.Context) Event {
+	return Fatal(ctx, logger.namespace)
 }

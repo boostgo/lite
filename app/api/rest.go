@@ -51,10 +51,14 @@ func Ok(ctx echo.Context, body ...any) error {
 }
 
 func Created(ctx echo.Context, body ...any) error {
+	if len(body) == 0 {
+		return Success(ctx, http.StatusCreated)
+	}
+
 	switch value := body[0].(type) {
-	case string, uuid.UUID: // provided id
+	case string, uuid.UUID, int, int64, int32: // provided id
 		return Success(ctx, http.StatusCreated, newCreatedID(value))
 	default: // provided body
-		return Success(ctx, http.StatusCreated, newCreatedID(value))
+		return Success(ctx, http.StatusCreated, value)
 	}
 }

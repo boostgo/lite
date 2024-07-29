@@ -1,8 +1,10 @@
 package api
 
 import (
+	"context"
 	"github.com/boostgo/lite/errs"
 	"github.com/boostgo/lite/system/validator"
+	"github.com/boostgo/lite/types/param"
 	"github.com/labstack/echo/v4"
 	"sync"
 )
@@ -31,4 +33,12 @@ func Parse(ctx echo.Context, export any) error {
 	}
 
 	return nil
+}
+
+func Context(ctx echo.Context) context.Context {
+	return ctx.Request().Context()
+}
+
+func QueryParam(ctx echo.Context, name string) param.Param {
+	return param.New(ctx.QueryParam(name))
 }
