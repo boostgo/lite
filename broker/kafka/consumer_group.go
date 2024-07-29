@@ -1,6 +1,7 @@
 package kafka
 
 import (
+	"context"
 	"errors"
 	"github.com/IBM/sarama"
 	"github.com/boostgo/lite/log"
@@ -18,6 +19,16 @@ type ConsumerGroup struct {
 }
 
 func NewConsumerGroup(name string, cfg Config, opts ...Option) (*ConsumerGroup, error) {
+	consumerGroup, err := newConsumerGroup(name, cfg, opts...)
+	if err != nil {
+		return nil, err
+	}
+	life.Tear(consumerGroup.Close)
+
+	return consumerGroup, nil
+}
+
+func newConsumerGroup(name string, cfg Config, opts ...Option) (*ConsumerGroup, error) {
 	if err := validateConsumerGroupConfig(cfg); err != nil {
 		return nil, err
 	}
@@ -50,7 +61,6 @@ func NewConsumerGroup(name string, cfg Config, opts ...Option) (*ConsumerGroup, 
 	if err != nil {
 		return nil, err
 	}
-	life.Tear(consumerGroup.Close)
 
 	return &ConsumerGroup{
 		name:   name,
@@ -64,18 +74,22 @@ func (consumer *ConsumerGroup) Close() error {
 }
 
 func (consumer *ConsumerGroup) Consume(handler GroupHandler) {
+	consumer.consume(life.Context(), handler, life.Cancel)
+}
+
+func (consumer *ConsumerGroup) consume(ctx context.Context, handler GroupHandler, cancel func()) {
 	logger := log.Namespace("kafka.consumer.group")
 
 	go func() {
 		for {
 			select {
-			case <-life.Context().Done():
+			case <-ctx.Done():
 				logger.Info().Str("name", consumer.name).Msg("Stop kafka consumer group")
 				return
 			default:
 				if err := consumer.group.Consume(life.Context(), consumer.topics, handler); err != nil {
 					logger.Error().Str("name", consumer.name).Err(err).Msg("Consume kafka claim")
-					life.Cancel()
+					cancel()
 				}
 			}
 		}
@@ -86,9 +100,9 @@ func (consumer *ConsumerGroup) Consume(handler GroupHandler) {
 			select {
 			case err := <-consumer.group.Errors():
 				logger.Error().Err(err).Str("name", consumer.name).Msg("Consumer group error")
-				life.Cancel()
+				cancel()
 				return
-			case <-life.Context().Done():
+			case <-ctx.Done():
 				logger.Info().Str("name", consumer.name).Msg("Stop worker from context")
 				return
 			}
