@@ -9,7 +9,7 @@ type SyncProducer struct {
 	producer sarama.SyncProducer
 }
 
-func NewSyncProducer(cfg *Config, opts ...Option) (*SyncProducer, error) {
+func NewSyncProducer(cfg Config, opts ...Option) (*SyncProducer, error) {
 	config := sarama.NewConfig()
 	config.Producer.Return.Successes = true
 	config.Producer.Return.Errors = true
