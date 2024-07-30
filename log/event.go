@@ -19,6 +19,8 @@ type Event interface {
 	Str(key string, val string) Event
 	Strs(key string, values []string) Event
 	Int(key string, val int) Event
+	Int32(key string, value int32) Event
+	Int64(key string, value int64) Event
 	Ints(key string, values []int) Event
 	Float32(key string, value float32) Event
 	Floats32(key string, values []float32) Event
@@ -123,6 +125,16 @@ func (e *event) Strs(key string, values []string) Event {
 
 func (e *event) Int(key string, value int) Event {
 	e.inner.Int(key, value)
+	return e
+}
+
+func (e *event) Int32(key string, value int32) Event {
+	e.inner.Int32(key, value)
+	return e
+}
+
+func (e *event) Int64(key string, value int64) Event {
+	e.inner.Int64(key, value)
 	return e
 }
 

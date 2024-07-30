@@ -1,7 +1,6 @@
 package kafka
 
 import (
-	"context"
 	"github.com/IBM/sarama"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/life"
@@ -12,15 +11,11 @@ type ConsumeHandler func(message *sarama.ConsumerMessage) error
 type ErrorHandler func(err error)
 
 type Consumer struct {
-	l            log.Logger
-	ctx          context.Context
 	consumer     sarama.Consumer
-	topic        string
-	handler      ConsumeHandler
 	errorHandler ErrorHandler
 }
 
-func NewConsumer(handler ConsumeHandler, cfg Config, opts ...Option) (*Consumer, error) {
+func NewConsumer(cfg Config, opts ...Option) (*Consumer, error) {
 	if err := validateConsumerConfig(cfg); err != nil {
 		return nil, err
 	}
@@ -54,10 +49,7 @@ func NewConsumer(handler ConsumeHandler, cfg Config, opts ...Option) (*Consumer,
 	life.Tear(consumer.Close)
 
 	return &Consumer{
-		l:        log.Namespace("kafka.consumer"),
-		ctx:      life.Context(),
 		consumer: consumer,
-		handler:  handler,
 	}, nil
 }
 
@@ -65,14 +57,16 @@ func (consumer *Consumer) SetErrorHandler(handler ErrorHandler) {
 	consumer.errorHandler = handler
 }
 
-func (consumer *Consumer) Consume() error {
-	partitions, err := consumer.consumer.Partitions(consumer.topic)
+func (consumer *Consumer) Consume(topic string, handler ConsumeHandler) error {
+	logger := log.Namespace("kafka.consumer")
+
+	partitions, err := consumer.consumer.Partitions(topic)
 	if err != nil {
 		return err
 	}
 
 	for i := 0; i < len(partitions); i++ {
-		partitionConsumer, err := consumer.consumer.ConsumePartition(consumer.topic, partitions[i], sarama.OffsetNewest)
+		partitionConsumer, err := consumer.consumer.ConsumePartition(topic, partitions[i], sarama.OffsetNewest)
 		if err != nil {
 			return err
 		}
@@ -80,20 +74,22 @@ func (consumer *Consumer) Consume() error {
 		life.Tear(partitionConsumer.Close)
 
 		go func() {
-			select {
-			case <-consumer.ctx.Done():
-				consumer.l.Info().Int("partition", i).Msg("Stop consumer by context")
-				return
-			case msg, ok := <-partitionConsumer.Messages():
-				if !ok {
-					consumer.l.Info().Int("partition", i).Msg("Stop consumer by closing channel")
+			for {
+				select {
+				case <-life.Context().Done():
+					logger.Info().Int32("partition", partitions[i]).Msg("Stop consumer by context")
 					return
-				}
+				case msg, ok := <-partitionConsumer.Messages():
+					if !ok {
+						logger.Info().Int32("partition", partitions[i]).Msg("Stop consumer by closing channel")
+						return
+					}
 
-				if err = consumer.handler(msg); err != nil {
-					consumer.l.Error().Err(err).Msg("Handle message error")
-					if consumer.errorHandler != nil {
-						consumer.errorHandler(err)
+					if err = handler(msg); err != nil {
+						logger.Error().Err(err).Msg("Handle message error")
+						if consumer.errorHandler != nil {
+							consumer.errorHandler(err)
+						}
 					}
 				}
 			}
