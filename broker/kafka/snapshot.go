@@ -13,7 +13,7 @@ func Snapshot(cfg Config, name string, brokers []string, topic string, snapshotC
 		return err
 	}
 
-	consumer, err := newConsumerGroup(name, cfg, func(config *sarama.Config) {
+	consumer, err := newConsumerGroup(cfg, func(config *sarama.Config) {
 		config.Consumer.Offsets.Initial = sarama.OffsetOldest
 	})
 	if err != nil {
@@ -24,7 +24,7 @@ func Snapshot(cfg Config, name string, brokers []string, topic string, snapshotC
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	consumer.consume(ctx, ConsumerGroupHandler(
+	consumer.consume(ctx, name, ConsumerGroupHandler(
 		func(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim, message *sarama.ConsumerMessage) {
 			lastOffset, ok := offsets[message.Partition]
 			if !ok {
