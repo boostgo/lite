@@ -48,6 +48,10 @@ func SetDebug(debug bool) {
 	handler.Debug = debug
 }
 
+func With(fn func(h *echo.Echo)) {
+	fn(handler)
+}
+
 func Debug() bool {
 	return _debug.Load()
 }
