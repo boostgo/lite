@@ -314,13 +314,13 @@ func main() {
 		GroupID: "test.some_topic_group_id",
 	}
 
-	consumer, err := kafka.NewConsumerGroup("event", cfg)
+	consumer, err := kafka.NewConsumerGroup(cfg)
 	if err != nil {
 		log.Fatal().Err(err).Msg("create kafka consumer")
 	}
 
 	fmt.Println("consuming started")
-	consumer.Consume(kafka.ConsumerGroupHandler(
+	consumer.Consume("event", kafka.ConsumerGroupHandler(
 		func(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim, message *sarama.ConsumerMessage) {
 			fmt.Println(to.String(message.Value))
 			session.MarkMessage(message, "")
