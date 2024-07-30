@@ -73,15 +73,15 @@ func (consumer *Consumer) Consume(topic string, handler ConsumeHandler) error {
 
 		life.Tear(partitionConsumer.Close)
 
-		go func() {
+		go func(partition int32) {
 			for {
 				select {
 				case <-life.Context().Done():
-					logger.Info().Int32("partition", partitions[i]).Msg("Stop consumer by context")
+					logger.Info().Int32("partition", partition).Msg("Stop consumer by context")
 					return
 				case msg, ok := <-partitionConsumer.Messages():
 					if !ok {
-						logger.Info().Int32("partition", partitions[i]).Msg("Stop consumer by closing channel")
+						logger.Info().Int32("partition", partition).Msg("Stop consumer by closing channel")
 						return
 					}
 
@@ -93,7 +93,7 @@ func (consumer *Consumer) Consume(topic string, handler ConsumeHandler) error {
 					}
 				}
 			}
-		}()
+		}(partitions[i])
 	}
 
 	return nil
