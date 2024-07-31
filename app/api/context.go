@@ -6,6 +6,7 @@ import (
 	"github.com/boostgo/lite/system/validator"
 	"github.com/boostgo/lite/types/param"
 	"github.com/labstack/echo/v4"
+	"io"
 	"sync"
 )
 
@@ -41,4 +42,25 @@ func Context(ctx echo.Context) context.Context {
 
 func QueryParam(ctx echo.Context, name string) param.Param {
 	return param.New(ctx.QueryParam(name))
+}
+
+func Param(ctx echo.Context, name string) param.Param {
+	return param.New(ctx.Param(name))
+}
+
+func File(ctx echo.Context, name string) (content []byte, err error) {
+	defer errs.Wrap("API", &err, "Read form file error")
+
+	header, err := ctx.FormFile(name)
+	if err != nil {
+		return content, err
+	}
+
+	file, err := header.Open()
+	if err != nil {
+		return content, err
+	}
+	defer file.Close()
+
+	return io.ReadAll(file)
 }
