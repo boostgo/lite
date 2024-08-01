@@ -83,6 +83,7 @@ func ParseForm(ctx echo.Context) (map[string]param.Param, error) {
 	return exportMap, nil
 }
 
-func Get[T any](ctx echo.Context, key string) T {
-	return ctx.Get(key)
+func Get[T any](ctx echo.Context, key string) (value T, ok bool) {
+	value, ok = ctx.Get(key).(T)
+	return value, ok
 }
