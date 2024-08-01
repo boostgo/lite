@@ -2,30 +2,36 @@ package to
 
 import (
 	"encoding/json"
+	"github.com/google/uuid"
 	"reflect"
 	"unsafe"
 )
 
-func Bytes(anyValue any) []byte {
-	return toBytes(anyValue, false)
+func Bytes(value any) []byte {
+	return toBytes(value, false)
 }
 
-func toBytes(anyValue any, memory bool) []byte {
-	if anyValue == nil {
+func toBytes(value any, memory bool) []byte {
+	if value == nil {
 		return nil
 	}
 
-	valueType := reflect.TypeOf(anyValue)
+	switch v := value.(type) {
+	case string:
+		return StringToBytes(v)
+	case int, int8, int16, int32, int64,
+		uint, uint8, uint16, uint32, uint64, uintptr,
+		float32, float64, bool:
+		return StringToBytes(toString(v, false))
+	case uuid.UUID:
+		return StringToBytes(v.String())
+	}
+
+	valueType := reflect.TypeOf(value)
 
 	switch valueType.Kind() {
-	case reflect.String:
-		return StringToBytes(anyValue.(string))
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
-		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr,
-		reflect.Float32, reflect.Float64, reflect.Bool:
-		return StringToBytes(toString(anyValue, false))
 	case reflect.Struct, reflect.Map, reflect.Slice, reflect.Array:
-		marshalled, err := json.Marshal(anyValue)
+		marshalled, err := json.Marshal(value)
 		if err != nil {
 			return nil
 		}
@@ -36,9 +42,9 @@ func toBytes(anyValue any, memory bool) []byte {
 			return nil
 		}
 
-		return toBytes(reflect.ValueOf(anyValue).Interface(), true)
+		return toBytes(reflect.ValueOf(value).Interface(), true)
 	default:
-		return StringToBytes(toString(anyValue, false))
+		return StringToBytes(toString(value, false))
 	}
 }
 

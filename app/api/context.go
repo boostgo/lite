@@ -64,3 +64,25 @@ func File(ctx echo.Context, name string) (content []byte, err error) {
 
 	return io.ReadAll(file)
 }
+
+func ParseForm(ctx echo.Context) (map[string]param.Param, error) {
+	form, err := ctx.MultipartForm()
+	if err != nil {
+		return nil, err
+	}
+
+	exportMap := make(map[string]param.Param)
+	for key, values := range form.Value {
+		if len(values) == 0 {
+			continue
+		}
+
+		exportMap[key] = param.New(values[0])
+	}
+
+	return exportMap, nil
+}
+
+func Get[T any](ctx echo.Context, key string) T {
+	return ctx.Get(key)
+}
