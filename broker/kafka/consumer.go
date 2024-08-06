@@ -4,6 +4,7 @@ import (
 	"github.com/IBM/sarama"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/life"
+	"github.com/boostgo/lite/system/try"
 	"time"
 )
 
@@ -85,7 +86,9 @@ func (consumer *Consumer) Consume(topic string, handler ConsumeHandler) error {
 						return
 					}
 
-					if err = handler(msg); err != nil {
+					if err = try.Try(func() error {
+						return handler(msg)
+					}); err != nil {
 						logger.Error().Err(err).Msg("Handle message error")
 						if consumer.errorHandler != nil {
 							consumer.errorHandler(err)

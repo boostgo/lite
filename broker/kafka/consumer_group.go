@@ -6,6 +6,7 @@ import (
 	"github.com/IBM/sarama"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/life"
+	"github.com/boostgo/lite/system/try"
 	"time"
 )
 
@@ -113,7 +114,7 @@ type (
 		session sarama.ConsumerGroupSession,
 		claim sarama.ConsumerGroupClaim,
 		message *sarama.ConsumerMessage,
-	)
+	) error
 
 	ConsumerGroupSetup   func(session sarama.ConsumerGroupSession) error
 	ConsumerGroupCleanup func(session sarama.ConsumerGroupSession) error
@@ -154,6 +155,8 @@ func (handler *consumerGroupHandler) Cleanup(session sarama.ConsumerGroupSession
 }
 
 func (handler *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+	logger := log.Namespace("kafka.consumer.group")
+
 	for {
 		select {
 		case message, ok := <-claim.Messages():
@@ -161,7 +164,11 @@ func (handler *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSe
 				return errors.New("kafka consumer channel closed")
 			}
 
-			handler.claim(session, claim, message)
+			if err := try.Try(func() error {
+				return handler.claim(session, claim, message)
+			}); err != nil {
+				logger.Error().Err(err).Msg("Kafka consumer group claim")
+			}
 		case <-session.Context().Done():
 			return nil
 		}
