@@ -10,13 +10,8 @@ const (
 	txKey = "lite_tx"
 )
 
-func SetTx(conn *sqlx.DB, ctx context.Context) (context.Context, error) {
-	transaction, err := conn.Beginx()
-	if err != nil {
-		return nil, err
-	}
-
-	return context.WithValue(ctx, txKey, transaction), nil
+func SetTx(ctx context.Context, tx *sqlx.Tx) context.Context {
+	return context.WithValue(ctx, txKey, tx)
 }
 
 func GetTx(ctx context.Context) (*sqlx.Tx, bool) {
