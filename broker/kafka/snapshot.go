@@ -7,8 +7,8 @@ import (
 
 type SnapshotClaim func(message *sarama.ConsumerMessage)
 
-func Snapshot(cfg Config, name string, brokers []string, topic string, snapshotClaim SnapshotClaim, commit ...bool) error {
-	offsets, err := GetOffsets(brokers, sarama.NewConfig(), topic, sarama.OffsetNewest)
+func Snapshot(cfg Config, name, topic string, snapshotClaim SnapshotClaim, commit ...bool) error {
+	offsets, err := GetOffsets(cfg.Brokers, sarama.NewConfig(), topic, sarama.OffsetNewest)
 	if err != nil {
 		return err
 	}
@@ -29,7 +29,7 @@ func Snapshot(cfg Config, name string, brokers []string, topic string, snapshotC
 		autoCommit = commit[0]
 	}
 
-	consumer.consume(ctx, name, ConsumerGroupHandler(
+	consumer.consume(ctx, name, []string{topic}, ConsumerGroupHandler(
 		func(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim, message *sarama.ConsumerMessage) error {
 			lastOffset, ok := offsets[message.Partition]
 			if !ok {

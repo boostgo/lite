@@ -16,28 +16,35 @@ type Consumer struct {
 	errorHandler ErrorHandler
 }
 
+func ConsumerOption(cfg Config) Option {
+	return func(config *sarama.Config) {
+		config.Consumer.Return.Errors = true
+		config.Consumer.Offsets.Initial = sarama.OffsetNewest
+		config.Consumer.Offsets.AutoCommit.Enable = true
+		config.Consumer.Offsets.AutoCommit.Interval = time.Second
+
+		config.Consumer.Fetch.Default = 1 << 20 // 1MB
+		config.Consumer.Fetch.Max = 10 << 20    // 10MB
+		config.ChannelBufferSize = 256
+
+		if cfg.Username != "" && cfg.Password != "" {
+			config.Net.SASL.Enable = true
+			config.Net.SASL.Handshake = true
+			config.Net.SASL.Mechanism = "PLAIN"
+			config.Net.SASL.User = cfg.Username
+			config.Net.SASL.Password = cfg.Password
+		}
+	}
+}
+
 func NewConsumer(cfg Config, opts ...Option) (*Consumer, error) {
 	if err := validateConsumerConfig(cfg); err != nil {
 		return nil, err
 	}
 
 	config := sarama.NewConfig()
-	config.Consumer.Return.Errors = true
-	config.Consumer.Offsets.Initial = sarama.OffsetNewest
-	config.Consumer.Offsets.AutoCommit.Enable = true
-	config.Consumer.Offsets.AutoCommit.Interval = time.Second
-
-	config.Consumer.Fetch.Default = 1 << 20 // 1MB
-	config.Consumer.Fetch.Max = 10 << 20    // 10MB
-	config.ChannelBufferSize = 256
-
-	if cfg.Username != "" && cfg.Password != "" {
-		config.Net.SASL.Enable = true
-		config.Net.SASL.Handshake = true
-		config.Net.SASL.Mechanism = "PLAIN"
-		config.Net.SASL.User = cfg.Username
-		config.Net.SASL.Password = cfg.Password
-	}
+	config.ClientID = buildClientID()
+	ConsumerOption(cfg)(config)
 
 	for _, opt := range opts {
 		opt(config)
@@ -52,6 +59,36 @@ func NewConsumer(cfg Config, opts ...Option) (*Consumer, error) {
 	return &Consumer{
 		consumer: consumer,
 	}, nil
+}
+
+func NewConsumerFromClient(client sarama.Client) (*Consumer, error) {
+	consumer, err := sarama.NewConsumerFromClient(client)
+	if err != nil {
+		return nil, err
+	}
+	life.Tear(consumer.Close)
+
+	return &Consumer{
+		consumer: consumer,
+	}, nil
+}
+
+func MustConsumer(cfg Config, opts ...Option) *Consumer {
+	consumer, err := NewConsumer(cfg, opts...)
+	if err != nil {
+		panic(err)
+	}
+
+	return consumer
+}
+
+func MustConsumerFromClient(client sarama.Client) *Consumer {
+	consumer, err := NewConsumerFromClient(client)
+	if err != nil {
+		panic(err)
+	}
+
+	return consumer
 }
 
 func (consumer *Consumer) SetErrorHandler(handler ErrorHandler) {
