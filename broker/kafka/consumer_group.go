@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/IBM/sarama"
+	"github.com/boostgo/lite/collections/list"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/life"
 	"github.com/boostgo/lite/system/try"
@@ -17,7 +18,7 @@ type ConsumerGroup struct {
 	group sarama.ConsumerGroup
 }
 
-func ConsumerGroupOption(cfg Config) Option {
+func ConsumerGroupOption() Option {
 	return func(config *sarama.Config) {
 		config.Consumer.Return.Errors = true
 		config.Consumer.Offsets.Initial = sarama.OffsetNewest
@@ -29,14 +30,6 @@ func ConsumerGroupOption(cfg Config) Option {
 		config.Consumer.Fetch.Default = 1 << 20 // 1MB
 		config.Consumer.Fetch.Max = 10 << 20    // 10MB
 		config.ChannelBufferSize = 256
-
-		if cfg.Username != "" && cfg.Password != "" {
-			config.Net.SASL.Enable = true
-			config.Net.SASL.Handshake = true
-			config.Net.SASL.Mechanism = "PLAIN"
-			config.Net.SASL.User = cfg.Username
-			config.Net.SASL.Password = cfg.Password
-		}
 	}
 }
 
@@ -50,8 +43,8 @@ func NewConsumerGroup(cfg Config, opts ...Option) (*ConsumerGroup, error) {
 	return consumerGroup, nil
 }
 
-func NewConsumerGroupFromClient(cfg Config, client sarama.Client) (*ConsumerGroup, error) {
-	consumerGroup, err := newConsumerGroupFromClient(cfg, client)
+func NewConsumerGroupFromClient(groupID string, client sarama.Client) (*ConsumerGroup, error) {
+	consumerGroup, err := newConsumerGroupFromClient(groupID, client)
 	if err != nil {
 		return nil, err
 	}
@@ -69,8 +62,8 @@ func MustConsumerGroup(cfg Config, opts ...Option) *ConsumerGroup {
 	return consumer
 }
 
-func MustConsumerGroupFromClient(cfg Config, client sarama.Client) *ConsumerGroup {
-	consumer, err := NewConsumerGroupFromClient(cfg, client)
+func MustConsumerGroupFromClient(groupID string, client sarama.Client) *ConsumerGroup {
+	consumer, err := NewConsumerGroupFromClient(groupID, client)
 	if err != nil {
 		panic(err)
 	}
@@ -79,42 +72,16 @@ func MustConsumerGroupFromClient(cfg Config, client sarama.Client) *ConsumerGrou
 }
 
 func newConsumerGroup(cfg Config, opts ...Option) (*ConsumerGroup, error) {
-	if err := validateConsumerGroupConfig(cfg); err != nil {
-		return nil, err
-	}
-
-	config := sarama.NewConfig()
-	config.ClientID = buildClientID()
-	ConsumerGroupOption(cfg)(config)
-
-	if cfg.Username != "" && cfg.Password != "" {
-		config.Net.SASL.Enable = true
-		config.Net.SASL.Handshake = true
-		config.Net.SASL.Mechanism = "PLAIN"
-		config.Net.SASL.User = cfg.Username
-		config.Net.SASL.Password = cfg.Password
-	}
-
-	for _, opt := range opts {
-		opt(config)
-	}
-
-	consumerGroup, err := sarama.NewConsumerGroup(cfg.Brokers, cfg.GroupID, config)
+	client, err := NewClient(cfg, list.AddLeft(opts, ConsumerGroupOption())...)
 	if err != nil {
 		return nil, err
 	}
 
-	return &ConsumerGroup{
-		group: consumerGroup,
-	}, nil
+	return newConsumerGroupFromClient(cfg.GroupID, client)
 }
 
-func newConsumerGroupFromClient(cfg Config, client sarama.Client) (*ConsumerGroup, error) {
-	if err := validateConsumerGroupConfig(cfg); err != nil {
-		return nil, err
-	}
-
-	consumerGroup, err := sarama.NewConsumerGroupFromClient(cfg.GroupID, client)
+func newConsumerGroupFromClient(groupID string, client sarama.Client) (*ConsumerGroup, error) {
+	consumerGroup, err := sarama.NewConsumerGroupFromClient(groupID, client)
 	if err != nil {
 		return nil, err
 	}

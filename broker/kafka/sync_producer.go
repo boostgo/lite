@@ -9,31 +9,23 @@ type SyncProducer struct {
 	producer sarama.SyncProducer
 }
 
-func SyncProducerOption(cfg Config) Option {
+func SyncProducerOption() Option {
 	return func(config *sarama.Config) {
 		config.Producer.Return.Successes = true
 		config.Producer.Return.Errors = true
-
-		if cfg.Username != "" && cfg.Password != "" {
-			config.Net.SASL.Enable = true
-			config.Net.SASL.Handshake = true
-			config.Net.SASL.Mechanism = "PLAIN"
-			config.Net.SASL.User = cfg.Username
-			config.Net.SASL.Password = cfg.Password
-		}
 	}
 }
 
-func NewSyncProducer(cfg Config, opts ...Option) (*SyncProducer, error) {
+func NewSyncProducer(brokers []string, opts ...Option) (*SyncProducer, error) {
 	config := sarama.NewConfig()
 	config.ClientID = buildClientID()
-	SyncProducerOption(cfg)(config)
+	SyncProducerOption()(config)
 
 	for _, opt := range opts {
 		opt(config)
 	}
 
-	producer, err := sarama.NewSyncProducer(cfg.Brokers, config)
+	producer, err := sarama.NewSyncProducer(brokers, config)
 	if err != nil {
 		return nil, err
 	}
@@ -56,8 +48,8 @@ func NewSyncProducerFromClient(client sarama.Client) (*SyncProducer, error) {
 	}, nil
 }
 
-func MustSyncProducer(cfg Config, opts ...Option) *SyncProducer {
-	producer, err := NewSyncProducer(cfg, opts...)
+func MustSyncProducer(brokers []string, opts ...Option) *SyncProducer {
+	producer, err := NewSyncProducer(brokers, opts...)
 	if err != nil {
 		panic(err)
 	}

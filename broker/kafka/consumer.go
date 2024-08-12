@@ -16,7 +16,7 @@ type Consumer struct {
 	errorHandler ErrorHandler
 }
 
-func ConsumerOption(cfg Config) Option {
+func ConsumerOption() Option {
 	return func(config *sarama.Config) {
 		config.Consumer.Return.Errors = true
 		config.Consumer.Offsets.Initial = sarama.OffsetNewest
@@ -26,14 +26,6 @@ func ConsumerOption(cfg Config) Option {
 		config.Consumer.Fetch.Default = 1 << 20 // 1MB
 		config.Consumer.Fetch.Max = 10 << 20    // 10MB
 		config.ChannelBufferSize = 256
-
-		if cfg.Username != "" && cfg.Password != "" {
-			config.Net.SASL.Enable = true
-			config.Net.SASL.Handshake = true
-			config.Net.SASL.Mechanism = "PLAIN"
-			config.Net.SASL.User = cfg.Username
-			config.Net.SASL.Password = cfg.Password
-		}
 	}
 }
 
@@ -44,7 +36,7 @@ func NewConsumer(cfg Config, opts ...Option) (*Consumer, error) {
 
 	config := sarama.NewConfig()
 	config.ClientID = buildClientID()
-	ConsumerOption(cfg)(config)
+	ConsumerOption()(config)
 
 	for _, opt := range opts {
 		opt(config)

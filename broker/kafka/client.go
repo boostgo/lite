@@ -10,7 +10,7 @@ func NewClient(cfg Config, opts ...Option) (sarama.Client, error) {
 	config := sarama.NewConfig()
 
 	apply := make([]Option, 0, len(opts)+1)
-	apply = append(apply, clientOption())
+	apply = append(apply, clientOption(cfg))
 	apply = append(apply, opts...)
 
 	for _, opt := range apply {
@@ -53,12 +53,33 @@ func MustCluster(client sarama.Client) sarama.ClusterAdmin {
 	return cluster
 }
 
-func clientOption() Option {
+func clientOption(cfg Config) Option {
 	return func(config *sarama.Config) {
 		config.ClientID = buildClientID()
+
+		if cfg.Username != "" && cfg.Password != "" {
+			config.Net.SASL.Enable = true
+			config.Net.SASL.Handshake = true
+			config.Net.SASL.Mechanism = "PLAIN"
+			config.Net.SASL.User = cfg.Username
+			config.Net.SASL.Password = cfg.Password
+		}
 	}
 }
 
+var clientIdPrefix = ""
+
+const defaultClientIdPrefix = "lite-app-"
+
+func SetClientIdPrefix(prefix string) {
+	clientIdPrefix = prefix
+}
+
 func buildClientID() string {
-	return "lite-app-" + uuid.New().String()
+	prefix := clientIdPrefix
+	if prefix == "" {
+		prefix = defaultClientIdPrefix
+	}
+
+	return prefix + uuid.New().String()
 }
