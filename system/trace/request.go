@@ -18,6 +18,10 @@ func FromRequest(request *http.Request) string {
 	return traceID
 }
 
+func FromResponse(response *http.Response) string {
+	return response.Header.Get(key)
+}
+
 func SetRequest(request *http.Request, traceID string) {
 	request.Header.Set(key, traceID)
 }
