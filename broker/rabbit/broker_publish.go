@@ -36,9 +36,12 @@ func (broker *Broker) Publish(ctx context.Context, queue string, body any, cfg .
 	}
 
 	headers := amqp.Table{}
-	traceIdSet := trace.SetAmqpCtx(ctx, headers)
-	if !traceIdSet && broker.isTraceMaster {
-		trace.SetAmqp(headers, trace.String())
+	if broker.isTraceMaster {
+		if trace.Get(ctx) == "" {
+			ctx = trace.Set(ctx, trace.String())
+		}
+
+		trace.SetAmqp(headers, ctx)
 	}
 
 	if err = broker.channel.PublishWithContext(ctx,

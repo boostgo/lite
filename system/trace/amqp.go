@@ -26,7 +26,12 @@ func GetAMQP(message *amqp.Delivery) string {
 	}
 }
 
-func SetAmqp(table amqp.Table, traceID string) {
+func SetAmqp(table amqp.Table, ctx context.Context) {
+	traceID := Get(ctx)
+	if traceID == "" {
+		return
+	}
+
 	table[key] = traceID
 }
 
