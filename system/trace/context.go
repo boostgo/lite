@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	key = "boost__trace-id"
+	key = "lite_trace-id"
 )
 
 func Key() string {

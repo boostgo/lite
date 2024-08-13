@@ -30,7 +30,7 @@ func Snapshot(cfg Config, name, topic string, snapshotClaim SnapshotClaim, commi
 	}
 
 	consumer.consume(ctx, name, []string{topic}, ConsumerGroupHandler(
-		func(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim, message *sarama.ConsumerMessage) error {
+		func(ctx context.Context, session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim, message *sarama.ConsumerMessage) error {
 			lastOffset, ok := offsets[message.Partition]
 			if !ok {
 				return nil

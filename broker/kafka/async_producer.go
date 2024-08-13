@@ -1,12 +1,15 @@
 package kafka
 
 import (
+	"context"
 	"github.com/IBM/sarama"
 	"github.com/boostgo/lite/system/life"
+	"github.com/boostgo/lite/system/trace"
 )
 
 type AsyncProducer struct {
-	producer sarama.AsyncProducer
+	producer  sarama.AsyncProducer
+	traceMode bool
 }
 
 func AsyncProducerOption() Option {
@@ -32,7 +35,8 @@ func NewAsyncProducer(brokers []string, opts ...Option) (*AsyncProducer, error) 
 	life.Tear(producer.Close)
 
 	return &AsyncProducer{
-		producer: producer,
+		producer:  producer,
+		traceMode: trace.AmIMaster(),
 	}, nil
 }
 
@@ -44,7 +48,8 @@ func NewAsyncProducerFromClient(client sarama.Client) (*AsyncProducer, error) {
 	life.Tear(producer.Close)
 
 	return &AsyncProducer{
-		producer: producer,
+		producer:  producer,
+		traceMode: trace.AmIMaster(),
 	}, nil
 }
 
@@ -66,9 +71,13 @@ func MustAsyncProducerFromClient(client sarama.Client) *AsyncProducer {
 	return producer
 }
 
-func (producer *AsyncProducer) Produce(messages ...*sarama.ProducerMessage) error {
+func (producer *AsyncProducer) Produce(ctx context.Context, messages ...*sarama.ProducerMessage) error {
 	if len(messages) == 0 {
 		return nil
+	}
+
+	if producer.traceMode {
+		trace.SetKafka(ctx, messages...)
 	}
 
 	for _, msg := range messages {
