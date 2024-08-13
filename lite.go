@@ -22,6 +22,7 @@ var (
 
 func init() {
 	handler = echo.New()
+
 	handler.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 	}))
@@ -35,6 +36,16 @@ func init() {
 		},
 		Timeout: time.Second * 30,
 	}))
+
+	if trace.AmIMaster() {
+		handler.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+			return func(ctx echo.Context) error {
+				trace.SetEchoCtx(ctx, trace.String())
+				return next(ctx)
+			}
+		})
+	}
+
 	handler.RouteNotFound("*", func(ctx echo.Context) error {
 		return api.Error(ctx, errs.New("Route not found").SetError(errs.ErrNotFound))
 	})

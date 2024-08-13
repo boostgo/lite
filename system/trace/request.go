@@ -2,6 +2,7 @@ package trace
 
 import (
 	"context"
+	"github.com/labstack/echo/v4"
 	"net/http"
 )
 
@@ -28,4 +29,8 @@ func SetRequestCtx(ctx context.Context, request *http.Request) {
 	}
 
 	SetRequest(request, traceID)
+}
+
+func SetEchoCtx(ctx echo.Context, traceID string) {
+	ctx.SetRequest(ctx.Request().WithContext(context.WithValue(ctx.Request().Context(), key, traceID)))
 }
