@@ -180,7 +180,7 @@ func (handler *consumerGroupHandler) Cleanup(session sarama.ConsumerGroupSession
 }
 
 func (handler *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
-	logger := log.Namespace("kafka.consumer.group")
+	logger := log.Namespace("kafka.consumer.group.handler")
 
 	for {
 		select {

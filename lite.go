@@ -7,7 +7,6 @@ import (
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/life"
 	"github.com/boostgo/lite/system/trace"
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"net/http"
@@ -85,15 +84,6 @@ func run(address string) error {
 }
 
 func Run(address string) {
-	if trace.AmIMaster() {
-		handler.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-			return func(ctx echo.Context) error {
-				ctx.SetRequest(ctx.Request().WithContext(trace.Set(ctx.Request().Context(), uuid.New().String())))
-				return next(ctx)
-			}
-		})
-	}
-
 	go func() {
 		if err := run(address); err != nil {
 			log.Error().Err(err).Namespace("handler")

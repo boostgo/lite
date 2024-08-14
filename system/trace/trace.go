@@ -3,11 +3,24 @@ package trace
 import (
 	"context"
 	"github.com/google/uuid"
+	"sync/atomic"
 )
 
 const (
 	key = "lite_trace-id"
 )
+
+var (
+	_masterMode = atomic.Bool{}
+)
+
+func IAmMaster() {
+	_masterMode.Store(true)
+}
+
+func AmIMaster() bool {
+	return _masterMode.Load()
+}
 
 func Key() string {
 	return key
@@ -56,4 +69,12 @@ func GetUUID(ctx context.Context) uuid.UUID {
 	default:
 		return uuid.UUID{}
 	}
+}
+
+func ID() uuid.UUID {
+	return uuid.New()
+}
+
+func String() string {
+	return ID().String()
 }
