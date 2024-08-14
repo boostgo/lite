@@ -2,30 +2,22 @@ package web
 
 import "context"
 
-var (
-	Default = New()
-)
-
 func Get(ctx context.Context, url string, params ...any) (*Response, error) {
-	return Default.
-		R(ctx).
+	return R(ctx).
 		GET(url, params...)
 }
 
 func Post(ctx context.Context, body any, url string) (*Response, error) {
-	return Default.
-		R(ctx).
+	return R(ctx).
 		POST(url, body)
 }
 
 func Put(ctx context.Context, body any, url string) (*Response, error) {
-	return Default.
-		R(ctx).
+	return R(ctx).
 		PUT(url, body)
 }
 
 func Delete(ctx context.Context, url string, params ...any) (*Response, error) {
-	return Default.
-		R(ctx).
+	return R(ctx).
 		DELETE(url, params...)
 }

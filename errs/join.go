@@ -12,6 +12,10 @@ func Join(errors ...error) error {
 	}
 }
 
+func (je joinErrors) Unwrap() []error {
+	return je.errors
+}
+
 func (je joinErrors) Error() string {
 	message := strings.Builder{}
 	for i := 0; i < len(je.errors); i++ {
