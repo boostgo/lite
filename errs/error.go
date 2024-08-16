@@ -166,6 +166,10 @@ func (err *Error) Unwrap() []error {
 	return unwrapped
 }
 
+func (err *Error) setMessage(message string) {
+	err.message = append(err.message, message)
+}
+
 func (err *Error) grow() int {
 	var grow int
 	if len(err.errorTypes) > 0 {
@@ -249,6 +253,10 @@ func Wrap(errType string, err *error, message string) {
 		if !ok {
 			*err = New(message).SetType(errType).SetError(*err)
 		} else {
+			custom.
+				SetType(errType).
+				setMessage(message)
+
 			*err = custom
 		}
 	}
