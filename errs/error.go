@@ -2,6 +2,7 @@ package errs
 
 import (
 	"errors"
+	"github.com/boostgo/lite/collections/list"
 	"github.com/boostgo/lite/types/to"
 	"strings"
 )
@@ -11,32 +12,35 @@ const (
 )
 
 type Error struct {
-	message    string
-	errorType  string
+	message    []string
+	errorTypes []string
 	context    map[string]any
 	innerError error
 }
 
 // New creates new Error object with provided message
 func New(message string) *Error {
+	messages := make([]string, 0)
+	messages = append(messages, message)
+
 	return &Error{
-		message:   message,
-		errorType: DefaultType,
-		context:   make(map[string]any),
+		message:    messages,
+		errorTypes: make([]string, 0),
+		context:    make(map[string]any),
 	}
 }
 
 func (err *Error) Message() string {
-	return err.message
+	return strings.Join(list.Reverse(err.message), " - ")
 }
 
 func (err *Error) SetType(errorType string) *Error {
-	err.errorType = errorType
+	err.errorTypes = append(err.errorTypes, errorType)
 	return err
 }
 
 func (err *Error) Type() string {
-	return err.errorType
+	return strings.Join(list.Reverse(err.errorTypes), " - ")
 }
 
 func (err *Error) Context() map[string]any {
@@ -92,43 +96,37 @@ func (err *Error) Error() string {
 
 func (err *Error) String() string {
 	builder := strings.Builder{}
-	builder.Grow(len(err.message))
-	if err.errorType != DefaultType {
-		builder.Grow(len(err.errorType) + 2)
+	builder.Grow(err.grow())
+
+	if len(err.errorTypes) > 0 {
 		builder.WriteString("[")
-		builder.WriteString(err.errorType)
+		builder.WriteString(err.Type())
 		builder.WriteString("] ")
 	}
-	builder.WriteString(err.message)
+	builder.WriteString(err.Message())
 
 	if err.innerError != nil {
 		innerMessage := err.innerError.Error()
-		builder.Grow(len(innerMessage) + 2)
 		builder.WriteString(": ")
 		builder.WriteString(innerMessage)
 	}
 
 	if err.context != nil && len(err.context) > 0 {
-		builder.Grow(11)
 		builder.WriteString(". Context: ")
 		for key, value := range err.context {
 			if key == "trace" {
 				trace := value.([]string)
 
 				for _, traceLine := range trace {
-					builder.Grow(len(traceLine) + 5)
 					builder.WriteString("\n\t")
 					builder.WriteString(traceLine)
 				}
 				continue
 			}
 
-			valueString := to.String(value)
-			builder.Grow(len(key) + len(valueString) + 2)
-
 			builder.WriteString(key)
 			builder.WriteString("=")
-			builder.WriteString(valueString)
+			builder.WriteString(to.String(value))
 			builder.WriteString(";")
 		}
 	}
@@ -166,6 +164,36 @@ func (err *Error) Unwrap() []error {
 	}
 
 	return unwrapped
+}
+
+func (err *Error) grow() int {
+	var grow int
+	if len(err.errorTypes) > 0 {
+		for i := 0; i < len(err.errorTypes); i++ {
+			grow += len(err.errorTypes[i]) + 2
+		}
+	}
+
+	if err.innerError != nil {
+		grow += len(err.innerError.Error()) + 2
+	}
+
+	if err.context != nil && len(err.context) > 0 {
+		grow += 11
+		for key, value := range err.context {
+			if key == "trace" {
+				trace := value.([]string)
+
+				for _, traceLine := range trace {
+					grow += len(traceLine) + 5
+				}
+				continue
+			}
+
+			grow += len(key) + len(to.String(value)) + 2
+		}
+	}
+	return grow
 }
 
 func equals(err, target *Error) bool {
@@ -217,7 +245,12 @@ func Is(err, target error) bool {
 
 func Wrap(errType string, err *error, message string) {
 	if *err != nil {
-		*err = New(message).SetType(errType).SetError(*err)
+		custom, ok := TryGet(*err)
+		if !ok {
+			*err = New(message).SetType(errType).SetError(*err)
+		} else {
+			*err = custom
+		}
 	}
 }
 
