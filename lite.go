@@ -97,6 +97,10 @@ func run(address string) error {
 	return nil
 }
 
+func Handler() *echo.Echo {
+	return handler
+}
+
 func Run(address string) {
 	go func() {
 		if err := run(address); err != nil {
