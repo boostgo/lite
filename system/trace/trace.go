@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	key = "lite_trace-id"
+	key = "X-Lite-Trace-ID"
 )
 
 var (

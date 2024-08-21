@@ -8,6 +8,7 @@ import (
 	"github.com/boostgo/lite/system/life"
 	"github.com/boostgo/lite/system/trace"
 	"github.com/boostgo/lite/system/try"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"net/http"
@@ -27,7 +28,6 @@ func init() {
 		AllowOrigins: []string{"*"},
 	}))
 	handler.Use(RecoverMiddleware())
-	handler.Use(middleware.RequestID())
 	handler.Use(middleware.TimeoutWithConfig(middleware.TimeoutConfig{
 		Skipper:      middleware.DefaultSkipper,
 		ErrorMessage: "Request reached timeout",
@@ -75,12 +75,11 @@ func Use(middlewares ...echo.MiddlewareFunc) {
 
 func run(address string) error {
 	if trace.AmIMaster() {
-		handler.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-			return func(ctx echo.Context) error {
-				trace.SetEchoCtx(ctx, trace.String())
-				return next(ctx)
-			}
-		})
+		handler.Use(middleware.RequestIDWithConfig(middleware.RequestIDConfig{
+			Generator:        uuid.NewString,
+			RequestIDHandler: trace.SetEchoCtx,
+			TargetHeader:     trace.Key(),
+		}))
 	}
 
 	life.Tear(func() error {

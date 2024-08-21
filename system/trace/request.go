@@ -38,3 +38,7 @@ func SetRequestCtx(ctx context.Context, request *http.Request) {
 func SetEchoCtx(ctx echo.Context, traceID string) {
 	ctx.SetRequest(ctx.Request().WithContext(context.WithValue(ctx.Request().Context(), key, traceID)))
 }
+
+func GetEchoCtx(ctx echo.Context) string {
+	return Get(ctx.Request().Context())
+}
