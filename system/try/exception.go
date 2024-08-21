@@ -28,6 +28,5 @@ func CatchPanic(err any) error {
 
 	return errs.New("PANIC RECOVER").
 		SetError(errors.New(to.String(err))).
-		SetType("Panic").
 		AddContext("trace", to.String(debug.Stack()))
 }

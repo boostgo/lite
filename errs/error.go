@@ -115,7 +115,12 @@ func (err *Error) String() string {
 		builder.WriteString(". Context: ")
 		for key, value := range err.context {
 			if key == "trace" {
-				trace := value.([]string)
+				trace, ok := value.([]string)
+				if !ok {
+					builder.WriteString("\n\t")
+					builder.WriteString(value.(string))
+					continue
+				}
 
 				for _, traceLine := range trace {
 					builder.WriteString("\n\t")
@@ -186,7 +191,10 @@ func (err *Error) grow() int {
 		grow += 11
 		for key, value := range err.context {
 			if key == "trace" {
-				trace := value.([]string)
+				trace, ok := value.([]string)
+				if !ok {
+					continue
+				}
 
 				for _, traceLine := range trace {
 					grow += len(traceLine) + 5

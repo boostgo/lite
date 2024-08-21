@@ -7,6 +7,7 @@ import (
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/life"
 	"github.com/boostgo/lite/system/trace"
+	"github.com/boostgo/lite/system/try"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"net/http"
@@ -25,7 +26,7 @@ func init() {
 	handler.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 	}))
-	handler.Use(middleware.Recover())
+	handler.Use(RecoverMiddleware())
 	handler.Use(middleware.RequestID())
 	handler.Use(middleware.TimeoutWithConfig(middleware.TimeoutConfig{
 		Skipper:      middleware.DefaultSkipper,
@@ -39,6 +40,20 @@ func init() {
 	handler.RouteNotFound("*", func(ctx echo.Context) error {
 		return api.Error(ctx, errs.New("Route not found").SetError(errs.ErrNotFound))
 	})
+}
+
+func RecoverMiddleware() echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(ctx echo.Context) error {
+			if err := try.Try(func() error {
+				return next(ctx)
+			}); err != nil {
+				return api.Error(ctx, err)
+			}
+
+			return nil
+		}
+	}
 }
 
 func SetDebug(debug bool) {
