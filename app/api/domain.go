@@ -19,6 +19,7 @@ type errorOutput struct {
 	Status  string         `json:"status"`
 	Type    string         `json:"type,omitempty"`
 	Message string         `json:"message"`
+	Inner   string         `json:"inner,omitempty"`
 	Context map[string]any `json:"context,omitempty"`
 }
 
