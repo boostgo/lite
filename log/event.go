@@ -42,10 +42,16 @@ type event struct {
 	called byte
 }
 
-func newEvent(inner *zerolog.Event) Event {
-	return &event{
+func newEvent(inner *zerolog.Event, ctx ...context.Context) Event {
+	e := &event{
 		inner: inner,
 	}
+
+	if len(ctx) > 0 && ctx[0] != nil {
+		e.Ctx(ctx[0])
+	}
+
+	return e
 }
 
 func (e *event) Send() {

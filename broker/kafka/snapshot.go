@@ -3,9 +3,10 @@ package kafka
 import (
 	"context"
 	"github.com/IBM/sarama"
+	"github.com/boostgo/lite/system/try"
 )
 
-type SnapshotClaim func(message *sarama.ConsumerMessage)
+type SnapshotClaim func(message *sarama.ConsumerMessage) error
 
 func Snapshot(cfg Config, name, topic string, snapshotClaim SnapshotClaim, commit ...bool) error {
 	offsets, err := GetOffsets(cfg.Brokers, sarama.NewConfig(), topic, sarama.OffsetNewest)
@@ -36,7 +37,12 @@ func Snapshot(cfg Config, name, topic string, snapshotClaim SnapshotClaim, commi
 				return nil
 			}
 
-			snapshotClaim(message)
+			if err = try.Try(func() error {
+				return snapshotClaim(message)
+			}); err != nil {
+				return err
+			}
+
 			if autoCommit {
 				session.MarkMessage(message, "")
 			}

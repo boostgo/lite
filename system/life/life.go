@@ -2,10 +2,12 @@ package life
 
 import (
 	"context"
+	"github.com/boostgo/lite/collections/list"
 	"github.com/boostgo/lite/system/try"
 	"os"
 	"os/signal"
 	"sync"
+	"time"
 )
 
 var (
@@ -58,7 +60,7 @@ func Tear(tear func() error) {
 	l.tears = append(l.tears, tear)
 }
 
-func Wait() {
+func Wait(waitTime ...time.Duration) {
 	l := instance()
 
 	go func() {
@@ -74,7 +76,11 @@ func Wait() {
 		l.gracefulLog()
 	}
 
-	for i := len(l.tears) - 1; i >= 0; i-- {
-		try.Must(l.tears[i])
+	for _, tear := range list.Reverse(l.tears) {
+		try.Must(tear)
+	}
+
+	if len(waitTime) > 0 {
+		time.Sleep(waitTime[0])
 	}
 }

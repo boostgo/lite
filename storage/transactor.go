@@ -10,6 +10,7 @@ type Transactor interface {
 }
 
 type Transaction interface {
+	Context() context.Context
 	Commit(ctx context.Context) error
 	Rollback(ctx context.Context) error
 }

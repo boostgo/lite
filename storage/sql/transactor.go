@@ -26,7 +26,7 @@ func (st sqlTransactor) Begin(ctx context.Context) (storage.Transaction, error) 
 		return nil, err
 	}
 
-	return newTransactorTx(tx), nil
+	return newTransactorTx(ctx, tx), nil
 }
 
 func (st sqlTransactor) BeginCtx(ctx context.Context) (context.Context, error) {
@@ -60,12 +60,14 @@ func (st sqlTransactor) RollbackCtx(ctx context.Context) error {
 }
 
 type sqlTransaction struct {
-	tx *sqlx.Tx
+	tx        *sqlx.Tx
+	parentCtx context.Context
 }
 
-func newTransactorTx(tx *sqlx.Tx) storage.Transaction {
+func newTransactorTx(ctx context.Context, tx *sqlx.Tx) storage.Transaction {
 	return &sqlTransaction{
-		tx: tx,
+		tx:        tx,
+		parentCtx: ctx,
 	}
 }
 
@@ -75,4 +77,8 @@ func (tx sqlTransaction) Commit(_ context.Context) error {
 
 func (tx sqlTransaction) Rollback(_ context.Context) error {
 	return tx.tx.Rollback()
+}
+
+func (tx sqlTransaction) Context() context.Context {
+	return SetTx(tx.parentCtx, tx.tx)
 }

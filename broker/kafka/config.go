@@ -14,6 +14,15 @@ type Config struct {
 	GroupID  string
 }
 
+func (cfg Config) Copy(groupID string) Config {
+	return Config{
+		Brokers:  cfg.Brokers,
+		Username: cfg.Username,
+		Password: cfg.Password,
+		GroupID:  groupID,
+	}
+}
+
 func With(fn func(*sarama.Config)) Option {
 	return func(cfg *sarama.Config) {
 		fn(cfg)

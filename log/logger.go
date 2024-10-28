@@ -6,25 +6,25 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func Debug() Event {
-	return newEvent(log.Debug())
+func Debug(ctx ...context.Context) Event {
+	return newEvent(log.Debug(), ctx...)
 }
 
-func Info() Event {
-	return newEvent(log.Info())
+func Info(ctx ...context.Context) Event {
+	return newEvent(log.Info(), ctx...)
 }
 
-func Warn() Event {
-	return newEvent(log.Warn())
+func Warn(ctx ...context.Context) Event {
+	return newEvent(log.Warn(), ctx...)
 }
 
-func Error() Event {
-	return newEvent(log.Error())
+func Error(ctx ...context.Context) Event {
+	return newEvent(log.Error(), ctx...)
 }
 
-func Fatal() Event {
+func Fatal(ctx ...context.Context) Event {
 	defer life.Cancel()
-	return newEvent(log.Error().Bool("fatal", true))
+	return newEvent(log.Error().Bool("fatal", true), ctx...)
 }
 
 type Logger interface {

@@ -54,6 +54,19 @@ func (param Param) Strings() []string {
 	return strings.Split(param.value, ",")
 }
 
+func (param Param) IntArray() []int {
+	integers := make([]int, 0)
+	split := strings.Split(param.value, ",")
+	for _, value := range split {
+		if value == "" {
+			continue
+		}
+
+		integers = append(integers, to.Int(value))
+	}
+	return integers
+}
+
 func (param Param) Int() (int, error) {
 	intValue, err := strconv.Atoi(param.value)
 	if err != nil {
