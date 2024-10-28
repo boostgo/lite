@@ -4,10 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/boostgo/lite/errs"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/storage"
 	"github.com/jmoiron/sqlx"
 )
+
+const errType = "SQL"
 
 func NotFound(err error) bool {
 	return errors.Is(err, sql.ErrNoRows)
@@ -61,7 +64,9 @@ func (c *client) Connection() *sqlx.DB {
 	return c.conn
 }
 
-func (c *client) ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
+func (c *client) ExecContext(ctx context.Context, query string, args ...interface{}) (result sql.Result, err error) {
+	defer errs.Wrap(errType, &err, "ExecContext")
+
 	c.printLog(ctx, "ExecContext", query, args...)
 
 	tx, ok := GetTx(ctx)
@@ -72,7 +77,9 @@ func (c *client) ExecContext(ctx context.Context, query string, args ...interfac
 	return c.conn.ExecContext(ctx, query, args...)
 }
 
-func (c *client) QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
+func (c *client) QueryContext(ctx context.Context, query string, args ...interface{}) (rows *sql.Rows, err error) {
+	defer errs.Wrap(errType, &err, "QueryContext")
+
 	c.printLog(ctx, "QueryContext", query, args...)
 
 	tx, ok := GetTx(ctx)
@@ -83,7 +90,9 @@ func (c *client) QueryContext(ctx context.Context, query string, args ...interfa
 	return c.conn.QueryContext(ctx, query, args...)
 }
 
-func (c *client) QueryxContext(ctx context.Context, query string, args ...interface{}) (*sqlx.Rows, error) {
+func (c *client) QueryxContext(ctx context.Context, query string, args ...interface{}) (rows *sqlx.Rows, err error) {
+	defer errs.Wrap(errType, &err, "QueryxContext")
+
 	c.printLog(ctx, "QueryxContext", query, args...)
 
 	tx, ok := GetTx(ctx)
@@ -105,7 +114,9 @@ func (c *client) QueryRowxContext(ctx context.Context, query string, args ...int
 	return c.conn.QueryRowxContext(ctx, query, args...)
 }
 
-func (c *client) PrepareContext(ctx context.Context, query string) (*sql.Stmt, error) {
+func (c *client) PrepareContext(ctx context.Context, query string) (statement *sql.Stmt, err error) {
+	defer errs.Wrap(errType, &err, "PrepareContext")
+
 	c.printLog(ctx, "PrepareContext", query)
 
 	tx, ok := GetTx(ctx)
@@ -116,7 +127,9 @@ func (c *client) PrepareContext(ctx context.Context, query string) (*sql.Stmt, e
 	return c.conn.PrepareContext(ctx, query)
 }
 
-func (c *client) NamedExecContext(ctx context.Context, query string, arg interface{}) (sql.Result, error) {
+func (c *client) NamedExecContext(ctx context.Context, query string, arg interface{}) (result sql.Result, err error) {
+	defer errs.Wrap(errType, &err, "NamedExecContext")
+
 	c.printLog(ctx, "NamedExecContext", query, arg)
 
 	tx, ok := GetTx(ctx)
@@ -127,7 +140,9 @@ func (c *client) NamedExecContext(ctx context.Context, query string, arg interfa
 	return c.conn.NamedExecContext(ctx, query, arg)
 }
 
-func (c *client) SelectContext(ctx context.Context, dest interface{}, query string, args ...interface{}) error {
+func (c *client) SelectContext(ctx context.Context, dest interface{}, query string, args ...interface{}) (err error) {
+	defer errs.Wrap(errType, &err, "SelectContext")
+
 	c.printLog(ctx, "SelectContext", query, args...)
 
 	tx, ok := GetTx(ctx)
@@ -138,7 +153,9 @@ func (c *client) SelectContext(ctx context.Context, dest interface{}, query stri
 	return c.conn.SelectContext(ctx, dest, query, args...)
 }
 
-func (c *client) GetContext(ctx context.Context, dest interface{}, query string, args ...interface{}) error {
+func (c *client) GetContext(ctx context.Context, dest interface{}, query string, args ...interface{}) (err error) {
+	defer errs.Wrap(errType, &err, "GetContext")
+
 	c.printLog(ctx, "GetContext", query, args...)
 
 	tx, ok := GetTx(ctx)
@@ -149,7 +166,9 @@ func (c *client) GetContext(ctx context.Context, dest interface{}, query string,
 	return c.conn.GetContext(ctx, dest, query, args...)
 }
 
-func (c *client) PrepareNamedContext(ctx context.Context, query string) (*sqlx.NamedStmt, error) {
+func (c *client) PrepareNamedContext(ctx context.Context, query string) (statement *sqlx.NamedStmt, err error) {
+	defer errs.Wrap(errType, &err, "PrepareNamedContext")
+
 	c.printLog(ctx, "PrepareNamedContext", query)
 
 	tx, ok := GetTx(ctx)
