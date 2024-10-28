@@ -9,16 +9,15 @@ require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/lib/pq v1.10.9
+	github.com/mailru/go-clickhouse v1.8.0
 	github.com/mehanizm/iuliia-go v1.0.2
 	github.com/rabbitmq/amqp091-go v1.8.1
 	github.com/rs/zerolog v1.33.0
-	github.com/sethvargo/go-envconfig v0.8.3
 	golang.org/x/text v0.14.0
 )
 
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
-	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

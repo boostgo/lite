@@ -45,10 +45,13 @@ func Atomic(ctx context.Context, conn *sqlx.DB, fn func(ctx context.Context) err
 	if err != nil {
 		return err
 	}
+
 	defer func() {
-		_ = tx.Rollback()
-	}()
-	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+			return
+		}
+
 		_ = tx.Commit()
 	}()
 

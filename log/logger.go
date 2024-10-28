@@ -27,20 +27,6 @@ func Fatal() Event {
 	return newEvent(log.Error().Bool("fatal", true))
 }
 
-func Namespace(namespace string) Logger {
-	return &wrapper{
-		ctx:       context.Background(),
-		namespace: namespace,
-	}
-}
-
-func Context(ctx context.Context, namespace string) Logger {
-	return &wrapper{
-		ctx:       ctx,
-		namespace: namespace,
-	}
-}
-
 type Logger interface {
 	Debug() Event
 	Info() Event
@@ -49,17 +35,20 @@ type Logger interface {
 	Fatal() Event
 }
 
-func New(ctx context.Context, namespace ...string) Logger {
-	if len(namespace) > 0 && namespace[0] != "" {
-		return Context(ctx, namespace[0])
-	}
-
-	return Context(ctx, "")
-}
-
 type wrapper struct {
 	namespace string
 	ctx       context.Context
+}
+
+func Namespace(namespace string) Logger {
+	return Context(context.Background(), namespace)
+}
+
+func Context(ctx context.Context, namespace string) Logger {
+	return &wrapper{
+		ctx:       ctx,
+		namespace: namespace,
+	}
 }
 
 func (logger wrapper) Debug() Event {

@@ -11,7 +11,9 @@ import (
 
 type Event interface {
 	Ctx(ctx context.Context) Event
+	Send()
 	Any(key string, value any) Event
+	Arr(key string, args ...any) Event
 	Err(err error) Event
 	Errs(key string, errors []error) Event
 	Msg(message string) Event
@@ -46,6 +48,10 @@ func newEvent(inner *zerolog.Event) Event {
 	}
 }
 
+func (e *event) Send() {
+	e.inner.Send()
+}
+
 func (e *event) Ctx(ctx context.Context) Event {
 	if ctx == nil {
 		return e
@@ -63,6 +69,15 @@ func (e *event) Ctx(ctx context.Context) Event {
 
 func (e *event) Any(key string, object any) Event {
 	e.inner.Interface(key, object)
+	return e
+}
+
+func (e *event) Arr(key string, args ...any) Event {
+	stringArgs := make([]string, len(args))
+	for i, arg := range args {
+		stringArgs[i] = to.String(arg)
+	}
+	e.inner.Strs(key, stringArgs)
 	return e
 }
 
