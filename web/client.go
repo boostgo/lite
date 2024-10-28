@@ -116,6 +116,16 @@ func (client *Client) Headers(headers map[string]any) *Client {
 	return client
 }
 
+func (client *Client) Authorization(token string) *Client {
+	client.headers["Authorization"] = "Bearer " + token
+	return client
+}
+
+func (client *Client) ContentType(contentType string) *Client {
+	client.headers["Content-Type"] = contentType
+	return client
+}
+
 func (client *Client) Cookie(key string, value any) *Client {
 	client.cookies[key] = to.String(value)
 	return client

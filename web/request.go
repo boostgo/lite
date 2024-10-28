@@ -168,6 +168,16 @@ func (request *Request) Headers(headers map[string]any) *Request {
 	return request
 }
 
+func (request *Request) Authorization(token string) *Request {
+	request.headers["Authorization"] = "Bearer " + token
+	return request
+}
+
+func (request *Request) ContentType(contentType string) *Request {
+	request.headers["Content-Type"] = contentType
+	return request
+}
+
 func (request *Request) Cookie(key string, value any) *Request {
 	request.cookies[key] = value
 	return request
