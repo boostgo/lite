@@ -32,7 +32,12 @@ func init() {
 		Skipper:      middleware.DefaultSkipper,
 		ErrorMessage: "Request reached timeout",
 		OnTimeoutRouteErrorHandler: func(err error, ctx echo.Context) {
-			_ = api.Error(ctx, errs.New("Request reached timeout").SetError(err, errs.ErrTimeout))
+			_ = api.Error(
+				ctx,
+				errs.
+					New("Request reached timeout").
+					SetError(err, errs.ErrTimeout),
+			)
 		},
 		Timeout: time.Second * 30,
 	}))
@@ -104,13 +109,13 @@ func Handler() *echo.Echo {
 func Run(address string) {
 	go func() {
 		if err := run(address); err != nil {
-			log.Error().Err(err).Namespace("handler")
+			log.Namespace("handler").Error().Err(err).Send()
 			life.Cancel()
 		}
 	}()
 
 	life.GracefulLog(func() {
-		log.Info().Msg("Graceful shutdown...").Namespace("lite")
+		log.Namespace("lite").Info().Msg("Graceful shutdown...")
 	})
 	life.Wait()
 }
