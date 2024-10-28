@@ -22,7 +22,6 @@ func Read(export any, path ...string) error {
 	}
 
 	return nil
-
 }
 
 func MustRead(export any, path ...string) {
