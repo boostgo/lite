@@ -21,6 +21,7 @@ type DB interface {
 	GetContext
 	NamedExecContext
 	SelectContext
+	PrepareContext
 }
 
 type NamedExecContext interface {
@@ -33,6 +34,10 @@ type SelectContext interface {
 
 type GetContext interface {
 	GetContext(ctx context.Context, dest interface{}, query string, args ...interface{}) error
+}
+
+type PrepareContext interface {
+	PrepareNamedContext(ctx context.Context, query string) (*sqlx.NamedStmt, error)
 }
 
 type client struct {
@@ -142,6 +147,17 @@ func (c *client) GetContext(ctx context.Context, dest interface{}, query string,
 	}
 
 	return c.conn.GetContext(ctx, dest, query, args...)
+}
+
+func (c *client) PrepareNamedContext(ctx context.Context, query string) (*sqlx.NamedStmt, error) {
+	c.printLog(ctx, "PrepareNamedContext", query)
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.PrepareNamedContext(ctx, query)
+	}
+
+	return c.conn.PrepareNamedContext(ctx, query)
 }
 
 func (c *client) printLog(ctx context.Context, queryType, query string, args ...any) {
