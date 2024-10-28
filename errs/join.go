@@ -21,7 +21,7 @@ func (je joinErrors) Error() string {
 	for i := 0; i < len(je.errors); i++ {
 		message.WriteString(je.errors[i].Error())
 		if i < len(je.errors)-1 {
-			message.WriteString("\n")
+			message.WriteString(" - ")
 		}
 	}
 	return message.String()

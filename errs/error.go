@@ -30,6 +30,27 @@ func New(message string) *Error {
 	}
 }
 
+func Copy(err error, innerErrors ...error) error {
+	custom, ok := TryGet(err)
+	if !ok {
+		return New(err.Error()).
+			SetError(innerErrors...)
+	}
+
+	inner := make([]error, 0, len(innerErrors)+1)
+	inner = append(inner, custom.innerError)
+	inner = append(inner, innerErrors...)
+
+	return New(custom.Message()).
+		SetType(custom.Type()).
+		SetContext(custom.Context()).
+		SetError(inner...)
+}
+
+func (err *Error) Copy() error {
+	return Copy(err)
+}
+
 func (err *Error) Message() string {
 	return strings.Join(list.Reverse(err.message), " - ")
 }
@@ -171,8 +192,9 @@ func (err *Error) Unwrap() []error {
 	return unwrapped
 }
 
-func (err *Error) setMessage(message string) {
+func (err *Error) setMessage(message string) *Error {
 	err.message = append(err.message, message)
+	return err
 }
 
 func (err *Error) grow() int {
@@ -261,11 +283,9 @@ func Wrap(errType string, err *error, message string) {
 		if !ok {
 			*err = New(message).SetType(errType).SetError(*err)
 		} else {
-			custom.
+			*err = custom.
 				SetType(errType).
 				setMessage(message)
-
-			*err = custom
 		}
 	}
 }
