@@ -50,6 +50,10 @@ func Get(ctx context.Context) string {
 	}
 }
 
+func Has(ctx context.Context) bool {
+	return Get(ctx) != ""
+}
+
 func GetUUID(ctx context.Context) uuid.UUID {
 	traceID := ctx.Value(key)
 	if traceID == nil {

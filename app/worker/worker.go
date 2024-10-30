@@ -1,9 +1,11 @@
 package worker
 
 import (
+	"context"
 	"github.com/boostgo/lite/errs"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/life"
+	"github.com/boostgo/lite/system/trace"
 	"github.com/boostgo/lite/system/try"
 	"time"
 )
@@ -12,19 +14,21 @@ type Worker struct {
 	name         string
 	fromStart    bool
 	duration     time.Duration
-	action       func() error
+	action       func(ctx context.Context) error
 	errorHandler func(error) bool
 	stopper      chan bool
 	lifeDown     chan bool
+	traceMaster  bool
 }
 
-func New(name string, duration time.Duration, action func() error) *Worker {
+func New(name string, duration time.Duration, action func(ctx context.Context) error) *Worker {
 	return &Worker{
-		name:     name,
-		duration: duration,
-		action:   action,
-		stopper:  make(chan bool),
-		lifeDown: make(chan bool, 1),
+		name:        name,
+		duration:    duration,
+		action:      action,
+		stopper:     make(chan bool),
+		lifeDown:    make(chan bool, 1),
+		traceMaster: trace.AmIMaster(),
 	}
 }
 
@@ -42,11 +46,20 @@ func (worker *Worker) ErrorHandler(handler func(error) bool) *Worker {
 	return worker
 }
 
+func (worker *Worker) runAction() error {
+	var ctx context.Context
+	if worker.traceMaster {
+		ctx = trace.Set(context.Background(), trace.String())
+	}
+
+	return try.Ctx(ctx, worker.action)
+}
+
 func (worker *Worker) Run() {
 	logger := log.Namespace("worker")
 
 	if worker.fromStart {
-		if err := try.Try(worker.action); err != nil {
+		if err := worker.runAction(); err != nil {
 			logger.Error().Str("worker", worker.name).Err(err).Msg("Start worker action")
 		}
 	}
@@ -73,7 +86,7 @@ func (worker *Worker) Run() {
 				logger.Info().Str("worker", worker.name).Msg("Stop worker by stopper")
 				return
 			case <-ticker.C:
-				if err := try.Try(worker.action); err != nil {
+				if err := worker.runAction(); err != nil {
 					logger.Error().Str("worker", worker.name).Err(err).Msg("Ticker worker action")
 
 					if errs.IsType(err, "Panic") {
@@ -93,7 +106,7 @@ func (worker *Worker) Run() {
 	}()
 }
 
-func Run(name string, duration time.Duration, action func() error, fromStart ...bool) {
+func Run(name string, duration time.Duration, action func(ctx context.Context) error, fromStart ...bool) {
 	worker := New(name, duration, action)
 	if len(fromStart) > 0 && fromStart[0] {
 		worker.FromStart()

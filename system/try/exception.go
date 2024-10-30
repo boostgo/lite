@@ -1,6 +1,7 @@
 package try
 
 import (
+	"context"
 	"errors"
 	"github.com/boostgo/lite/errs"
 	"github.com/boostgo/lite/types/to"
@@ -15,6 +16,16 @@ func Try(tryFunc func() error) (err error) {
 	}()
 
 	return tryFunc()
+}
+
+func Ctx(ctx context.Context, tryFunc func(ctx context.Context) error) error {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	return Try(func() error {
+		return tryFunc(ctx)
+	})
 }
 
 func Must(tryFunc func() error) {
