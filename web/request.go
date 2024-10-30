@@ -234,13 +234,19 @@ func (request *Request) initRequest(method, url string, body ...any) error {
 
 	// creating request
 	if len(body) > 0 && body[0] != nil {
-		var bodyBlob []byte
-		bodyBlob, err = json.Marshal(body[0])
-		if err != nil {
-			return err
-		}
+		if formDataWriter, isFormData := body[0].(FormDataWriter); isFormData {
+			request.Header("Content-Type", formDataWriter.ContentType())
+			_ = formDataWriter.Close()
+			request.req, err = http.NewRequest(method, fullURL, formDataWriter.Buffer())
+		} else {
+			var bodyBlob []byte
+			bodyBlob, err = json.Marshal(body[0])
+			if err != nil {
+				return err
+			}
 
-		request.req, err = http.NewRequest(method, fullURL, bytes.NewReader(bodyBlob))
+			request.req, err = http.NewRequest(method, fullURL, bytes.NewReader(bodyBlob))
+		}
 	} else {
 		request.req, err = http.NewRequest(method, fullURL, nil)
 	}
