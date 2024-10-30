@@ -10,6 +10,7 @@ import (
 type FormDataWriter interface {
 	Add(key string, value any) FormDataWriter
 	AddFile(name, fileName string, file []byte) FormDataWriter
+	Set(data map[string]any) FormDataWriter
 	Boundary() string
 	ContentType() string
 	Buffer() *bytes.Buffer
@@ -21,12 +22,17 @@ type formData struct {
 	writer *multipart.Writer
 }
 
-func NewFormData() FormDataWriter {
+func NewFormData(initial ...map[string]any) FormDataWriter {
 	fd := &formData{
 		body: bytes.Buffer{},
 	}
 
 	fd.writer = multipart.NewWriter(&fd.body)
+
+	if len(initial) > 0 {
+		fd.Set(initial[0])
+	}
+
 	return fd
 }
 
@@ -42,6 +48,18 @@ func (fd *formData) AddFile(name, fileName string, file []byte) FormDataWriter {
 	}
 
 	_, _ = io.Copy(fileWriter, bytes.NewReader(file))
+	return fd
+}
+
+func (fd *formData) Set(data map[string]any) FormDataWriter {
+	if data == nil || len(data) == 0 {
+		return fd
+	}
+
+	for key, value := range data {
+		fd.Add(key, value)
+	}
+
 	return fd
 }
 
