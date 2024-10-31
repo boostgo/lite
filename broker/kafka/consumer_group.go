@@ -126,7 +126,7 @@ func (consumer *ConsumerGroup) consume(ctx context.Context, name string, topics 
 				cancel()
 				return
 			case <-ctx.Done():
-				logger.Info().Str("name", name).Msg("Stop worker from context")
+				logger.Info().Str("name", name).Msg("Stop broker from context")
 				return
 			}
 		}
