@@ -47,6 +47,14 @@ func Error(ctx echo.Context, err error) error {
 }
 
 func Success(ctx echo.Context, status int, body ...any) error {
+	// set trace ID
+	traceID := trace.Get(Context(ctx))
+	if traceID != "" {
+		ctx.Response().Header().Set(trace.Key(), traceID)
+		ctx.Response().Header().Set("X-Request-ID", traceID)
+	}
+
+	// return empty response if no response body
 	if len(body) == 0 {
 		return ctx.String(status, "")
 	}
@@ -55,10 +63,8 @@ func Success(ctx echo.Context, status int, body ...any) error {
 		return ctx.String(status, to.String(body[0]))
 	}
 
-	traceID := trace.Get(Context(ctx))
-	if traceID != "" {
-		ctx.Response().Header().Set(trace.Key(), traceID)
-		ctx.Response().Header().Set("X-Request-ID", traceID)
+	if isRaw(ctx) {
+		return ctx.JSON(status, body[0])
 	}
 
 	return ctx.JSON(status, newSuccess(body[0]))
