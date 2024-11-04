@@ -25,7 +25,7 @@ func Connect(connectionString string, options ...func(connection *sqlx.DB)) (*sq
 	if err = connection.Ping(); err != nil {
 		return nil, err
 	}
-	
+
 	return connection, nil
 }
 

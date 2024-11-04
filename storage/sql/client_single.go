@@ -43,7 +43,7 @@ type PrepareContext interface {
 	PrepareNamedContext(ctx context.Context, query string) (*sqlx.NamedStmt, error)
 }
 
-type client struct {
+type clientSingle struct {
 	conn      *sqlx.DB
 	enableLog bool
 }
@@ -54,17 +54,17 @@ func Client(conn *sqlx.DB, enableLog ...bool) DB {
 		enable = enableLog[0]
 	}
 
-	return &client{
+	return &clientSingle{
 		conn:      conn,
 		enableLog: enable,
 	}
 }
 
-func (c *client) Connection() *sqlx.DB {
+func (c *clientSingle) Connection() *sqlx.DB {
 	return c.conn
 }
 
-func (c *client) ExecContext(ctx context.Context, query string, args ...interface{}) (result sql.Result, err error) {
+func (c *clientSingle) ExecContext(ctx context.Context, query string, args ...interface{}) (result sql.Result, err error) {
 	defer errs.Wrap(errType, &err, "ExecContext")
 
 	c.printLog(ctx, "ExecContext", query, args...)
@@ -77,7 +77,7 @@ func (c *client) ExecContext(ctx context.Context, query string, args ...interfac
 	return c.conn.ExecContext(ctx, query, args...)
 }
 
-func (c *client) QueryContext(ctx context.Context, query string, args ...interface{}) (rows *sql.Rows, err error) {
+func (c *clientSingle) QueryContext(ctx context.Context, query string, args ...interface{}) (rows *sql.Rows, err error) {
 	defer errs.Wrap(errType, &err, "QueryContext")
 
 	c.printLog(ctx, "QueryContext", query, args...)
@@ -90,7 +90,7 @@ func (c *client) QueryContext(ctx context.Context, query string, args ...interfa
 	return c.conn.QueryContext(ctx, query, args...)
 }
 
-func (c *client) QueryxContext(ctx context.Context, query string, args ...interface{}) (rows *sqlx.Rows, err error) {
+func (c *clientSingle) QueryxContext(ctx context.Context, query string, args ...interface{}) (rows *sqlx.Rows, err error) {
 	defer errs.Wrap(errType, &err, "QueryxContext")
 
 	c.printLog(ctx, "QueryxContext", query, args...)
@@ -103,7 +103,7 @@ func (c *client) QueryxContext(ctx context.Context, query string, args ...interf
 	return c.conn.QueryxContext(ctx, query, args...)
 }
 
-func (c *client) QueryRowxContext(ctx context.Context, query string, args ...interface{}) *sqlx.Row {
+func (c *clientSingle) QueryRowxContext(ctx context.Context, query string, args ...interface{}) *sqlx.Row {
 	c.printLog(ctx, "QueryRowxContext", query, args...)
 
 	tx, ok := GetTx(ctx)
@@ -114,7 +114,7 @@ func (c *client) QueryRowxContext(ctx context.Context, query string, args ...int
 	return c.conn.QueryRowxContext(ctx, query, args...)
 }
 
-func (c *client) PrepareContext(ctx context.Context, query string) (statement *sql.Stmt, err error) {
+func (c *clientSingle) PrepareContext(ctx context.Context, query string) (statement *sql.Stmt, err error) {
 	defer errs.Wrap(errType, &err, "PrepareContext")
 
 	c.printLog(ctx, "PrepareContext", query)
@@ -127,7 +127,7 @@ func (c *client) PrepareContext(ctx context.Context, query string) (statement *s
 	return c.conn.PrepareContext(ctx, query)
 }
 
-func (c *client) NamedExecContext(ctx context.Context, query string, arg interface{}) (result sql.Result, err error) {
+func (c *clientSingle) NamedExecContext(ctx context.Context, query string, arg interface{}) (result sql.Result, err error) {
 	defer errs.Wrap(errType, &err, "NamedExecContext")
 
 	c.printLog(ctx, "NamedExecContext", query, arg)
@@ -140,7 +140,7 @@ func (c *client) NamedExecContext(ctx context.Context, query string, arg interfa
 	return c.conn.NamedExecContext(ctx, query, arg)
 }
 
-func (c *client) SelectContext(ctx context.Context, dest interface{}, query string, args ...interface{}) (err error) {
+func (c *clientSingle) SelectContext(ctx context.Context, dest interface{}, query string, args ...interface{}) (err error) {
 	defer errs.Wrap(errType, &err, "SelectContext")
 
 	c.printLog(ctx, "SelectContext", query, args...)
@@ -153,7 +153,7 @@ func (c *client) SelectContext(ctx context.Context, dest interface{}, query stri
 	return c.conn.SelectContext(ctx, dest, query, args...)
 }
 
-func (c *client) GetContext(ctx context.Context, dest interface{}, query string, args ...interface{}) (err error) {
+func (c *clientSingle) GetContext(ctx context.Context, dest interface{}, query string, args ...interface{}) (err error) {
 	defer errs.Wrap(errType, &err, "GetContext")
 
 	c.printLog(ctx, "GetContext", query, args...)
@@ -166,7 +166,7 @@ func (c *client) GetContext(ctx context.Context, dest interface{}, query string,
 	return c.conn.GetContext(ctx, dest, query, args...)
 }
 
-func (c *client) PrepareNamedContext(ctx context.Context, query string) (statement *sqlx.NamedStmt, err error) {
+func (c *clientSingle) PrepareNamedContext(ctx context.Context, query string) (statement *sqlx.NamedStmt, err error) {
 	defer errs.Wrap(errType, &err, "PrepareNamedContext")
 
 	c.printLog(ctx, "PrepareNamedContext", query)
@@ -179,7 +179,7 @@ func (c *client) PrepareNamedContext(ctx context.Context, query string) (stateme
 	return c.conn.PrepareNamedContext(ctx, query)
 }
 
-func (c *client) printLog(ctx context.Context, queryType, query string, args ...any) {
+func (c *clientSingle) printLog(ctx context.Context, queryType, query string, args ...any) {
 	if !c.enableLog || storage.IsNoLog(ctx) {
 		return
 	}

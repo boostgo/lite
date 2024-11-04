@@ -7,18 +7,22 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type sqlTransactor struct {
-	conn *sqlx.DB
+type TransactorConnectionProvider interface {
+	BeginTxx(ctx context.Context, opts *sql.TxOptions) (*sqlx.Tx, error)
 }
 
-func NewTransactor(conn *sqlx.DB) storage.Transactor {
+type sqlTransactor struct {
+	provider TransactorConnectionProvider
+}
+
+func NewTransactor(provider TransactorConnectionProvider) storage.Transactor {
 	return &sqlTransactor{
-		conn: conn,
+		provider: provider,
 	}
 }
 
 func (st sqlTransactor) Begin(ctx context.Context) (storage.Transaction, error) {
-	tx, err := st.conn.BeginTxx(ctx, &sql.TxOptions{
+	tx, err := st.provider.BeginTxx(ctx, &sql.TxOptions{
 		Isolation: sql.LevelReadCommitted,
 		ReadOnly:  false,
 	})
@@ -30,7 +34,7 @@ func (st sqlTransactor) Begin(ctx context.Context) (storage.Transaction, error) 
 }
 
 func (st sqlTransactor) BeginCtx(ctx context.Context) (context.Context, error) {
-	tx, err := st.conn.BeginTxx(ctx, &sql.TxOptions{
+	tx, err := st.provider.BeginTxx(ctx, &sql.TxOptions{
 		Isolation: sql.LevelReadCommitted,
 		ReadOnly:  false,
 	})
