@@ -68,6 +68,11 @@ func (repo Repository) Refresh(ctx context.Context, key string, ttl time.Duratio
 	return repo.conn.Expire(ctx, key, ttl).Err()
 }
 
+func (repo Repository) TTL(ctx context.Context, key string) (ttl time.Duration, err error) {
+	defer errs.Wrap(errType, &err, "TTL")
+	return repo.conn.TTL(ctx, key).Result()
+}
+
 func (repo Repository) Set(ctx context.Context, key string, value any, ttl ...time.Duration) (err error) {
 	defer errs.Wrap(errType, &err, "Set")
 
