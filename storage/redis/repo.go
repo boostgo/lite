@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/boostgo/lite/errs"
 	"github.com/redis/go-redis/v9"
 	"time"
@@ -70,7 +71,18 @@ func (repo Repository) Refresh(ctx context.Context, key string, ttl time.Duratio
 
 func (repo Repository) TTL(ctx context.Context, key string) (ttl time.Duration, err error) {
 	defer errs.Wrap(errType, &err, "TTL")
-	return repo.conn.TTL(ctx, key).Result()
+
+	ttl, err = repo.conn.TTL(ctx, key).Result()
+	if err != nil {
+		return ttl, err
+	}
+
+	const notExistKey = -2
+	if ttl == notExistKey {
+		return ttl, errs.ErrNotFound
+	}
+
+	return ttl, nil
 }
 
 func (repo Repository) Set(ctx context.Context, key string, value any, ttl ...time.Duration) (err error) {
@@ -86,17 +98,56 @@ func (repo Repository) Set(ctx context.Context, key string, value any, ttl ...ti
 
 func (repo Repository) Get(ctx context.Context, key string) (result string, err error) {
 	defer errs.Wrap(errType, &err, "Get")
-	return repo.conn.Get(ctx, key).Result()
+
+	result, err = repo.conn.Get(ctx, key).Result()
+	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return result, errs.
+				New("Redis key not found").
+				SetError(errs.ErrNotFound).
+				AddContext("key", key)
+		}
+
+		return result, err
+	}
+
+	return result, nil
 }
 
 func (repo Repository) GetBytes(ctx context.Context, key string) (result []byte, err error) {
 	defer errs.Wrap(errType, &err, "Get")
-	return repo.conn.Get(ctx, key).Bytes()
+
+	result, err = repo.conn.Get(ctx, key).Bytes()
+	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return result, errs.
+				New("Redis key not found").
+				SetError(errs.ErrNotFound).
+				AddContext("key", key)
+		}
+
+		return result, err
+	}
+
+	return result, nil
 }
 
 func (repo Repository) GetInt(ctx context.Context, key string) (result int, err error) {
 	defer errs.Wrap(errType, &err, "GetInt")
-	return repo.conn.Get(ctx, key).Int()
+
+	result, err = repo.conn.Get(ctx, key).Int()
+	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return result, errs.
+				New("Redis key not found").
+				SetError(errs.ErrNotFound).
+				AddContext("key", key)
+		}
+
+		return result, err
+	}
+
+	return result, nil
 }
 
 func (repo Repository) Parse(ctx context.Context, key string, export any) (err error) {
@@ -105,6 +156,13 @@ func (repo Repository) Parse(ctx context.Context, key string, export any) (err e
 	var result []byte
 	result, err = repo.conn.Get(ctx, key).Bytes()
 	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return errs.
+				New("Redis key not found").
+				SetError(errs.ErrNotFound).
+				AddContext("key", key)
+		}
+
 		return err
 	}
 
