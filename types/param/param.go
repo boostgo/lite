@@ -46,7 +46,11 @@ func (param Param) IsEmpty() bool {
 	return param.value == ""
 }
 
-func (param Param) String() string {
+func (param Param) String(defaultValue ...string) string {
+	if param.value == "" && len(defaultValue) > 0 {
+		return defaultValue[0]
+	}
+
 	return param.value
 }
 
