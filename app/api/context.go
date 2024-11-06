@@ -59,7 +59,15 @@ func Body(ctx echo.Context) (body []byte, err error) {
 		return nil, nil
 	}
 
-	return io.ReadAll(ctx.Request().Body)
+	body, err = io.ReadAll(ctx.Request().Body)
+	if err != nil {
+		return nil, errs.
+			New("Parse request body").
+			SetType("API").
+			SetError(err)
+	}
+
+	return body, nil
 }
 
 func Context(ctx echo.Context) context.Context {
