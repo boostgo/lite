@@ -54,6 +54,14 @@ func Parse(ctx echo.Context, export any) error {
 	return _validator.Struct(export)
 }
 
+func Body(ctx echo.Context) (body []byte, err error) {
+	if ctx.Request().Body == nil {
+		return nil, nil
+	}
+
+	return io.ReadAll(ctx.Request().Body)
+}
+
 func Context(ctx echo.Context) context.Context {
 	return ctx.Request().Context()
 }
