@@ -114,6 +114,11 @@ func (repo Repository) Get(ctx context.Context, key string) (result string, err 
 	return result, nil
 }
 
+func (repo Repository) Exist(ctx context.Context, key string) (result int64, err error) {
+	defer errs.Wrap(errType, &err, "Exist")
+	return repo.conn.Exists(ctx, key).Result()
+}
+
 func (repo Repository) GetBytes(ctx context.Context, key string) (result []byte, err error) {
 	defer errs.Wrap(errType, &err, "Get")
 
@@ -192,4 +197,9 @@ func (repo Repository) HGetInt(ctx context.Context, key, field string) (result i
 func (repo Repository) HGetBool(ctx context.Context, key, field string) (result bool, err error) {
 	defer errs.Wrap(errType, &err, "HGet")
 	return repo.conn.HGet(ctx, key, field).Bool()
+}
+
+func (repo Repository) HExist(ctx context.Context, key, field string) (exist bool, err error) {
+	defer errs.Wrap(errType, &err, "HExist")
+	return repo.conn.HExists(ctx, key, field).Result()
 }
