@@ -30,19 +30,6 @@ func init() {
 		AllowCredentials: true,
 	}))
 	handler.Use(RecoverMiddleware())
-	handler.Use(middleware.TimeoutWithConfig(middleware.TimeoutConfig{
-		Skipper:      middleware.DefaultSkipper,
-		ErrorMessage: "Request reached timeout",
-		OnTimeoutRouteErrorHandler: func(err error, ctx echo.Context) {
-			_ = api.Error(
-				ctx,
-				errs.
-					New("Request reached timeout").
-					SetError(err, errs.ErrTimeout),
-			)
-		},
-		Timeout: time.Second * 30,
-	}))
 
 	if trace.AmIMaster() {
 		handler.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
@@ -55,6 +42,22 @@ func init() {
 
 	handler.RouteNotFound("*", func(ctx echo.Context) error {
 		return api.Error(ctx, errs.New("Route not found").SetError(errs.ErrNotFound))
+	})
+}
+
+func TimeoutMiddleware(duration time.Duration) echo.MiddlewareFunc {
+	return middleware.TimeoutWithConfig(middleware.TimeoutConfig{
+		Skipper:      middleware.DefaultSkipper,
+		ErrorMessage: "Request reached timeout",
+		OnTimeoutRouteErrorHandler: func(err error, ctx echo.Context) {
+			_ = api.Error(
+				ctx,
+				errs.
+					New("Request reached timeout").
+					SetError(err, errs.ErrTimeout),
+			)
+		},
+		Timeout: duration,
 	})
 }
 
