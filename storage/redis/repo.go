@@ -203,3 +203,8 @@ func (repo Repository) HExist(ctx context.Context, key, field string) (exist boo
 	defer errs.Wrap(errType, &err, "HExist")
 	return repo.conn.HExists(ctx, key, field).Result()
 }
+
+func (repo Repository) Scan(ctx context.Context, cursor uint64, pattern string, count int64) (keys []string, nextCursor uint64, err error) {
+	defer errs.Wrap(errType, &err, "Scan")
+	return repo.conn.Scan(ctx, cursor, pattern, count).Result()
+}
