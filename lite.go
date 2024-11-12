@@ -41,7 +41,10 @@ func init() {
 	}
 
 	handler.RouteNotFound("*", func(ctx echo.Context) error {
-		return api.Error(ctx, errs.New("Route not found").SetError(errs.ErrNotFound))
+		return api.Error(ctx, errs.
+			New("Route not found").
+			SetError(errs.ErrNotFound).
+			AddContext("url", ctx.Request().RequestURI))
 	})
 }
 
