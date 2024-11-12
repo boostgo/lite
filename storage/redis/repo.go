@@ -12,7 +12,7 @@ import (
 const errType = "Redis"
 
 type Repository struct {
-	conn *redis.Client
+	client *redis.Client
 }
 
 func New(address string, port, db int, password string, opts ...Option) (*Repository, error) {
@@ -22,7 +22,7 @@ func New(address string, port, db int, password string, opts ...Option) (*Reposi
 	}
 
 	return &Repository{
-		conn: conn,
+		client: conn,
 	}, nil
 }
 
@@ -37,17 +37,21 @@ func Must(address string, port, db int, password string, opts ...Option) *Reposi
 
 func NewFromClient(conn *redis.Client) *Repository {
 	return &Repository{
-		conn: conn,
+		client: conn,
 	}
 }
 
 func (repo Repository) Close() error {
-	return repo.conn.Close()
+	return repo.client.Close()
+}
+
+func (repo Repository) Client() *redis.Client {
+	return repo.client
 }
 
 func (repo Repository) Keys(ctx context.Context, pattern string) (keys []string, err error) {
 	defer errs.Wrap(errType, &err, "Keys")
-	return repo.conn.Keys(ctx, pattern).Result()
+	return repo.client.Keys(ctx, pattern).Result()
 }
 
 func (repo Repository) Delete(ctx context.Context, keys ...string) (err error) {
@@ -56,23 +60,33 @@ func (repo Repository) Delete(ctx context.Context, keys ...string) (err error) {
 	}
 
 	defer errs.Wrap(errType, &err, "Delete")
-	return repo.conn.Del(ctx, keys...).Err()
+	return repo.client.Del(ctx, keys...).Err()
+}
+
+func (repo Repository) Dump(ctx context.Context, key string) (result string, err error) {
+	defer errs.Wrap(errType, &err, "Dump")
+	return repo.client.Dump(ctx, key).Result()
 }
 
 func (repo Repository) Rename(ctx context.Context, oldKey, newKey string) (err error) {
 	defer errs.Wrap(errType, &err, "Rename")
-	return repo.conn.Rename(ctx, oldKey, newKey).Err()
+	return repo.client.Rename(ctx, oldKey, newKey).Err()
 }
 
 func (repo Repository) Refresh(ctx context.Context, key string, ttl time.Duration) (err error) {
 	defer errs.Wrap(errType, &err, "Refresh")
-	return repo.conn.Expire(ctx, key, ttl).Err()
+	return repo.client.Expire(ctx, key, ttl).Err()
+}
+
+func (repo Repository) RefreshAt(ctx context.Context, key string, at time.Time) (err error) {
+	defer errs.Wrap(errType, &err, "RefreshAt")
+	return repo.client.ExpireAt(ctx, key, at).Err()
 }
 
 func (repo Repository) TTL(ctx context.Context, key string) (ttl time.Duration, err error) {
 	defer errs.Wrap(errType, &err, "TTL")
 
-	ttl, err = repo.conn.TTL(ctx, key).Result()
+	ttl, err = repo.client.TTL(ctx, key).Result()
 	if err != nil {
 		return ttl, err
 	}
@@ -93,13 +107,13 @@ func (repo Repository) Set(ctx context.Context, key string, value any, ttl ...ti
 		expireAt = ttl[0]
 	}
 
-	return repo.conn.Set(ctx, key, value, expireAt).Err()
+	return repo.client.Set(ctx, key, value, expireAt).Err()
 }
 
 func (repo Repository) Get(ctx context.Context, key string) (result string, err error) {
 	defer errs.Wrap(errType, &err, "Get")
 
-	result, err = repo.conn.Get(ctx, key).Result()
+	result, err = repo.client.Get(ctx, key).Result()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return result, errs.
@@ -116,13 +130,13 @@ func (repo Repository) Get(ctx context.Context, key string) (result string, err 
 
 func (repo Repository) Exist(ctx context.Context, key string) (result int64, err error) {
 	defer errs.Wrap(errType, &err, "Exist")
-	return repo.conn.Exists(ctx, key).Result()
+	return repo.client.Exists(ctx, key).Result()
 }
 
 func (repo Repository) GetBytes(ctx context.Context, key string) (result []byte, err error) {
 	defer errs.Wrap(errType, &err, "Get")
 
-	result, err = repo.conn.Get(ctx, key).Bytes()
+	result, err = repo.client.Get(ctx, key).Bytes()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return result, errs.
@@ -140,7 +154,7 @@ func (repo Repository) GetBytes(ctx context.Context, key string) (result []byte,
 func (repo Repository) GetInt(ctx context.Context, key string) (result int, err error) {
 	defer errs.Wrap(errType, &err, "GetInt")
 
-	result, err = repo.conn.Get(ctx, key).Int()
+	result, err = repo.client.Get(ctx, key).Int()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return result, errs.
@@ -159,7 +173,7 @@ func (repo Repository) Parse(ctx context.Context, key string, export any) (err e
 	defer errs.Wrap(errType, &err, "Parse")
 
 	var result []byte
-	result, err = repo.conn.Get(ctx, key).Bytes()
+	result, err = repo.client.Get(ctx, key).Bytes()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return errs.
@@ -176,35 +190,35 @@ func (repo Repository) Parse(ctx context.Context, key string, export any) (err e
 
 func (repo Repository) HSet(ctx context.Context, key string, value map[string]any) (err error) {
 	defer errs.Wrap(errType, &err, "HSet")
-	return repo.conn.HSet(ctx, key, value).Err()
+	return repo.client.HSet(ctx, key, value).Err()
 }
 
 func (repo Repository) HGetAll(ctx context.Context, key string) (result map[string]string, err error) {
 	defer errs.Wrap(errType, &err, "HGetAll")
-	return repo.conn.HGetAll(ctx, key).Result()
+	return repo.client.HGetAll(ctx, key).Result()
 }
 
 func (repo Repository) HGet(ctx context.Context, key, field string) (result string, err error) {
 	defer errs.Wrap(errType, &err, "HGet")
-	return repo.conn.HGet(ctx, key, field).Result()
+	return repo.client.HGet(ctx, key, field).Result()
 }
 
 func (repo Repository) HGetInt(ctx context.Context, key, field string) (result int, err error) {
 	defer errs.Wrap(errType, &err, "HGet")
-	return repo.conn.HGet(ctx, key, field).Int()
+	return repo.client.HGet(ctx, key, field).Int()
 }
 
 func (repo Repository) HGetBool(ctx context.Context, key, field string) (result bool, err error) {
 	defer errs.Wrap(errType, &err, "HGet")
-	return repo.conn.HGet(ctx, key, field).Bool()
+	return repo.client.HGet(ctx, key, field).Bool()
 }
 
 func (repo Repository) HExist(ctx context.Context, key, field string) (exist bool, err error) {
 	defer errs.Wrap(errType, &err, "HExist")
-	return repo.conn.HExists(ctx, key, field).Result()
+	return repo.client.HExists(ctx, key, field).Result()
 }
 
 func (repo Repository) Scan(ctx context.Context, cursor uint64, pattern string, count int64) (keys []string, nextCursor uint64, err error) {
 	defer errs.Wrap(errType, &err, "Scan")
-	return repo.conn.Scan(ctx, cursor, pattern, count).Result()
+	return repo.client.Scan(ctx, cursor, pattern, count).Result()
 }
