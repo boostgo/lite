@@ -104,7 +104,7 @@ func (e *event) Err(err error) Event {
 			}
 		}
 
-		e.Msg(custom.Message())
+		e.Str("message", custom.Message())
 	}
 	return e
 }
