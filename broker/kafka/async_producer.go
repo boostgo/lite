@@ -76,13 +76,11 @@ func (producer *AsyncProducer) Produce(ctx context.Context, messages ...*sarama.
 		return nil
 	}
 
-	if producer.traceMode {
-		if trace.Get(ctx) == "" {
-			ctx = trace.Set(ctx, trace.String())
-		}
-
-		trace.SetKafka(ctx, messages...)
+	if producer.traceMode && trace.Get(ctx) == "" {
+		ctx = trace.Set(ctx, trace.String())
 	}
+
+	trace.SetKafka(ctx, messages...)
 
 	for _, msg := range messages {
 		producer.producer.Input() <- msg

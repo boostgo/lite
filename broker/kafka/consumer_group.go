@@ -19,10 +19,16 @@ type ConsumerGroup struct {
 	group sarama.ConsumerGroup
 }
 
-func ConsumerGroupOption() Option {
+func ConsumerGroupOption(offset ...int64) Option {
 	return func(config *sarama.Config) {
 		config.Consumer.Return.Errors = true
-		config.Consumer.Offsets.Initial = sarama.OffsetNewest
+
+		if len(offset) > 0 {
+			config.Consumer.Offsets.Initial = offset[0]
+		} else {
+			config.Consumer.Offsets.Initial = sarama.OffsetNewest
+		}
+
 		config.Consumer.Offsets.AutoCommit.Enable = true
 		config.Consumer.Offsets.AutoCommit.Interval = time.Second
 

@@ -2,6 +2,7 @@ package to
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/google/uuid"
 	"reflect"
 	"unsafe"
@@ -24,6 +25,8 @@ func toBytes(value any, memory bool) []byte {
 		float32, float64, bool:
 		return StringToBytes(toString(v, false))
 	case uuid.UUID:
+		return StringToBytes(v.String())
+	case fmt.Stringer:
 		return StringToBytes(v.String())
 	}
 

@@ -1,6 +1,7 @@
 package kafka
 
 import (
+	"encoding/json"
 	"github.com/IBM/sarama"
 )
 
@@ -27,4 +28,8 @@ func GetOffsets(brokers []string, cfg *sarama.Config, topic string, offset int64
 	}
 
 	return offsets, nil
+}
+
+func Parse(message *sarama.ConsumerMessage, export any) error {
+	return json.Unmarshal(message.Value, export)
 }

@@ -88,6 +88,10 @@ func (e *event) Arr(key string, args ...any) Event {
 }
 
 func (e *event) Err(err error) Event {
+	if err == nil {
+		return e
+	}
+
 	custom, ok := errs.TryGet(err)
 	if !ok {
 		e.inner.Err(err)
