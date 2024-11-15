@@ -35,6 +35,10 @@ func Set(ctx context.Context, id string) context.Context {
 }
 
 func Get(ctx context.Context) string {
+	if ctx == nil {
+		return ""
+	}
+
 	traceID := ctx.Value(key)
 	if traceID == nil {
 		return ""
@@ -55,23 +59,27 @@ func Has(ctx context.Context) bool {
 }
 
 func GetUUID(ctx context.Context) uuid.UUID {
+	if ctx == nil {
+		return uuid.Nil
+	}
+
 	traceID := ctx.Value(key)
 	if traceID == nil {
-		return uuid.UUID{}
+		return uuid.Nil
 	}
 
 	switch tid := traceID.(type) {
 	case string:
 		uuidVer, err := uuid.Parse(tid)
 		if err != nil {
-			return uuid.UUID{}
+			return uuid.Nil
 		}
 
 		return uuidVer
 	case uuid.UUID:
 		return tid
 	default:
-		return uuid.UUID{}
+		return uuid.Nil
 	}
 }
 

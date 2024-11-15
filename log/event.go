@@ -38,8 +38,7 @@ type Event interface {
 }
 
 type event struct {
-	inner  *zerolog.Event
-	called byte
+	inner *zerolog.Event
 }
 
 func newEvent(inner *zerolog.Event, ctx ...context.Context) Event {
@@ -79,6 +78,10 @@ func (e *event) Any(key string, object any) Event {
 }
 
 func (e *event) Arr(key string, args ...any) Event {
+	if args == nil {
+		return e
+	}
+
 	stringArgs := make([]string, len(args))
 	for i, arg := range args {
 		stringArgs[i] = to.String(arg)
@@ -119,22 +122,12 @@ func (e *event) Errs(key string, errors []error) Event {
 }
 
 func (e *event) Msg(message string) Event {
-	if e.called == 1 {
-		return e
-	}
-
 	e.inner.Msg(message)
-	e.called = 1
 	return e
 }
 
 func (e *event) Msgf(format string, args ...any) Event {
-	if e.called == 1 {
-		return e
-	}
-
 	e.inner.Msgf(format, args...)
-	e.called = 1
 	return e
 }
 
