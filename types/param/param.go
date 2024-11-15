@@ -1,6 +1,7 @@
 package param
 
 import (
+	"encoding/json"
 	"github.com/boostgo/lite/errs"
 	"github.com/boostgo/lite/types/to"
 	"github.com/google/uuid"
@@ -40,6 +41,14 @@ func New(value string) Param {
 	return Param{
 		value: value,
 	}
+}
+
+func Empty() Param {
+	return New("")
+}
+
+func IsEmpty(param Param) bool {
+	return param.IsEmpty()
 }
 
 func (param Param) IsEmpty() bool {
@@ -179,4 +188,8 @@ func (param Param) MustUUID() uuid.UUID {
 
 func (param Param) Bytes() []byte {
 	return to.Bytes(param.value)
+}
+
+func (param Param) Parse(export any) error {
+	return json.Unmarshal(param.Bytes(), export)
 }
