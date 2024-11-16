@@ -1,8 +1,10 @@
 package to
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"reflect"
 	"strconv"
 	"unsafe"
@@ -18,6 +20,10 @@ func toString(value any, memory bool) string {
 	}
 
 	switch v := value.(type) {
+	case uuid.UUID:
+		var buf [36]byte
+		encodeUuidHex(buf[:], v)
+		return BytesToString(buf[:])
 	case fmt.Stringer:
 		return v.String()
 	case []byte:
@@ -65,4 +71,16 @@ func toString(value any, memory bool) string {
 
 func BytesToString(buffer []byte) string {
 	return *(*string)(unsafe.Pointer(&buffer))
+}
+
+func encodeUuidHex(dst []byte, uuid uuid.UUID) {
+	hex.Encode(dst, uuid[:4])
+	dst[8] = '-'
+	hex.Encode(dst[9:13], uuid[4:6])
+	dst[13] = '-'
+	hex.Encode(dst[14:18], uuid[6:8])
+	dst[18] = '-'
+	hex.Encode(dst[19:23], uuid[8:10])
+	dst[23] = '-'
+	hex.Encode(dst[24:], uuid[10:])
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/boostgo/lite/errs"
 	"github.com/boostgo/lite/system/trace"
 	"github.com/boostgo/lite/types/to"
+	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"time"
 )
@@ -19,6 +20,7 @@ type Event interface {
 	Msg(message string) Event
 	Msgf(format string, args ...any) Event
 	Str(key string, val string) Event
+	UUID(key string, id uuid.UUID) Event
 	Strs(key string, values []string) Event
 	Int(key string, val int) Event
 	Int32(key string, value int32) Event
@@ -133,6 +135,11 @@ func (e *event) Msgf(format string, args ...any) Event {
 
 func (e *event) Str(key, value string) Event {
 	e.inner.Str(key, value)
+	return e
+}
+
+func (e *event) UUID(key string, id uuid.UUID) Event {
+	e.inner.Str(key, to.String(id))
 	return e
 }
 
