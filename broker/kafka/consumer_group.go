@@ -109,30 +109,38 @@ func (consumer *ConsumerGroup) Consume(name string, topics []string, handler Gro
 func (consumer *ConsumerGroup) consume(ctx context.Context, name string, topics []string, handler GroupHandler, cancel func()) {
 	logger := log.Namespace("kafka.consumer.group")
 
+	// run consuming
 	go func() {
-		for {
-			select {
-			case <-ctx.Done():
-				logger.Info().Str("name", name).Msg("Stop kafka consumer group")
-				return
-			default:
-				if err := consumer.group.Consume(ctx, topics, handler); err != nil {
-					logger.Error().Str("name", name).Err(err).Msg("Consume kafka claim")
-					cancel()
-				}
-			}
+		if err := consumer.group.Consume(ctx, topics, handler); err != nil {
+			logger.
+				Error().
+				Err(err).
+				Str("name", name).
+				Strs("topics", topics).
+				Msg("Consume kafka claim")
+			cancel()
 		}
 	}()
 
+	// run catching consumer errors and context canceling
 	go func() {
 		for {
 			select {
 			case err := <-consumer.group.Errors():
-				logger.Error().Err(err).Str("name", name).Msg("Consumer group error")
+				logger.
+					Error().
+					Err(err).
+					Str("name", name).
+					Strs("topics", topics).
+					Msg("Consumer group error")
 				cancel()
 				return
 			case <-ctx.Done():
-				logger.Info().Str("name", name).Msg("Stop broker from context")
+				logger.
+					Info().
+					Str("name", name).
+					Strs("topics", topics).
+					Msg("Stop broker from context")
 				return
 			}
 		}
