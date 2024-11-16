@@ -225,6 +225,7 @@ func (handler *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSe
 				}); err != nil {
 					logger.
 						Error().
+						Ctx(ctx).
 						Err(err).
 						Str("name", handler.name).
 						Msg("Kafka consumer group claim")
