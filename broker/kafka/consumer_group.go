@@ -2,9 +2,9 @@ package kafka
 
 import (
 	"context"
-	"errors"
 	"github.com/IBM/sarama"
 	"github.com/boostgo/lite/collections/list"
+	"github.com/boostgo/lite/errs"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/life"
 	"github.com/boostgo/lite/system/trace"
@@ -106,7 +106,13 @@ func (consumer *ConsumerGroup) Consume(name string, topics []string, handler Gro
 	consumer.consume(life.Context(), name, topics, handler, life.Cancel)
 }
 
-func (consumer *ConsumerGroup) consume(ctx context.Context, name string, topics []string, handler GroupHandler, cancel func()) {
+func (consumer *ConsumerGroup) consume(
+	ctx context.Context,
+	name string,
+	topics []string,
+	handler GroupHandler,
+	cancel func(),
+) {
 	logger := log.Namespace("kafka.consumer.group")
 
 	// run consuming
@@ -160,17 +166,20 @@ type (
 )
 
 type consumerGroupHandler struct {
+	name    string
 	claim   ConsumerGroupClaim
 	setup   ConsumerGroupSetup
 	cleanup ConsumerGroupCleanup
 }
 
 func ConsumerGroupHandler(
+	name string,
 	handler ConsumerGroupClaim,
 	setup ConsumerGroupSetup,
 	cleanup ConsumerGroupCleanup,
 ) sarama.ConsumerGroupHandler {
 	return &consumerGroupHandler{
+		name:    name,
 		claim:   handler,
 		setup:   setup,
 		cleanup: cleanup,
@@ -200,7 +209,9 @@ func (handler *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSe
 		select {
 		case message, ok := <-claim.Messages():
 			if !ok {
-				return errors.New("kafka consumer channel closed")
+				return errs.
+					New("Kafka Consumer Group Handler channel closed").
+					AddContext("name", handler.name)
 			}
 
 			func() {
@@ -212,7 +223,11 @@ func (handler *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSe
 				if err := try.Try(func() error {
 					return handler.claim(ctx, session, claim, message)
 				}); err != nil {
-					logger.Error().Err(err).Msg("Kafka consumer group claim")
+					logger.
+						Error().
+						Err(err).
+						Str("name", handler.name).
+						Msg("Kafka consumer group claim")
 				}
 			}()
 		case <-session.Context().Done():
