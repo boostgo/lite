@@ -8,6 +8,7 @@ import (
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/storage"
 	"github.com/jmoiron/sqlx"
+	"golang.org/x/sync/errgroup"
 )
 
 type ConnectionSelector func(ctx context.Context, connections []ShardConnect) ShardConnect
@@ -190,6 +191,10 @@ func (c *clientShard) EveryShard(fn func(conn DB) error) (err error) {
 	return EveryShard(c, fn)
 }
 
+func (c *clientShard) EveryShardAsync(fn func(conn DB) error, limit ...int) (err error) {
+	return EveryShardAsync(c, fn, limit...)
+}
+
 func (c *clientShard) printLog(ctx context.Context, connectionName, queryType, query string, args ...any) {
 	if !c.enableLog || storage.IsNoLog(ctx) {
 		return
@@ -221,4 +226,24 @@ func EveryShard(conn DB, fn func(conn DB) error) (err error) {
 	}
 
 	return nil
+}
+
+func EveryShardAsync(conn DB, fn func(conn DB) error, limit ...int) (err error) {
+	shardClient, ok := conn.(*clientShard)
+	if !ok {
+		return errors.New("provided conn is not shard client")
+	}
+
+	wg := errgroup.Group{}
+	if len(limit) > 0 {
+		wg.SetLimit(limit[0])
+	}
+
+	for _, shard := range shardClient.connections.connections {
+		wg.Go(func() error {
+			return fn(Client(shard.Conn()))
+		})
+	}
+
+	return wg.Wait()
 }

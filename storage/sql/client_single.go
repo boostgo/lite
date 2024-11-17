@@ -150,6 +150,10 @@ func (c *clientSingle) EveryShard(_ func(conn DB) error) error {
 	return errors.New("method not supported in single client")
 }
 
+func (c *clientSingle) EveryShardAsync(_ func(conn DB) error, _ ...int) error {
+	return errors.New("method not supported in single client")
+}
+
 func (c *clientSingle) printLog(ctx context.Context, queryType, query string, args ...any) {
 	if !c.enableLog || storage.IsNoLog(ctx) {
 		return
