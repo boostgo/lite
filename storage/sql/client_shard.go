@@ -187,12 +187,12 @@ func (c *clientShard) PrepareNamedContext(ctx context.Context, query string) (st
 	return raw.Conn().PrepareNamedContext(ctx, query)
 }
 
-func (c *clientShard) EveryShard(fn func(conn DB) error) (err error) {
-	return EveryShard(c, fn)
+func (c *clientShard) EachShard(fn func(conn DB) error) (err error) {
+	return EachShard(c, fn)
 }
 
-func (c *clientShard) EveryShardAsync(fn func(conn DB) error, limit ...int) (err error) {
-	return EveryShardAsync(c, fn, limit...)
+func (c *clientShard) EachShardAsync(fn func(conn DB) error, limit ...int) (err error) {
+	return EachShardAsync(c, fn, limit...)
 }
 
 func (c *clientShard) printLog(ctx context.Context, connectionName, queryType, query string, args ...any) {
@@ -213,7 +213,7 @@ func (c *clientShard) selectConnect(ctx context.Context) (ShardConnect, error) {
 	return c.connections.Get(ctx)
 }
 
-func EveryShard(conn DB, fn func(conn DB) error) (err error) {
+func EachShard(conn DB, fn func(conn DB) error) (err error) {
 	shardClient, ok := conn.(*clientShard)
 	if !ok {
 		return errors.New("provided conn is not shard client")
@@ -228,7 +228,7 @@ func EveryShard(conn DB, fn func(conn DB) error) (err error) {
 	return nil
 }
 
-func EveryShardAsync(conn DB, fn func(conn DB) error, limit ...int) (err error) {
+func EachShardAsync(conn DB, fn func(conn DB) error, limit ...int) (err error) {
 	shardClient, ok := conn.(*clientShard)
 	if !ok {
 		return errors.New("provided conn is not shard client")

@@ -22,8 +22,8 @@ type DB interface {
 	NamedExecContext
 	SelectContext
 	PrepareContext
-	EveryShard(fn func(conn DB) error) error
-	EveryShardAsync(fn func(conn DB) error, limit ...int) error
+	EachShard(fn func(conn DB) error) error
+	EachShardAsync(fn func(conn DB) error, limit ...int) error
 }
 
 type NamedExecContext interface {

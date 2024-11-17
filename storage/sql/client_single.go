@@ -146,11 +146,11 @@ func (c *clientSingle) PrepareNamedContext(ctx context.Context, query string) (s
 	return c.conn.PrepareNamedContext(ctx, query)
 }
 
-func (c *clientSingle) EveryShard(_ func(conn DB) error) error {
+func (c *clientSingle) EachShard(_ func(conn DB) error) error {
 	return errors.New("method not supported in single client")
 }
 
-func (c *clientSingle) EveryShardAsync(_ func(conn DB) error, _ ...int) error {
+func (c *clientSingle) EachShardAsync(_ func(conn DB) error, _ ...int) error {
 	return errors.New("method not supported in single client")
 }
 
