@@ -7,6 +7,8 @@ type Arguments struct {
 	counter int
 }
 
+// NewArguments created instance of Arguments object.
+// Helps manage query arguments count & their values
 func NewArguments(args ...any) *Arguments {
 	return &Arguments{
 		args:    args,

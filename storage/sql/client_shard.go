@@ -41,7 +41,7 @@ func (c *clientShard) ExecContext(ctx context.Context, query string, args ...int
 	if err != nil {
 		return nil, err
 	}
-	c.printLog(ctx, raw.Name(), "ExecContext", query, args...)
+	c.printLog(ctx, raw.Key(), "ExecContext", query, args...)
 
 	tx, ok := GetTx(ctx)
 	if ok {
@@ -58,7 +58,7 @@ func (c *clientShard) QueryContext(ctx context.Context, query string, args ...in
 	if err != nil {
 		return nil, err
 	}
-	c.printLog(ctx, raw.Name(), "QueryContext", query, args...)
+	c.printLog(ctx, raw.Key(), "QueryContext", query, args...)
 
 	tx, ok := GetTx(ctx)
 	if ok {
@@ -75,7 +75,7 @@ func (c *clientShard) QueryxContext(ctx context.Context, query string, args ...i
 	if err != nil {
 		return nil, err
 	}
-	c.printLog(ctx, raw.Name(), "QueryxContext", query, args...)
+	c.printLog(ctx, raw.Key(), "QueryxContext", query, args...)
 
 	tx, ok := GetTx(ctx)
 	if ok {
@@ -91,7 +91,7 @@ func (c *clientShard) QueryRowxContext(ctx context.Context, query string, args .
 		return nil
 	}
 
-	c.printLog(ctx, raw.Name(), "QueryRowxContext", query, args...)
+	c.printLog(ctx, raw.Key(), "QueryRowxContext", query, args...)
 
 	tx, ok := GetTx(ctx)
 	if ok {
@@ -108,7 +108,7 @@ func (c *clientShard) PrepareContext(ctx context.Context, query string) (stateme
 	if err != nil {
 		return nil, err
 	}
-	c.printLog(ctx, raw.Name(), "PrepareContext", query)
+	c.printLog(ctx, raw.Key(), "PrepareContext", query)
 
 	tx, ok := GetTx(ctx)
 	if ok {
@@ -125,7 +125,7 @@ func (c *clientShard) NamedExecContext(ctx context.Context, query string, arg in
 	if err != nil {
 		return nil, err
 	}
-	c.printLog(ctx, raw.Name(), "NamedExecContext", query, arg)
+	c.printLog(ctx, raw.Key(), "NamedExecContext", query, arg)
 
 	tx, ok := GetTx(ctx)
 	if ok {
@@ -142,7 +142,7 @@ func (c *clientShard) SelectContext(ctx context.Context, dest interface{}, query
 	if err != nil {
 		return err
 	}
-	c.printLog(ctx, raw.Name(), "SelectContext", query, args...)
+	c.printLog(ctx, raw.Key(), "SelectContext", query, args...)
 
 	tx, ok := GetTx(ctx)
 	if ok {
@@ -159,7 +159,7 @@ func (c *clientShard) GetContext(ctx context.Context, dest interface{}, query st
 	if err != nil {
 		return err
 	}
-	c.printLog(ctx, raw.Name(), "GetContext", query, args...)
+	c.printLog(ctx, raw.Key(), "GetContext", query, args...)
 
 	tx, ok := GetTx(ctx)
 	if ok {
@@ -177,7 +177,7 @@ func (c *clientShard) PrepareNamedContext(ctx context.Context, query string) (st
 		return nil, err
 	}
 
-	c.printLog(ctx, raw.Name(), "PrepareNamedContext", query)
+	c.printLog(ctx, raw.Key(), "PrepareNamedContext", query)
 
 	tx, ok := GetTx(ctx)
 	if ok {
@@ -195,7 +195,7 @@ func (c *clientShard) EachShardAsync(fn func(conn DB) error, limit ...int) (err 
 	return EachShardAsync(c, fn, limit...)
 }
 
-func (c *clientShard) printLog(ctx context.Context, connectionName, queryType, query string, args ...any) {
+func (c *clientShard) printLog(ctx context.Context, connectionKey, queryType, query string, args ...any) {
 	if !c.enableLog || storage.IsNoLog(ctx) {
 		return
 	}
@@ -203,7 +203,7 @@ func (c *clientShard) printLog(ctx context.Context, connectionName, queryType, q
 	log.
 		Context(ctx, "storage.sql."+queryType).
 		Info().
-		Str("connection_name", connectionName).
+		Str("connection_key", connectionKey).
 		Str("query", query).
 		Any("args", args).
 		Send()
@@ -213,6 +213,7 @@ func (c *clientShard) selectConnect(ctx context.Context) (ShardConnect, error) {
 	return c.connections.Get(ctx)
 }
 
+// EachShard runs provided fn function with every shard single connection
 func EachShard(conn DB, fn func(conn DB) error) (err error) {
 	shardClient, ok := conn.(*clientShard)
 	if !ok {
@@ -228,6 +229,8 @@ func EachShard(conn DB, fn func(conn DB) error) (err error) {
 	return nil
 }
 
+// EachShardAsync do the same as EachShard but in parallel every shard.
+// If provide "limit", count of goroutines will be limited
 func EachShardAsync(conn DB, fn func(conn DB) error, limit ...int) (err error) {
 	shardClient, ok := conn.(*clientShard)
 	if !ok {
@@ -235,7 +238,7 @@ func EachShardAsync(conn DB, fn func(conn DB) error, limit ...int) (err error) {
 	}
 
 	wg := errgroup.Group{}
-	if len(limit) > 0 {
+	if len(limit) > 0 && limit[0] > 0 {
 		wg.SetLimit(limit[0])
 	}
 

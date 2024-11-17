@@ -7,21 +7,26 @@ import (
 	"time"
 )
 
+// Connect to the database.
+// "options" can override default settings
 func Connect(connectionString string, options ...func(connection *sqlx.DB)) (*sqlx.DB, error) {
 	connection, err := sqlx.Open("postgres", connectionString)
 	if err != nil {
 		return nil, err
 	}
 
+	// set default settings
 	connection.SetMaxOpenConns(10)
 	connection.SetMaxIdleConns(10)
 	connection.SetConnMaxLifetime(time.Second * 10)
 	connection.SetConnMaxIdleTime(time.Second * 10)
 
+	// apply options
 	for _, option := range options {
 		option(connection)
 	}
 
+	// make ping
 	if err = connection.Ping(); err != nil {
 		return nil, err
 	}

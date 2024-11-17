@@ -10,30 +10,30 @@ import (
 )
 
 type ShardConnectString struct {
-	Name             string
+	Key              string
 	ConnectionString string
 }
 
 type ShardConnect interface {
-	Name() string
+	Key() string
 	Conn() *sqlx.DB
 	Close() error
 }
 
 type shardConnect struct {
-	name string
+	key  string
 	conn *sqlx.DB
 }
 
-func newShardConnect(name string, conn *sqlx.DB) ShardConnect {
+func newShardConnect(key string, conn *sqlx.DB) ShardConnect {
 	return &shardConnect{
-		name: name,
+		key:  key,
 		conn: conn,
 	}
 }
 
-func (conn *shardConnect) Name() string {
-	return conn.name
+func (conn *shardConnect) Key() string {
+	return conn.key
 }
 
 func (conn *shardConnect) Conn() *sqlx.DB {
@@ -45,21 +45,38 @@ func (conn *shardConnect) Close() error {
 }
 
 func ConnectShards(connectionStrings []ShardConnectString, selector ConnectionSelector, options ...func(connection *sqlx.DB)) (*Connections, error) {
-	connections := make([]ShardConnect, len(connectionStrings))
+	// validate for connection key unique and for empty
+	// also, validate for empty connection string
+	keys := make(map[string]struct{}, len(connectionStrings))
+	for _, cs := range connectionStrings {
+		if cs.Key == "" {
+			return nil, errs.New("Connection key is empty")
+		}
 
-	for idx, cs := range connectionStrings {
 		if cs.ConnectionString == "" {
 			return nil, errs.
 				New("Connection string is empty").
-				AddContext("name", cs.Name)
+				AddContext("key", cs.Key)
 		}
 
+		if _, ok := keys[cs.Key]; ok {
+			return nil, errs.
+				New("Connection keys cannot duplicate").
+				AddContext("key", cs.Key)
+		}
+
+		keys[cs.Key] = struct{}{}
+	}
+
+	// connect every shard
+	connections := make([]ShardConnect, len(connectionStrings))
+	for idx, cs := range connectionStrings {
 		connection, err := Connect(cs.ConnectionString, options...)
 		if err != nil {
 			return nil, err
 		}
 
-		connections[idx] = newShardConnect(cs.Name, connection)
+		connections[idx] = newShardConnect(cs.Key, connection)
 	}
 
 	return newConnections(connections, selector), nil
@@ -87,6 +104,7 @@ func newConnections(connections []ShardConnect, selector ConnectionSelector) *Co
 }
 
 func (c *Connections) Get(ctx context.Context) (ShardConnect, error) {
+	// get shard by provided selector
 	conn := c.selector(ctx, c.connections)
 	if conn == nil {
 		return nil, storage.ErrConnNotSelected
@@ -118,6 +136,7 @@ func (c *Connections) Close() error {
 }
 
 func (c *Connections) BeginTxx(ctx context.Context, opts *sql.TxOptions) (*sqlx.Tx, error) {
+	// begin transaction at selected shard
 	conn, err := c.Get(ctx)
 	if err != nil {
 		return nil, err
