@@ -10,39 +10,6 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-const errType = "SQL"
-
-func NotFound(err error) bool {
-	return errors.Is(err, sql.ErrNoRows)
-}
-
-type DB interface {
-	Connection() *sqlx.DB
-	sqlx.ExecerContext
-	sqlx.QueryerContext
-	sqlx.PreparerContext
-	GetContext
-	NamedExecContext
-	SelectContext
-	PrepareContext
-}
-
-type NamedExecContext interface {
-	NamedExecContext(ctx context.Context, query string, arg interface{}) (sql.Result, error)
-}
-
-type SelectContext interface {
-	SelectContext(ctx context.Context, dest interface{}, query string, args ...interface{}) error
-}
-
-type GetContext interface {
-	GetContext(ctx context.Context, dest interface{}, query string, args ...interface{}) error
-}
-
-type PrepareContext interface {
-	PrepareNamedContext(ctx context.Context, query string) (*sqlx.NamedStmt, error)
-}
-
 type clientSingle struct {
 	conn      *sqlx.DB
 	enableLog bool
@@ -177,6 +144,10 @@ func (c *clientSingle) PrepareNamedContext(ctx context.Context, query string) (s
 	}
 
 	return c.conn.PrepareNamedContext(ctx, query)
+}
+
+func (c *clientSingle) EveryShard(_ func(conn DB) error) error {
+	return errors.New("method not supported in single client")
 }
 
 func (c *clientSingle) printLog(ctx context.Context, queryType, query string, args ...any) {
