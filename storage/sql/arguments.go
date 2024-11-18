@@ -22,6 +22,18 @@ func (a *Arguments) Add(arg any) *Arguments {
 	return a
 }
 
+func (a *Arguments) AddMany(args ...any) string {
+	values := "("
+	for idx, arg := range args {
+		values += a.Add(arg).Number()
+		if idx < len(args)-1 {
+			values += ", "
+		}
+	}
+	values += ")"
+	return values
+}
+
 func (a *Arguments) Number() string {
 	return fmt.Sprintf("$%d", a.counter)
 }
