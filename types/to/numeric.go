@@ -38,6 +38,78 @@ func Int(anyValue any) int {
 		return int(value)
 	case float64:
 		return int(value)
+	case *int:
+		if value == nil {
+			return 0
+		}
+
+		return *value
+	case *int8:
+		if value == nil {
+			return 0
+		}
+
+		return int(*value)
+	case *int16:
+		if value == nil {
+			return 0
+		}
+
+		return int(*value)
+	case *int32:
+		if value == nil {
+			return 0
+		}
+
+		return int(*value)
+	case *int64:
+		if value == nil {
+			return 0
+		}
+
+		return int(*value)
+	case *uint:
+		if value == nil {
+			return 0
+		}
+
+		return int(*value)
+	case *uint8:
+		if value == nil {
+			return 0
+		}
+
+		return int(*value)
+	case *uint16:
+		if value == nil {
+			return 0
+		}
+
+		return int(*value)
+	case *uint32:
+		if value == nil {
+			return 0
+		}
+
+		return int(*value)
+	case *uint64:
+		if value == nil {
+			return 0
+		}
+
+		return int(*value)
+	case *float32:
+		if value == nil {
+			return 0
+		}
+
+		return int(*value)
+	case *float64:
+		if value == nil {
+			return 0
+		}
+
+		return int(*value)
 	case string:
 		parsed, err := strconv.Atoi(value)
 		if err != nil {
@@ -70,6 +142,12 @@ func Float32(anyValue any) float32 {
 		return value
 	case float64:
 		return float32(value)
+	case *float32:
+		if value == nil {
+			return 0
+		}
+
+		return *value
 	case int:
 		return float32(value)
 	case int8:
@@ -122,6 +200,12 @@ func Float64(anyValue any) float64 {
 		return float64(value)
 	case float64:
 		return value
+	case *float64:
+		if value == nil {
+			return 0
+		}
+
+		return *value
 	case int:
 		return float64(value)
 	case int8:
