@@ -18,6 +18,7 @@ func Failure(ctx echo.Context, status int, err error) error {
 	var output errorOutput
 	output.Status = statusFailure
 
+	// build/collect error output
 	custom, ok := errs.TryGet(err)
 	if ok {
 		output.Message = custom.Message()
@@ -38,6 +39,14 @@ func Failure(ctx echo.Context, status int, err error) error {
 		Err(err).
 		Msg("Failure request")
 
+	// clear from trace
+	if output.Context != nil {
+		if _, traceExist := output.Context["trace"]; traceExist {
+			delete(output.Context, "trace")
+		}
+	}
+
+	// convert output object to bytes
 	outputBlob, _ := json.Marshal(output)
 	return ctx.JSONBlob(status, outputBlob)
 }
