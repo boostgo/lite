@@ -42,3 +42,15 @@ func MustConnect(connectionString string, options ...func(connection *sqlx.DB)) 
 
 	return connection
 }
+
+type Connector struct {
+	//
+}
+
+func NewConnector() *Connector {
+	return &Connector{}
+}
+
+func (connector *Connector) Build() string {
+	return ""
+}
