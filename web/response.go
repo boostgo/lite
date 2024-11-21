@@ -20,23 +20,23 @@ func newResponse(resp *http.Response) *Response {
 	}
 }
 
-func (response Response) Raw() *http.Response {
+func (response *Response) Raw() *http.Response {
 	return response.raw
 }
 
-func (response Response) Status() string {
+func (response *Response) Status() string {
 	return response.raw.Status
 }
 
-func (response Response) StatusCode() int {
+func (response *Response) StatusCode() int {
 	return response.raw.StatusCode
 }
 
-func (response Response) BodyRaw() []byte {
+func (response *Response) BodyRaw() []byte {
 	return response.bodyBlob
 }
 
-func (response Response) Parse(export any) error {
+func (response *Response) Parse(export any) error {
 	if response.bodyBlob == nil {
 		return nil
 	}
@@ -48,10 +48,10 @@ func (response Response) Parse(export any) error {
 	return json.Unmarshal(response.bodyBlob, export)
 }
 
-func (response Response) Context(ctx context.Context) context.Context {
+func (response *Response) Context(ctx context.Context) context.Context {
 	return trace.Set(ctx, trace.FromResponse(response.raw))
 }
 
-func (response Response) TraceID() string {
+func (response *Response) TraceID() string {
 	return trace.FromResponse(response.raw)
 }

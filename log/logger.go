@@ -51,22 +51,22 @@ func Context(ctx context.Context, namespace string) Logger {
 	}
 }
 
-func (logger wrapper) Debug() Event {
+func (logger *wrapper) Debug() Event {
 	return Debug().Ctx(logger.ctx).Namespace(logger.namespace)
 }
 
-func (logger wrapper) Info() Event {
+func (logger *wrapper) Info() Event {
 	return Info().Ctx(logger.ctx).Namespace(logger.namespace)
 }
 
-func (logger wrapper) Warn() Event {
+func (logger *wrapper) Warn() Event {
 	return Warn().Ctx(logger.ctx).Namespace(logger.namespace)
 }
 
-func (logger wrapper) Error() Event {
+func (logger *wrapper) Error() Event {
 	return Error().Ctx(logger.ctx).Namespace(logger.namespace)
 }
 
-func (logger wrapper) Fatal() Event {
+func (logger *wrapper) Fatal() Event {
 	return Fatal().Ctx(logger.ctx).Namespace(logger.namespace)
 }
