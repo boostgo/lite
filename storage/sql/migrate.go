@@ -8,6 +8,9 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/jmoiron/sqlx"
+
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	_ "github.com/lib/pq"
 )
 
 func Migrate(ctx context.Context, conn *sqlx.DB, databaseName string) (err error) {
@@ -57,5 +60,11 @@ func MustMigrate(ctx context.Context, conn *sqlx.DB, databaseName string) {
 }
 
 func BackgroundMigrate(ctx context.Context, conn *sqlx.DB, databaseName string) {
-	_ = Migrate(ctx, conn, databaseName)
+	if err := Migrate(ctx, conn, databaseName); err != nil {
+		log.
+			Error().
+			Err(err).
+			Str("database_name", databaseName).
+			Msg("Migrate database")
+	}
 }
