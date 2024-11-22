@@ -9,7 +9,7 @@ import (
 const split = "	"
 
 func Unmarshal(body []byte) ([]string, error) {
-	input := to.BytesToString(body)
+	input := to.StringFromBytes(body)
 
 	records := strings.Split(input, split)
 

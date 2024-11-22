@@ -23,11 +23,11 @@ func toString(value any, memory bool) string {
 	case uuid.UUID:
 		var buf [36]byte
 		encodeUuidHex(buf[:], v)
-		return BytesToString(buf[:])
+		return StringFromBytes(buf[:])
 	case fmt.Stringer:
 		return v.String()
 	case []byte:
-		return BytesToString(v)
+		return StringFromBytes(v)
 	case error:
 		if v == nil {
 			return ""
@@ -61,7 +61,7 @@ func toString(value any, memory bool) string {
 		if err != nil {
 			return ""
 		}
-		return BytesToString(valueInBytes)
+		return StringFromBytes(valueInBytes)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return strconv.FormatInt(valueReflect.Int(), 10)
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
@@ -75,7 +75,7 @@ func toString(value any, memory bool) string {
 	}
 }
 
-func BytesToString(buffer []byte) string {
+func StringFromBytes(buffer []byte) string {
 	return *(*string)(unsafe.Pointer(&buffer))
 }
 

@@ -19,15 +19,15 @@ func toBytes(value any, memory bool) []byte {
 
 	switch v := value.(type) {
 	case string:
-		return StringToBytes(v)
+		return BytesFromString(v)
 	case int, int8, int16, int32, int64,
 		uint, uint8, uint16, uint32, uint64, uintptr,
 		float32, float64, bool:
-		return StringToBytes(toString(v, false))
+		return BytesFromString(toString(v, false))
 	case uuid.UUID:
-		return StringToBytes(v.String())
+		return BytesFromString(v.String())
 	case fmt.Stringer:
-		return StringToBytes(v.String())
+		return BytesFromString(v.String())
 	}
 
 	valueType := reflect.TypeOf(value)
@@ -47,11 +47,11 @@ func toBytes(value any, memory bool) []byte {
 
 		return toBytes(reflect.ValueOf(value).Interface(), true)
 	default:
-		return StringToBytes(toString(value, false))
+		return BytesFromString(toString(value, false))
 	}
 }
 
-func StringToBytes(s string) []byte {
+func BytesFromString(s string) []byte {
 	return *(*[]byte)(unsafe.Pointer(&reflect.SliceHeader{
 		Data: (*(*reflect.StringHeader)(unsafe.Pointer(&s))).Data,
 		Len:  len(s),
