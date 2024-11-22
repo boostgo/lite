@@ -40,6 +40,8 @@ func toString(value any, memory bool) string {
 		return v
 	case bool:
 		return strconv.FormatBool(v)
+	case rune:
+		return string(v)
 	}
 
 	valueReflect := reflect.ValueOf(value)
