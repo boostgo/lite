@@ -29,6 +29,10 @@ func toString(value any, memory bool) string {
 	case []byte:
 		return BytesToString(v)
 	case error:
+		if v == nil {
+			return ""
+		}
+
 		return v.Error()
 	case *string:
 		if v == nil {
@@ -57,7 +61,7 @@ func toString(value any, memory bool) string {
 		if err != nil {
 			return ""
 		}
-		return string(valueInBytes)
+		return BytesToString(valueInBytes)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return strconv.FormatInt(valueReflect.Int(), 10)
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
