@@ -19,6 +19,7 @@ type Worker struct {
 	stopper      chan bool
 	lifeDown     chan bool
 	traceMaster  bool
+	timeout      time.Duration
 }
 
 func New(name string, duration time.Duration, action func(ctx context.Context) error) *Worker {
@@ -37,6 +38,11 @@ func (worker *Worker) FromStart() *Worker {
 	return worker
 }
 
+func (worker *Worker) Timeout(timeout time.Duration) *Worker {
+	worker.timeout = timeout
+	return worker
+}
+
 func (worker *Worker) ErrorHandler(handler func(error) bool) *Worker {
 	if handler == nil {
 		return worker
@@ -48,8 +54,15 @@ func (worker *Worker) ErrorHandler(handler func(error) bool) *Worker {
 
 func (worker *Worker) runAction() error {
 	var ctx context.Context
+	var cancel context.CancelFunc
+
 	if worker.traceMaster {
 		ctx = trace.Set(context.Background(), trace.String())
+	}
+
+	if worker.duration > 0 {
+		ctx, cancel = context.WithTimeout(ctx, worker.duration)
+		defer cancel()
 	}
 
 	return try.Ctx(ctx, worker.action)
