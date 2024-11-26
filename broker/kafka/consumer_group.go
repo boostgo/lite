@@ -170,6 +170,7 @@ type consumerGroupHandler struct {
 	claim   ConsumerGroupClaim
 	setup   ConsumerGroupSetup
 	cleanup ConsumerGroupCleanup
+	timeout time.Duration
 }
 
 func ConsumerGroupHandler(
@@ -177,12 +178,19 @@ func ConsumerGroupHandler(
 	handler ConsumerGroupClaim,
 	setup ConsumerGroupSetup,
 	cleanup ConsumerGroupCleanup,
+	timeout ...time.Duration,
 ) sarama.ConsumerGroupHandler {
+	var setTimeout time.Duration
+	if len(timeout) > 0 {
+		setTimeout = timeout[0]
+	}
+
 	return &consumerGroupHandler{
 		name:    name,
 		claim:   handler,
 		setup:   setup,
 		cleanup: cleanup,
+		timeout: setTimeout,
 	}
 }
 
@@ -215,8 +223,13 @@ func (handler *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSe
 			}
 
 			func() {
-				ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
-				defer cancel()
+				var ctx context.Context
+				var cancel context.CancelFunc
+
+				if handler.timeout > 0 {
+					ctx, cancel = context.WithTimeout(context.Background(), handler.timeout)
+					defer cancel()
+				}
 
 				ctx = trace.GetKafkaCtx(ctx, message)
 
