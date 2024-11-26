@@ -2,20 +2,17 @@ package sql
 
 import (
 	"context"
+	"github.com/boostgo/lite/storage"
 	"github.com/boostgo/lite/system/try"
 	"github.com/jmoiron/sqlx"
 )
 
-const (
-	txKey = "lite_tx"
-)
-
 func SetTx(ctx context.Context, tx *sqlx.Tx) context.Context {
-	return context.WithValue(ctx, txKey, tx)
+	return context.WithValue(ctx, storage.TransactionContextKey, tx)
 }
 
 func GetTx(ctx context.Context) (*sqlx.Tx, bool) {
-	transaction := ctx.Value(txKey)
+	transaction := ctx.Value(storage.TransactionContextKey)
 	if transaction == nil {
 		return nil, false
 	}
@@ -56,6 +53,6 @@ func Atomic(ctx context.Context, conn *sqlx.DB, fn func(ctx context.Context) err
 	}()
 
 	return try.Try(func() error {
-		return fn(context.WithValue(ctx, txKey, tx))
+		return fn(context.WithValue(ctx, storage.TransactionContextKey, tx))
 	})
 }
