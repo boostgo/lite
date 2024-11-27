@@ -10,6 +10,7 @@ const (
 	rawResponseKey = "lite-response-raw"
 )
 
+// Raw if middleware set, all responses by this middleware will be returned in "raw" way (no successOutput object)
 func Raw() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {

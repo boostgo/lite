@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+// errStatusCode - define which status code must be provided to response by error
 func errStatusCode(err error) int {
 	switch {
 	case errors.Is(err, errs.ErrBadRequest):
