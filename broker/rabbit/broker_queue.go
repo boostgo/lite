@@ -14,6 +14,7 @@ func defaultQueueConfig() QueueConfig {
 	return QueueConfig{}
 }
 
+// NewQueue creates new queue with provided name and optional configurations
 func (broker *Broker) NewQueue(name string, cfg ...QueueConfig) (*amqp.Queue, error) {
 	var config QueueConfig
 	if len(cfg) > 0 {

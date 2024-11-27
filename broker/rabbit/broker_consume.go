@@ -20,6 +20,7 @@ func defaultConsumerConfig() ConsumerConfig {
 	return ConsumerConfig{}
 }
 
+// Consume starts consuming provided queue with optional configurations
 func (broker *Broker) Consume(queue string, cfg ...ConsumerConfig) (<-chan amqp.Delivery, error) {
 	var config ConsumerConfig
 	if len(cfg) > 0 {

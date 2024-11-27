@@ -31,6 +31,7 @@ func newDispatcher(ctx context.Context, channel *amqp.Channel, validator *valida
 	return d
 }
 
+// Dispatch send provided event/message to queue named as name of structure
 func (d *dispatcher) Dispatch(ctx context.Context, event any) (err error) {
 	if d.ctx.Err() != nil {
 		return nil

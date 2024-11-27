@@ -8,6 +8,7 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
+// eventContext context which is providing to calling consumer function
 type eventContext struct {
 	body   []byte
 	ctx    context.Context

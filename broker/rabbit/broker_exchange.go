@@ -17,6 +17,7 @@ func defaultExchangeConfig() ExchangeConfig {
 	return ExchangeConfig{}
 }
 
+// NewExchange create new exchange with provided type and optional configurations
 func (broker *Broker) NewExchange(name, exchangeType string, cfg ...ExchangeConfig) error {
 	var config ExchangeConfig
 	if len(cfg) > 0 {
