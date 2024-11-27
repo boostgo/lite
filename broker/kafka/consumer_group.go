@@ -15,10 +15,12 @@ import (
 type GroupHandler sarama.ConsumerGroupHandler
 type GroupHandlerFunc func(msg *sarama.ConsumerMessage, session sarama.ConsumerGroupSession)
 
+// ConsumerGroup wrap structure for Consumer Group
 type ConsumerGroup struct {
 	group sarama.ConsumerGroup
 }
 
+// ConsumerGroupOption returns default consumer group configs
 func ConsumerGroupOption(offset ...int64) Option {
 	return func(config *sarama.Config) {
 		config.Consumer.Return.Errors = true
@@ -40,6 +42,7 @@ func ConsumerGroupOption(offset ...int64) Option {
 	}
 }
 
+// NewConsumerGroup creates ConsumerGroup by options
 func NewConsumerGroup(cfg Config, opts ...Option) (*ConsumerGroup, error) {
 	consumerGroup, err := newConsumerGroup(cfg, opts...)
 	if err != nil {
@@ -50,6 +53,7 @@ func NewConsumerGroup(cfg Config, opts ...Option) (*ConsumerGroup, error) {
 	return consumerGroup, nil
 }
 
+// NewConsumerGroupFromClient creates ConsumerGroup by sarama client
 func NewConsumerGroupFromClient(groupID string, client sarama.Client) (*ConsumerGroup, error) {
 	consumerGroup, err := newConsumerGroupFromClient(groupID, client)
 	if err != nil {
@@ -60,6 +64,7 @@ func NewConsumerGroupFromClient(groupID string, client sarama.Client) (*Consumer
 	return consumerGroup, nil
 }
 
+// MustConsumerGroup calls NewConsumerGroup and if error catch throws panic
 func MustConsumerGroup(cfg Config, opts ...Option) *ConsumerGroup {
 	consumer, err := NewConsumerGroup(cfg, opts...)
 	if err != nil {
@@ -69,6 +74,7 @@ func MustConsumerGroup(cfg Config, opts ...Option) *ConsumerGroup {
 	return consumer
 }
 
+// MustConsumerGroupFromClient calls NewConsumerGroupFromClient and if error catch throws panic
 func MustConsumerGroupFromClient(groupID string, client sarama.Client) *ConsumerGroup {
 	consumer, err := NewConsumerGroupFromClient(groupID, client)
 	if err != nil {
@@ -102,6 +108,8 @@ func (consumer *ConsumerGroup) Close() error {
 	return consumer.group.Close()
 }
 
+// Consume starts consuming topic with consumer group.
+// Catch consumer group errors and provided context done (for graceful shutdown).
 func (consumer *ConsumerGroup) Consume(name string, topics []string, handler GroupHandler) {
 	consumer.consume(life.Context(), name, topics, handler, life.Cancel)
 }
@@ -173,6 +181,9 @@ type consumerGroupHandler struct {
 	timeout time.Duration
 }
 
+// ConsumerGroupHandler creates sarama.ConsumerGroupHandler interface implementation object.
+// Provide 3 methods: claim, setup and cleanup for implementing interface.
+// Also, could be provided timeout for claiming every message
 func ConsumerGroupHandler(
 	name string,
 	handler ConsumerGroupClaim,

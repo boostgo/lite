@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// NewClient creates new kafka client with default options as Option
 func NewClient(cfg Config, opts ...Option) (sarama.Client, error) {
 	config := sarama.NewConfig()
 
@@ -26,6 +27,7 @@ func NewClient(cfg Config, opts ...Option) (sarama.Client, error) {
 	return client, nil
 }
 
+// MustClient calls NewClient and if catches error will be thrown panic
 func MustClient(cfg Config, opts ...Option) sarama.Client {
 	client, err := NewClient(cfg, opts...)
 	if err != nil {
@@ -35,6 +37,7 @@ func MustClient(cfg Config, opts ...Option) sarama.Client {
 	return client
 }
 
+// NewCluster creates new kafka cluster with default options as Option by client
 func NewCluster(client sarama.Client) (sarama.ClusterAdmin, error) {
 	clusterClient, err := sarama.NewClusterAdminFromClient(client)
 	if err != nil {
@@ -44,6 +47,7 @@ func NewCluster(client sarama.Client) (sarama.ClusterAdmin, error) {
 	return clusterClient, nil
 }
 
+// MustCluster calls NewCluster and if errors is catch throws panic
 func MustCluster(client sarama.Client) sarama.ClusterAdmin {
 	cluster, err := NewCluster(client)
 	if err != nil {
@@ -53,6 +57,7 @@ func MustCluster(client sarama.Client) sarama.ClusterAdmin {
 	return cluster
 }
 
+// clientOption returns default options for client as Option
 func clientOption(cfg Config) Option {
 	return func(config *sarama.Config) {
 		config.ClientID = buildClientID()

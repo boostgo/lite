@@ -11,11 +11,13 @@ import (
 type ConsumeHandler func(message *sarama.ConsumerMessage) error
 type ErrorHandler func(err error)
 
+// Consumer wrap structure for Consumer
 type Consumer struct {
 	consumer     sarama.Consumer
 	errorHandler ErrorHandler
 }
 
+// ConsumerOption returns default consumer configs
 func ConsumerOption() Option {
 	return func(config *sarama.Config) {
 		config.Consumer.Return.Errors = true
@@ -29,6 +31,7 @@ func ConsumerOption() Option {
 	}
 }
 
+// NewConsumer creates Consumer by options
 func NewConsumer(cfg Config, opts ...Option) (*Consumer, error) {
 	if err := validateConsumerConfig(cfg); err != nil {
 		return nil, err
@@ -53,6 +56,7 @@ func NewConsumer(cfg Config, opts ...Option) (*Consumer, error) {
 	}, nil
 }
 
+// NewConsumerFromClient creates Consumer by sarama client
 func NewConsumerFromClient(client sarama.Client) (*Consumer, error) {
 	consumer, err := sarama.NewConsumerFromClient(client)
 	if err != nil {
@@ -65,6 +69,7 @@ func NewConsumerFromClient(client sarama.Client) (*Consumer, error) {
 	}, nil
 }
 
+// MustConsumer calls NewConsumer and if error catch throws panic
 func MustConsumer(cfg Config, opts ...Option) *Consumer {
 	consumer, err := NewConsumer(cfg, opts...)
 	if err != nil {
@@ -74,6 +79,7 @@ func MustConsumer(cfg Config, opts ...Option) *Consumer {
 	return consumer
 }
 
+// MustConsumerFromClient calls NewConsumerFromClient and if error catch throws panic
 func MustConsumerFromClient(client sarama.Client) *Consumer {
 	consumer, err := NewConsumerFromClient(client)
 	if err != nil {
@@ -87,6 +93,8 @@ func (consumer *Consumer) SetErrorHandler(handler ErrorHandler) {
 	consumer.errorHandler = handler
 }
 
+// Consume starts consuming topic with consumer.
+// Catch consumer errors and provided context done (for graceful shutdown).
 func (consumer *Consumer) Consume(topic string, handler ConsumeHandler) error {
 	logger := log.Namespace("kafka.consumer")
 

@@ -3,10 +3,25 @@ package kafka
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"github.com/IBM/sarama"
+	"github.com/boostgo/lite/system/validator"
+	"github.com/boostgo/lite/types/flex"
 	"github.com/boostgo/lite/types/param"
 	"github.com/boostgo/lite/types/to"
+	"sync"
 )
+
+var (
+	_validator     *validator.Validator
+	_validatorOnce sync.Once
+)
+
+func init() {
+	_validatorOnce.Do(func() {
+		_validator, _ = validator.New()
+	})
+}
 
 func GetOffsets(brokers []string, cfg *sarama.Config, topic string, offset int64) (map[int32]int64, error) {
 	client, err := sarama.NewClient(brokers, cfg)
@@ -33,10 +48,23 @@ func GetOffsets(brokers []string, cfg *sarama.Config, topic string, offset int64
 	return offsets, nil
 }
 
+// Parse message body to provided export object (which must be ptr) and validate for "validate" tags.
 func Parse(message *sarama.ConsumerMessage, export any) error {
-	return json.Unmarshal(message.Value, export)
+	// check export type
+	if !flex.Type(export).IsPtr() {
+		return errors.New("export object must be pointer")
+	}
+
+	// parse message
+	if err := json.Unmarshal(message.Value, export); err != nil {
+		return err
+	}
+
+	// validate parsed message body
+	return _validator.Struct(export)
 }
 
+// Header search header in provided message by header name.
 func Header(message *sarama.ConsumerMessage, name string) param.Param {
 	nameBlob := to.Bytes(name)
 
@@ -49,6 +77,7 @@ func Header(message *sarama.ConsumerMessage, name string) param.Param {
 	return param.Empty()
 }
 
+// Headers returns all headers from message as map and param.Param object
 func Headers(message *sarama.ConsumerMessage) map[string]param.Param {
 	headers := make(map[string]param.Param, len(message.Headers))
 	for _, header := range message.Headers {
@@ -57,6 +86,7 @@ func Headers(message *sarama.ConsumerMessage) map[string]param.Param {
 	return headers
 }
 
+// SetHeaders convert provided headers map to sarama headers slice
 func SetHeaders(headers map[string]any) []sarama.RecordHeader {
 	messageHeaders := make([]sarama.RecordHeader, len(headers))
 
