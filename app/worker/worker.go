@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// Worker is job/cron based structure.
 type Worker struct {
 	name         string
 	fromStart    bool
@@ -22,6 +23,7 @@ type Worker struct {
 	timeout      time.Duration
 }
 
+// New creates Worker object
 func New(name string, duration time.Duration, action func(ctx context.Context) error) *Worker {
 	return &Worker{
 		name:        name,
@@ -33,16 +35,19 @@ func New(name string, duration time.Duration, action func(ctx context.Context) e
 	}
 }
 
+// FromStart sets flag for starting worker from start.
 func (worker *Worker) FromStart() *Worker {
 	worker.fromStart = true
 	return worker
 }
 
+// Timeout sets timeout duration for working action timeout.
 func (worker *Worker) Timeout(timeout time.Duration) *Worker {
 	worker.timeout = timeout
 	return worker
 }
 
+// ErrorHandler sets custom error handler from action
 func (worker *Worker) ErrorHandler(handler func(error) bool) *Worker {
 	if handler == nil {
 		return worker
@@ -52,6 +57,7 @@ func (worker *Worker) ErrorHandler(handler func(error) bool) *Worker {
 	return worker
 }
 
+// runAction runs provided action with context and try function and trace id.
 func (worker *Worker) runAction() error {
 	var ctx context.Context
 	var cancel context.CancelFunc
@@ -68,6 +74,7 @@ func (worker *Worker) runAction() error {
 	return try.Ctx(ctx, worker.action)
 }
 
+// Run runs worker with provided duration
 func (worker *Worker) Run() {
 	logger := log.Namespace("worker")
 
@@ -119,6 +126,7 @@ func (worker *Worker) Run() {
 	}()
 }
 
+// Run created worker object and runs by itself. It is like "short" version of using Worker
 func Run(name string, duration time.Duration, action func(ctx context.Context) error, fromStart ...bool) {
 	worker := New(name, duration, action)
 	if len(fromStart) > 0 && fromStart[0] {
