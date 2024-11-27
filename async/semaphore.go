@@ -6,20 +6,24 @@ type Semaphore struct {
 	c chan struct{}
 }
 
+func NewSemaphore(size int) *Semaphore {
+	return &Semaphore{
+		c: make(chan struct{}, size),
+	}
+}
+
+// Acquire add one more semaphore to pool.
+// Here is becoming "wait/hold" moment.
 func (s *Semaphore) Acquire() {
 	s.c <- struct{}{}
 }
 
+// Release remove one semaphore from pool.
+// It allows pool to acquire one more semaphore
 func (s *Semaphore) Release() {
 	<-s.c
 }
 
 func (s *Semaphore) Close() {
 	close(s.c)
-}
-
-func NewSemaphore(size int) *Semaphore {
-	return &Semaphore{
-		c: make(chan struct{}, size),
-	}
 }

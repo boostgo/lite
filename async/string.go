@@ -4,6 +4,7 @@ import (
 	"sync"
 )
 
+// String representation of "thread safe" or "atomic" for string.
 type String struct {
 	value string
 	mx    sync.RWMutex
@@ -21,8 +22,14 @@ func (str *String) Load() string {
 	return str.value
 }
 
-func (str *String) Store(value string) {
+func (str *String) Store(value string) *String {
 	str.mx.Lock()
 	defer str.mx.Unlock()
 	str.value = value
+	return str
+}
+
+func (str *String) Append(appendValue string) *String {
+	str.Store(str.value + appendValue)
+	return str
 }
