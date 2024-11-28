@@ -13,7 +13,9 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func Migrate(ctx context.Context, conn *sqlx.DB, databaseName string) (err error) {
+// Migrate runs migration by provided connection & database name.
+// Use by default ./migrations directory in the root of project.
+func Migrate(ctx context.Context, conn *sqlx.DB, databaseName string, migrationsDir ...string) (err error) {
 	const errType = "Storage Migrate"
 	defer errs.Wrap(errType, &err, "Migrate")
 
@@ -32,7 +34,13 @@ func Migrate(ctx context.Context, conn *sqlx.DB, databaseName string) (err error
 		return err
 	}
 
-	migrator, err := migrate.NewWithDatabaseInstance("file://./migrations", databaseName, driver)
+	const defaultMigrationsDir = "./migrations"
+	migrationsDirectoryPath := defaultMigrationsDir
+	if len(migrationsDir) > 0 {
+		migrationsDirectoryPath = migrationsDir[0]
+	}
+
+	migrator, err := migrate.NewWithDatabaseInstance("file://"+migrationsDirectoryPath, databaseName, driver)
 	if err != nil {
 		return err
 	}
@@ -53,12 +61,14 @@ func Migrate(ctx context.Context, conn *sqlx.DB, databaseName string) (err error
 	return nil
 }
 
+// MustMigrate calls Migrate function and if error catch throws panic
 func MustMigrate(ctx context.Context, conn *sqlx.DB, databaseName string) {
 	if err := Migrate(ctx, conn, databaseName); err != nil {
 		panic(err)
 	}
 }
 
+// BackgroundMigrate calls Migrate function and if error catch print log
 func BackgroundMigrate(ctx context.Context, conn *sqlx.DB, databaseName string) {
 	if err := Migrate(ctx, conn, databaseName); err != nil {
 		log.

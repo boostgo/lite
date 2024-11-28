@@ -7,10 +7,12 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+// SetTx sets transaction key to new context
 func SetTx(ctx context.Context, tx *sqlx.Tx) context.Context {
 	return context.WithValue(ctx, storage.TransactionContextKey, tx)
 }
 
+// GetTx returns sql transaction object from context if it exist
 func GetTx(ctx context.Context) (*sqlx.Tx, bool) {
 	transaction := ctx.Value(storage.TransactionContextKey)
 	if transaction == nil {
@@ -21,6 +23,7 @@ func GetTx(ctx context.Context) (*sqlx.Tx, bool) {
 	return tx, ok
 }
 
+// Transaction run "actions" by created transaction object
 func Transaction(conn *sqlx.DB, transactionActions func(tx *sqlx.Tx) error) error {
 	transaction, err := conn.Beginx()
 	if err != nil {

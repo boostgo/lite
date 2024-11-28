@@ -18,6 +18,8 @@ type clientShard struct {
 	enableLog   bool
 }
 
+// ClientShard creates DB implementation as shard client.
+// Need to provide Connections object which contains multiple connections for sharding
 func ClientShard(connections *Connections, enableLog ...bool) DB {
 	var enable bool
 	if len(enableLog) > 0 {
@@ -187,10 +189,13 @@ func (c *clientShard) PrepareNamedContext(ctx context.Context, query string) (st
 	return raw.Conn().PrepareNamedContext(ctx, query)
 }
 
+// EachShard runs provided fn function with every shard single connection
 func (c *clientShard) EachShard(fn func(conn DB) error) (err error) {
 	return EachShard(c, fn)
 }
 
+// EachShardAsync do the same as EachShard but in parallel every shard.
+// If provide "limit", count of goroutines will be limited
 func (c *clientShard) EachShardAsync(fn func(conn DB) error, limit ...int) (err error) {
 	return EachShardAsync(c, fn, limit...)
 }

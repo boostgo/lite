@@ -14,6 +14,7 @@ type ShardConnectString struct {
 	ConnectionString string
 }
 
+// ShardConnect contain connection & it's key for shard client
 type ShardConnect interface {
 	Key() string
 	Conn() *sqlx.DB
@@ -32,10 +33,12 @@ func newShardConnect(key string, conn *sqlx.DB) ShardConnect {
 	}
 }
 
+// Key returns key of connection
 func (conn *shardConnect) Key() string {
 	return conn.key
 }
 
+// Conn return single connection
 func (conn *shardConnect) Conn() *sqlx.DB {
 	return conn.conn
 }
@@ -44,6 +47,7 @@ func (conn *shardConnect) Close() error {
 	return conn.conn.Close()
 }
 
+// ConnectShards connect all provided connections and create Connections object
 func ConnectShards(connectionStrings []ShardConnectString, selector ConnectionSelector, options ...func(connection *sqlx.DB)) (*Connections, error) {
 	// validate for connection key unique and for empty
 	// also, validate for empty connection string
@@ -82,6 +86,7 @@ func ConnectShards(connectionStrings []ShardConnectString, selector ConnectionSe
 	return newConnections(connections, selector), nil
 }
 
+// MustConnectShards calls ConnectShards and if error catch throws panic
 func MustConnectShards(connectionStrings []ShardConnectString, selector ConnectionSelector, options ...func(connection *sqlx.DB)) *Connections {
 	connections, err := ConnectShards(connectionStrings, selector, options...)
 	if err != nil {
@@ -91,6 +96,7 @@ func MustConnectShards(connectionStrings []ShardConnectString, selector Connecti
 	return connections
 }
 
+// Connections contain all connections for shard client and selector for choosing connection
 type Connections struct {
 	connections []ShardConnect
 	selector    ConnectionSelector
@@ -103,6 +109,7 @@ func newConnections(connections []ShardConnect, selector ConnectionSelector) *Co
 	}
 }
 
+// Get returns shard connect by using selector
 func (c *Connections) Get(ctx context.Context) (ShardConnect, error) {
 	// get shard by provided selector
 	conn := c.selector(ctx, c.connections)
@@ -113,10 +120,12 @@ func (c *Connections) Get(ctx context.Context) (ShardConnect, error) {
 	return conn, nil
 }
 
+// Connections return all shard connections
 func (c *Connections) Connections() []ShardConnect {
 	return c.connections
 }
 
+// RawConnections returns all connections as []*sqlx.DB
 func (c *Connections) RawConnections() []*sqlx.DB {
 	connections := make([]*sqlx.DB, len(c.connections))
 	for idx, conn := range c.connections {
@@ -125,6 +134,7 @@ func (c *Connections) RawConnections() []*sqlx.DB {
 	return connections
 }
 
+// Close all connections in parallel
 func (c *Connections) Close() error {
 	wg := errgroup.Group{}
 
@@ -135,6 +145,7 @@ func (c *Connections) Close() error {
 	return wg.Wait()
 }
 
+// BeginTxx method for TransactorConnectionProvider implementation by choosing connection by selector
 func (c *Connections) BeginTxx(ctx context.Context, opts *sql.TxOptions) (*sqlx.Tx, error) {
 	// begin transaction at selected shard
 	conn, err := c.Get(ctx)

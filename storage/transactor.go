@@ -15,12 +15,14 @@ type Transactor interface {
 	RollbackCtx(ctx context.Context) error
 }
 
+// Transaction interface using by Transactor
 type Transaction interface {
 	Context() context.Context
 	Commit(ctx context.Context) error
 	Rollback(ctx context.Context) error
 }
 
+// RewriteTx take transaction key from original context and copy key to toCopy context
 func RewriteTx(original context.Context, toCopy context.Context) context.Context {
 	tx := original.Value(TransactionContextKey)
 	if tx == nil {

@@ -7,6 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+// TransactorConnectionProvider sql transaction interface
 type TransactorConnectionProvider interface {
 	BeginTxx(ctx context.Context, opts *sql.TxOptions) (*sqlx.Tx, error)
 }
@@ -15,6 +16,7 @@ type sqlTransactor struct {
 	provider TransactorConnectionProvider
 }
 
+// NewTransactor creates SQL transactor
 func NewTransactor(provider TransactorConnectionProvider) storage.Transactor {
 	return &sqlTransactor{
 		provider: provider,

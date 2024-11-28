@@ -15,6 +15,7 @@ type clientSingle struct {
 	enableLog bool
 }
 
+// Client creates DB implementation by single client
 func Client(conn *sqlx.DB, enableLog ...bool) DB {
 	var enable bool
 	if len(enableLog) > 0 {
@@ -167,6 +168,7 @@ func (c *clientSingle) printLog(ctx context.Context, queryType, query string, ar
 		Send()
 }
 
+// Page returns offset & limit by pagination
 func Page(pageSize, page int) (offset int, limit int) {
 	if page == 0 {
 		page = 1
