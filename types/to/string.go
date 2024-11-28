@@ -10,6 +10,12 @@ import (
 	"unsafe"
 )
 
+// String converts any value to string.
+// If value is nil returns empty string.
+// If value is implementation of fmt.Stringer interface calls .String() method.
+// If value is UUID convert it to string by StringFromBytes function with no allocation.
+// If value is error calls .Error() method.
+// If value is link type data (slice, map, etc...) convert it to bytes by JSON marshaller and then to string.
 func String(value any) string {
 	return toString(value, false)
 }
@@ -75,6 +81,7 @@ func toString(value any, memory bool) string {
 	}
 }
 
+// StringFromBytes convert bytes array/slice to string with no allocation.
 func StringFromBytes(buffer []byte) string {
 	return *(*string)(unsafe.Pointer(&buffer))
 }

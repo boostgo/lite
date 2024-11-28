@@ -2,6 +2,10 @@ package to
 
 import "strings"
 
+// Bool convert any value to bool.
+// If value is string, convert it to string and then compare for "true" value.
+// If value is numeric and values equals to 1 then it's true.
+// Other cases convert to string and compare to "true"
 func Bool(value any) bool {
 	switch v := value.(type) {
 	case bool:

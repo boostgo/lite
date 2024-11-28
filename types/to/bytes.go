@@ -8,6 +8,11 @@ import (
 	"unsafe"
 )
 
+// Bytes convert any value to bytes slice.
+// If value is string calls BytesFromString function.
+// If value is numeric convert it to string then to bytes.
+// If value is uuid convert to string by String() function and then to bytes.
+// If value is fmt.Stringer implementation calls .String() method and then to bytes.
 func Bytes(value any) []byte {
 	return toBytes(value, false)
 }
@@ -25,7 +30,7 @@ func toBytes(value any, memory bool) []byte {
 		float32, float64, bool:
 		return BytesFromString(toString(v, false))
 	case uuid.UUID:
-		return BytesFromString(v.String())
+		return BytesFromString(String(v))
 	case fmt.Stringer:
 		return BytesFromString(v.String())
 	}
@@ -51,6 +56,7 @@ func toBytes(value any, memory bool) []byte {
 	}
 }
 
+// BytesFromString converts string to bytes slice with no allocation
 func BytesFromString(s string) []byte {
 	return *(*[]byte)(unsafe.Pointer(&reflect.SliceHeader{
 		Data: (*(*reflect.StringHeader)(unsafe.Pointer(&s))).Data,

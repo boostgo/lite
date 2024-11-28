@@ -4,6 +4,8 @@ import (
 	"strconv"
 )
 
+// Int convert any value to int.
+// If value is nil return 0.
 func Int(anyValue any) int {
 	if anyValue == nil {
 		return 0
@@ -132,6 +134,8 @@ func Int(anyValue any) int {
 	}
 }
 
+// Float32 convert any value to float32.
+// If value is nil return 0.
 func Float32(anyValue any) float32 {
 	if anyValue == nil {
 		return 0
@@ -190,6 +194,8 @@ func Float32(anyValue any) float32 {
 	}
 }
 
+// Float64 convert any value to float64.
+// If value is nil return 0.
 func Float64(anyValue any) float64 {
 	if anyValue == nil {
 		return 0
