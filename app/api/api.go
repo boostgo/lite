@@ -69,7 +69,7 @@ func Error(ctx echo.Context, err error) error {
 	return Failure(ctx, errStatusCode(err), err)
 }
 
-// Success returns response with success bode & successOutput object and convert it to JSON response.
+// Success returns response with success code & successOutput object and convert it to JSON response.
 // Sets trace id to the response if it was in request context.
 // If provided body exist, and it is "primitive" response will be in raw (no successOutput object).
 // If context contain "raw" middleware key, response will be in raw (no successOutput object).
@@ -98,15 +98,27 @@ func Success(ctx echo.Context, status int, body ...any) error {
 	return ctx.JSON(status, newSuccess(body[0]))
 }
 
+// SuccessRaw returns response in "raw" way
+func SuccessRaw(ctx echo.Context, status int, body []byte) error {
+	return ctx.Blob(status, "application/octet-stream", body)
+}
+
+// ReturnExcel returns response with Excel file content type
 func ReturnExcel(ctx echo.Context, name string, file []byte) error {
 	ctx.Response().Header().Set("Content-Disposition", "attachment; filename="+name)
 	return ctx.Blob(http.StatusOK, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", file)
 }
 
 // Ok is wrap function over Success function.
-// It provides HTTP code "OK" 200
+// Set HTTP code "OK" 200
 func Ok(ctx echo.Context, body ...any) error {
 	return Success(ctx, http.StatusOK, body...)
+}
+
+// OkRaw is wrap function over SuccessRaw function.
+// Set HTTP code "OK" 200
+func OkRaw(ctx echo.Context, body []byte) error {
+	return SuccessRaw(ctx, http.StatusOK, body)
 }
 
 // Created is wrap function over Success function.
