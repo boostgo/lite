@@ -6,27 +6,39 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// Debug print log on debug level.
+// Provided context use trace id
 func Debug(ctx ...context.Context) Event {
 	return newEvent(log.Debug(), ctx...)
 }
 
+// Info print log on debug level.
+// Provided context use trace id
 func Info(ctx ...context.Context) Event {
 	return newEvent(log.Info(), ctx...)
 }
 
+// Warn print log on debug level.
+// Provided context use trace id
 func Warn(ctx ...context.Context) Event {
 	return newEvent(log.Warn(), ctx...)
 }
 
+// Error print log on debug level.
+// Provided context use trace id
 func Error(ctx ...context.Context) Event {
 	return newEvent(log.Error(), ctx...)
 }
 
+// Fatal print log on debug level.
+// Provided context use trace id.
+// Call life.Cancel() method which call graceful shutdown
 func Fatal(ctx ...context.Context) Event {
 	defer life.Cancel()
 	return newEvent(log.Error().Bool("fatal", true), ctx...)
 }
 
+// Logger wrap interface for zerolog logger
 type Logger interface {
 	Debug() Event
 	Info() Event
@@ -40,10 +52,12 @@ type wrapper struct {
 	ctx       context.Context
 }
 
+// Namespace creates Logger implementation with namespace
 func Namespace(namespace string) Logger {
 	return Context(context.Background(), namespace)
 }
 
+// Context creates Logger implementation with context & namespace
 func Context(ctx context.Context, namespace string) Logger {
 	return &wrapper{
 		ctx:       ctx,
