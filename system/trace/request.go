@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+// FromRequest returns trace id from HTTP request
 func FromRequest(request *http.Request) string {
 	if request == nil {
 		return ""
@@ -22,6 +23,7 @@ func FromRequest(request *http.Request) string {
 	return traceID
 }
 
+// FromResponse returns trace id from HTTP response
 func FromResponse(response *http.Response) string {
 	if response == nil {
 		return ""
@@ -30,6 +32,7 @@ func FromResponse(response *http.Response) string {
 	return response.Header.Get(key)
 }
 
+// SetRequest sets trace id to HTTP request
 func SetRequest(request *http.Request, traceID string) {
 	if request == nil {
 		return
@@ -38,6 +41,7 @@ func SetRequest(request *http.Request, traceID string) {
 	request.Header.Set(key, traceID)
 }
 
+// SetRequestCtx sets trace id from context to HTTP request
 func SetRequestCtx(ctx context.Context, request *http.Request) {
 	traceID := Get(ctx)
 	if traceID == "" {
@@ -47,6 +51,7 @@ func SetRequestCtx(ctx context.Context, request *http.Request) {
 	SetRequest(request, traceID)
 }
 
+// SetEchoCtx sets trace id to HTTP request into echo context
 func SetEchoCtx(ctx echo.Context, traceID string) {
 	if ctx == nil {
 		return
@@ -55,6 +60,7 @@ func SetEchoCtx(ctx echo.Context, traceID string) {
 	ctx.SetRequest(ctx.Request().WithContext(context.WithValue(ctx.Request().Context(), key, traceID)))
 }
 
+// GetEchoCtx returns trace id from request in echo context
 func GetEchoCtx(ctx echo.Context) string {
 	return Get(ctx.Request().Context())
 }

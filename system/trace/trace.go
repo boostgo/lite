@@ -14,18 +14,24 @@ var (
 	_masterMode = atomic.Bool{}
 )
 
+// IAmMaster set flag that current app is "Trace Master".
+// "Trace Master" means that app will generate trace ids on every handler request, on kafka, rmq messages, etc...
 func IAmMaster() {
 	_masterMode.Store(true)
 }
 
+// AmIMaster returns flag if current app is "Trace Master".
+// "Trace Master" means that app will generate trace ids on every handler request, on kafka, rmq messages, etc...
 func AmIMaster() bool {
 	return _masterMode.Load()
 }
 
+// Key returns trace id key from HTTP request, kafka/rmq message, etc...
 func Key() string {
 	return key
 }
 
+// Set sets trace id to new context
 func Set(ctx context.Context, id string) context.Context {
 	if Get(ctx) != "" {
 		return ctx
@@ -34,6 +40,7 @@ func Set(ctx context.Context, id string) context.Context {
 	return context.WithValue(ctx, key, id)
 }
 
+// Get returns trace id from provided context
 func Get(ctx context.Context) string {
 	if ctx == nil {
 		return ""
@@ -54,10 +61,12 @@ func Get(ctx context.Context) string {
 	}
 }
 
+// Has checks if provided context contain trace id
 func Has(ctx context.Context) bool {
 	return Get(ctx) != ""
 }
 
+// GetUUID returns trace id as "UUID" from context
 func GetUUID(ctx context.Context) uuid.UUID {
 	if ctx == nil {
 		return uuid.Nil
@@ -83,10 +92,12 @@ func GetUUID(ctx context.Context) uuid.UUID {
 	}
 }
 
+// ID generate new trace id as UUID
 func ID() uuid.UUID {
 	return uuid.New()
 }
 
+// String generate new trace id as string
 func String() string {
 	return ID().String()
 }

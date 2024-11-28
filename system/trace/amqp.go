@@ -6,6 +6,7 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
+// GetAMQP returns trace id from RMQ message
 func GetAMQP(message *amqp.Delivery) string {
 	if message == nil || message.Headers == nil {
 		return ""
@@ -26,6 +27,7 @@ func GetAMQP(message *amqp.Delivery) string {
 	}
 }
 
+// SetAmqp set trace id in RMQ headers from context
 func SetAmqp(table amqp.Table, ctx context.Context) {
 	traceID := Get(ctx)
 	if traceID == "" {
@@ -35,6 +37,7 @@ func SetAmqp(table amqp.Table, ctx context.Context) {
 	table[key] = traceID
 }
 
+// SetAmqpCtx set trace id to RMQ headers table
 func SetAmqpCtx(ctx context.Context, table amqp.Table) bool {
 	traceID := Get(ctx)
 	if traceID == "" {

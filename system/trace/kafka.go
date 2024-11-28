@@ -6,6 +6,7 @@ import (
 	"github.com/boostgo/lite/types/to"
 )
 
+// GetKafka return request id from kafka message
 func GetKafka(message *sarama.ConsumerMessage) string {
 	for _, header := range message.Headers {
 		if to.String(header.Key) != key {
@@ -18,6 +19,7 @@ func GetKafka(message *sarama.ConsumerMessage) string {
 	return ""
 }
 
+// GetKafkaCtx returns context with trace id from message
 func GetKafkaCtx(ctx context.Context, message *sarama.ConsumerMessage) context.Context {
 	for _, header := range message.Headers {
 		if to.String(header.Key) != key {
@@ -30,6 +32,7 @@ func GetKafkaCtx(ctx context.Context, message *sarama.ConsumerMessage) context.C
 	return ctx
 }
 
+// SetKafka sets trace id from context to provided messages
 func SetKafka(ctx context.Context, messages ...*sarama.ProducerMessage) {
 	if len(messages) == 0 {
 		return
