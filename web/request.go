@@ -44,6 +44,7 @@ type Request struct {
 	response *Response
 }
 
+// R creates Request object with context.
 func R(ctx context.Context) *Request {
 	if ctx == nil {
 		ctx = context.Background()
@@ -71,6 +72,7 @@ func (request *Request) setBaseURL(baseURL string) *Request {
 	return request
 }
 
+// Options sets option functions which can modify created request.
 func (request *Request) Options(opts ...RequestOption) *Request {
 	if len(opts) == 0 {
 		return request
@@ -80,11 +82,14 @@ func (request *Request) Options(opts ...RequestOption) *Request {
 	return request
 }
 
+// Logging setting logging mode.
+// Logging mode turns on inner logs (mostly errors).
 func (request *Request) Logging(logging bool) *Request {
 	request.logging = logging
 	return request
 }
 
+// Client set default http client for current Request object.
 func (request *Request) Client(client *http.Client) *Request {
 	if client == nil {
 		return request
@@ -94,6 +99,8 @@ func (request *Request) Client(client *http.Client) *Request {
 	return request
 }
 
+// RetryCount sets count of retries need.
+// By default, retry count is 1
 func (request *Request) RetryCount(count int) *Request {
 	if count <= 1 {
 		return request
@@ -103,6 +110,8 @@ func (request *Request) RetryCount(count int) *Request {
 	return request
 }
 
+// RetryWait sets wait time between retry requests.
+// Default wait time is 100ms.
 func (request *Request) RetryWait(wait time.Duration) *Request {
 	if wait <= 0 {
 		return request
@@ -112,6 +121,8 @@ func (request *Request) RetryWait(wait time.Duration) *Request {
 	return request
 }
 
+// Timeout sets timeout for waiting for request.
+// By default, there is no timeout
 func (request *Request) Timeout(timeout time.Duration) *Request {
 	if timeout <= 0 {
 		return request
@@ -121,6 +132,7 @@ func (request *Request) Timeout(timeout time.Duration) *Request {
 	return request
 }
 
+// BasicAuth sets username & password for basic auth mechanism
 func (request *Request) BasicAuth(username, password string) *Request {
 	if username == "" {
 		return request
@@ -130,16 +142,21 @@ func (request *Request) BasicAuth(username, password string) *Request {
 	return request
 }
 
+// BearerToken sets token for "Authorization" header.
+// Prefix "Bearer " sets automatically.
 func (request *Request) BearerToken(token string) *Request {
 	request.bearerToken = token
 	return request
 }
 
+// Query add new query param to current request.
 func (request *Request) Query(key string, value any) *Request {
 	request.queryVariables[key] = value
 	return request
 }
 
+// Queries sets query params to request.
+// Existing keys will be rewritten
 func (request *Request) Queries(queries map[string]any) *Request {
 	for key, value := range queries {
 		request.queryVariables[key] = value
@@ -147,6 +164,8 @@ func (request *Request) Queries(queries map[string]any) *Request {
 	return request
 }
 
+// Result got response bytes slice will try convert to provided export object.
+// Export object must be pointer.
 func (request *Request) Result(export any) *Request {
 	if !flex.Type(export).IsPtr() {
 		return request
@@ -156,11 +175,15 @@ func (request *Request) Result(export any) *Request {
 	return request
 }
 
+// Header set one more key-value pair to headers.
+// If key already exist it rewrites existing key value.
 func (request *Request) Header(key string, value any) *Request {
 	request.headers[key] = value
 	return request
 }
 
+// Headers sets map of key-value pairs.
+// Existing keys will be rewritten.
 func (request *Request) Headers(headers map[string]any) *Request {
 	for key, value := range headers {
 		request.headers[key] = value
@@ -168,21 +191,28 @@ func (request *Request) Headers(headers map[string]any) *Request {
 	return request
 }
 
+// Authorization sets authorization token for "Authorization" header.
+// Prefix "Bearer " will set automatically
 func (request *Request) Authorization(token string) *Request {
 	request.headers["Authorization"] = "Bearer " + token
 	return request
 }
 
+// ContentType sets header value to "Content-Type" header.
 func (request *Request) ContentType(contentType string) *Request {
 	request.headers["Content-Type"] = contentType
 	return request
 }
 
+// Cookie sets new cookie to request.
+// Existing key will be rewritten.
 func (request *Request) Cookie(key string, value any) *Request {
 	request.cookies[key] = value
 	return request
 }
 
+// Cookies sets new cookies map to request.
+// Existing keys will be rewritten.
 func (request *Request) Cookies(cookies map[string]any) *Request {
 	for key, value := range cookies {
 		request.cookies[key] = value
@@ -190,34 +220,56 @@ func (request *Request) Cookies(cookies map[string]any) *Request {
 	return request
 }
 
+// GET execute request with method "GET" and returns Response object.
+// url - if base url set concat baseURL + url.
+// body - request body. If provide body as FormDataWriter interface - will be used form-data body. Optional
 func (request *Request) GET(url string, body ...any) (*Response, error) {
 	return request.retryDo(http.MethodGet, url, body...)
 }
 
+// POST execute request with method "POST" and returns Response object.
+// url - if base url set concat baseURL + url.
+// body - request body. If provide body as FormDataWriter interface - will be used form-data body. Optional
 func (request *Request) POST(url string, body ...any) (*Response, error) {
 	return request.retryDo(http.MethodPost, url, body...)
 }
 
+// PUT execute request with method "PUT" and returns Response object.
+// url - if base url set concat baseURL + url.
+// body - request body. If provide body as FormDataWriter interface - will be used form-data body. Optional
 func (request *Request) PUT(url string, body ...any) (*Response, error) {
 	return request.retryDo(http.MethodPut, url, body...)
 }
 
+// PATCH execute request with method "PATCH" and returns Response object.
+// url - if base url set concat baseURL + url.
+// body - request body. If provide body as FormDataWriter interface - will be used form-data body. Optional
 func (request *Request) PATCH(url string, body ...any) (*Response, error) {
 	return request.retryDo(http.MethodPatch, url, body...)
 }
 
+// DELETE execute request with method "DELETE" and returns Response object.
+// url - if base url set concat baseURL + url.
+// body - request body. If provide body as FormDataWriter interface - will be used form-data body. Optional
 func (request *Request) DELETE(url string, body ...any) (*Response, error) {
 	return request.retryDo(http.MethodDelete, url, body...)
 }
 
+// OPTIONS execute request with method "OPTIONS" and returns Response object.
+// url - if base url set concat baseURL + url.
+// body - request body. If provide body as FormDataWriter interface - will be used form-data body. Optional
 func (request *Request) OPTIONS(url string, body ...any) (*Response, error) {
 	return request.retryDo(http.MethodOptions, url, body...)
 }
 
+// HEAD execute request with method "HEAD" and returns Response object.
+// url - if base url set concat baseURL + url.
+// body - request body. If provide body as FormDataWriter interface - will be used form-data body. Optional
 func (request *Request) HEAD(url string, body ...any) (*Response, error) {
 	return request.retryDo(http.MethodHead, url, body...)
 }
 
+// initRequest creates http.Request object and if it already created will return cache
 func (request *Request) initRequest(method, url string, body ...any) error {
 	if request.req != nil {
 		return nil

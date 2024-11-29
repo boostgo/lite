@@ -7,6 +7,7 @@ import (
 	"mime/multipart"
 )
 
+// FormDataWriter uses for sending form-data request body
 type FormDataWriter interface {
 	Add(key string, value any) FormDataWriter
 	AddFile(name, fileName string, file []byte) FormDataWriter
