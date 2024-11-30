@@ -29,8 +29,7 @@ func New(connectionStrings ...string) health.Checker {
 		}
 
 		return health.Status{
-			CheckerName: "postgres",
-			Status:      health.StatusHealthy,
+			Status: health.StatusHealthy,
 		}, nil
 	})
 }

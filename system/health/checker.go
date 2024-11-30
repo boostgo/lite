@@ -44,7 +44,11 @@ func (checker *healthChecker) Status(ctx context.Context) (status Status, err er
 		return status, err
 	}
 
-	return status, nil
+	return Status{
+		CheckerName: checker.name,
+		Status:      status.Status,
+		Error:       status.Error,
+	}, nil
 }
 
 func (checker *healthChecker) StatusAsync(ctx context.Context) chan Status {

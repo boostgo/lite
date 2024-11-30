@@ -10,6 +10,13 @@ import (
 
 type Option func(options *redis.Options)
 
+type ConnectionConfig struct {
+	Address  string
+	Port     int
+	DB       int
+	Password string
+}
+
 func Connect(address string, port, db int, password string, opts ...Option) (*redis.Client, error) {
 	options := &redis.Options{
 		Addr:     fmt.Sprintf("%s:%d", address, port),
