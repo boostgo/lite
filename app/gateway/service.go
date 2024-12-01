@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/boostgo/lite/errs"
 	"github.com/boostgo/lite/web"
+	"strings"
 )
 
 type Service interface {
@@ -44,8 +45,9 @@ func (s *service) Routes() []Route {
 }
 
 func (s *service) Match(method string, path string) (Route, bool) {
+	method = strings.ToLower(method)
 	for _, r := range s.routes {
-		if r.Method() != method {
+		if method != "any" && r.Method() != method {
 			continue
 		}
 
