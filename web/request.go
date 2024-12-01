@@ -220,6 +220,13 @@ func (request *Request) Cookies(cookies map[string]any) *Request {
 	return request
 }
 
+// Do execute request with the provided method and returns Response object.
+// url - if base url set concat baseURL + url.
+// body - request body. If provide body as FormDataWriter interface - will be used form-data body. Optional
+func (request *Request) Do(method, url string, body ...any) (*Response, error) {
+	return request.retryDo(method, url, body...)
+}
+
 // GET execute request with method "GET" and returns Response object.
 // url - if base url set concat baseURL + url.
 // body - request body. If provide body as FormDataWriter interface - will be used form-data body. Optional
@@ -290,6 +297,9 @@ func (request *Request) initRequest(method, url string, body ...any) error {
 			request.Header("Content-Type", formDataWriter.ContentType())
 			_ = formDataWriter.Close()
 			request.req, err = http.NewRequest(method, fullURL, formDataWriter.Buffer())
+		} else if bytesWriter, isBytes := body[0].(BytesWriter); isBytes {
+			request.Header("Content-Type", bytesWriter.ContentType())
+			request.req, err = http.NewRequest(method, fullURL, bytesWriter.Reader())
 		} else {
 			var bodyBlob []byte
 			bodyBlob, err = json.Marshal(body[0])
