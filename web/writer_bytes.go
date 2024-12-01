@@ -2,6 +2,7 @@ package web
 
 import (
 	"bytes"
+	"github.com/boostgo/lite/errs"
 	"io"
 )
 
@@ -16,17 +17,24 @@ type BytesWriter interface {
 type bytesBuffer struct {
 	buffer      *bytes.Buffer
 	contentType string
+	errType     string
 }
 
 func NewBytesWriter() BytesWriter {
-	const defaultContentType = "application/octet-stream"
+	const (
+		defaultContentType = "application/octet-stream"
+		errType            = "Bytes Writer"
+	)
+
 	return &bytesBuffer{
 		buffer:      bytes.NewBuffer(make([]byte, 0)),
 		contentType: defaultContentType,
+		errType:     errType,
 	}
 }
 
-func (writer *bytesBuffer) Write(bytes []byte) (int, error) {
+func (writer *bytesBuffer) Write(bytes []byte) (n int, err error) {
+	defer errs.Wrap(writer.errType, &err, "Write")
 	return writer.buffer.Write(bytes)
 }
 

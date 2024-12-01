@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
+	"github.com/boostgo/lite/errs"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/trace"
 	"github.com/boostgo/lite/types/flex"
@@ -42,10 +43,14 @@ type Request struct {
 	req      *http.Request
 	resp     *http.Response
 	response *Response
+
+	errType string
 }
 
 // R creates Request object with context.
 func R(ctx context.Context) *Request {
+	const errType = "Request"
+
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -64,6 +69,8 @@ func R(ctx context.Context) *Request {
 
 		logging:   true,
 		traceMode: trace.AmIMaster(),
+
+		errType: errType,
 	}
 }
 
@@ -223,56 +230,64 @@ func (request *Request) Cookies(cookies map[string]any) *Request {
 // Do execute request with the provided method and returns Response object.
 // url - if base url set concat baseURL + url.
 // body - request body. If provide body as FormDataWriter interface - will be used form-data body. Optional
-func (request *Request) Do(method, url string, body ...any) (*Response, error) {
+func (request *Request) Do(method, url string, body ...any) (response *Response, err error) {
+	defer errs.Wrap(request.errType, &err, "Do")
 	return request.retryDo(method, url, body...)
 }
 
 // GET execute request with method "GET" and returns Response object.
 // url - if base url set concat baseURL + url.
 // body - request body. If provide body as FormDataWriter interface - will be used form-data body. Optional
-func (request *Request) GET(url string, body ...any) (*Response, error) {
+func (request *Request) GET(url string, body ...any) (response *Response, err error) {
+	defer errs.Wrap(request.errType, &err, "GET")
 	return request.retryDo(http.MethodGet, url, body...)
 }
 
 // POST execute request with method "POST" and returns Response object.
 // url - if base url set concat baseURL + url.
 // body - request body. If provide body as FormDataWriter interface - will be used form-data body. Optional
-func (request *Request) POST(url string, body ...any) (*Response, error) {
+func (request *Request) POST(url string, body ...any) (response *Response, err error) {
+	defer errs.Wrap(request.errType, &err, "POST")
 	return request.retryDo(http.MethodPost, url, body...)
 }
 
 // PUT execute request with method "PUT" and returns Response object.
 // url - if base url set concat baseURL + url.
 // body - request body. If provide body as FormDataWriter interface - will be used form-data body. Optional
-func (request *Request) PUT(url string, body ...any) (*Response, error) {
+func (request *Request) PUT(url string, body ...any) (response *Response, err error) {
+	defer errs.Wrap(request.errType, &err, "PUT")
 	return request.retryDo(http.MethodPut, url, body...)
 }
 
 // PATCH execute request with method "PATCH" and returns Response object.
 // url - if base url set concat baseURL + url.
 // body - request body. If provide body as FormDataWriter interface - will be used form-data body. Optional
-func (request *Request) PATCH(url string, body ...any) (*Response, error) {
+func (request *Request) PATCH(url string, body ...any) (response *Response, err error) {
+	defer errs.Wrap(request.errType, &err, "PATCH")
 	return request.retryDo(http.MethodPatch, url, body...)
 }
 
 // DELETE execute request with method "DELETE" and returns Response object.
 // url - if base url set concat baseURL + url.
 // body - request body. If provide body as FormDataWriter interface - will be used form-data body. Optional
-func (request *Request) DELETE(url string, body ...any) (*Response, error) {
+func (request *Request) DELETE(url string, body ...any) (response *Response, err error) {
+	defer errs.Wrap(request.errType, &err, "DELETE")
 	return request.retryDo(http.MethodDelete, url, body...)
 }
 
 // OPTIONS execute request with method "OPTIONS" and returns Response object.
 // url - if base url set concat baseURL + url.
 // body - request body. If provide body as FormDataWriter interface - will be used form-data body. Optional
-func (request *Request) OPTIONS(url string, body ...any) (*Response, error) {
+func (request *Request) OPTIONS(url string, body ...any) (response *Response, err error) {
+	defer errs.Wrap(request.errType, &err, "OPTIONS")
 	return request.retryDo(http.MethodOptions, url, body...)
 }
 
 // HEAD execute request with method "HEAD" and returns Response object.
 // url - if base url set concat baseURL + url.
 // body - request body. If provide body as FormDataWriter interface - will be used form-data body. Optional
-func (request *Request) HEAD(url string, body ...any) (*Response, error) {
+func (request *Request) HEAD(url string, body ...any) (response *Response, err error) {
+	defer errs.Wrap(request.errType, &err, "HEAD")
 	return request.retryDo(http.MethodHead, url, body...)
 }
 
@@ -295,7 +310,9 @@ func (request *Request) initRequest(method, url string, body ...any) error {
 	if len(body) > 0 && body[0] != nil {
 		if formDataWriter, isFormData := body[0].(FormDataWriter); isFormData {
 			request.Header("Content-Type", formDataWriter.ContentType())
-			_ = formDataWriter.Close()
+			if err = formDataWriter.Close(); err != nil {
+				return err
+			}
 			request.req, err = http.NewRequest(method, fullURL, formDataWriter.Buffer())
 		} else if bytesWriter, isBytes := body[0].(BytesWriter); isBytes {
 			request.Header("Content-Type", bytesWriter.ContentType())
@@ -344,14 +361,19 @@ func (request *Request) initRequest(method, url string, body ...any) error {
 	return nil
 }
 
-func (request *Request) retryDo(method, url string, body ...any) (*Response, error) {
+func (request *Request) retryDo(method, url string, body ...any) (_ *Response, err error) {
+	defer errs.Wrap(request.errType, &err, "retryDo", map[string]any{
+		"method": method,
+		"url":    url,
+		"body":   len(body) > 0 && body[0] != nil,
+	})
+
 	if request.timeout > 0 {
 		var cancel context.CancelFunc
 		request.ctx, cancel = context.WithTimeout(context.Background(), request.timeout)
 		defer cancel()
 	}
 
-	var err error
 	for i := 0; i < request.retryCount; i++ {
 		isLast := i == request.retryCount-1
 
@@ -360,7 +382,9 @@ func (request *Request) retryDo(method, url string, body ...any) (*Response, err
 			return nil, err
 		}
 
-		time.Sleep(request.retryWait)
+		if request.response == nil {
+			time.Sleep(request.retryWait)
+		}
 	}
 
 	return request.response, nil

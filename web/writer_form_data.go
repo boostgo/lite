@@ -2,6 +2,7 @@ package web
 
 import (
 	"bytes"
+	"github.com/boostgo/lite/errs"
 	"github.com/boostgo/lite/types/to"
 	"io"
 	"mime/multipart"
@@ -9,9 +10,9 @@ import (
 
 // FormDataWriter uses for sending form-data request body
 type FormDataWriter interface {
-	Add(key string, value any) FormDataWriter
-	AddFile(name, fileName string, file []byte) FormDataWriter
-	Set(data map[string]any) FormDataWriter
+	Add(key string, value any) error
+	AddFile(name, fileName string, file []byte) error
+	Set(data map[string]any) error
 	Boundary() string
 	ContentType() string
 	Buffer() *bytes.Buffer
@@ -19,13 +20,17 @@ type FormDataWriter interface {
 }
 
 type formData struct {
-	body   bytes.Buffer
-	writer *multipart.Writer
+	body    bytes.Buffer
+	writer  *multipart.Writer
+	errType string
 }
 
 func NewFormData(initial ...map[string]any) FormDataWriter {
+	const errType = "Form Data Writer"
+
 	fd := &formData{
-		body: bytes.Buffer{},
+		body:    bytes.Buffer{},
+		errType: errType,
 	}
 
 	fd.writer = multipart.NewWriter(&fd.body)
@@ -37,31 +42,41 @@ func NewFormData(initial ...map[string]any) FormDataWriter {
 	return fd
 }
 
-func (fd *formData) Add(key string, value any) FormDataWriter {
-	_ = fd.writer.WriteField(key, to.String(value))
-	return fd
+func (fd *formData) Add(key string, value any) (err error) {
+	defer errs.Wrap(fd.errType, &err, "Add")
+	return fd.writer.WriteField(key, to.String(value))
 }
 
-func (fd *formData) AddFile(name, fileName string, file []byte) FormDataWriter {
+func (fd *formData) AddFile(name, fileName string, file []byte) (err error) {
+	defer errs.Wrap(fd.errType, &err, "AddFile")
+
 	fileWriter, err := fd.writer.CreateFormFile(name, fileName)
 	if err != nil {
-		return fd
+		return err
 	}
 
-	_, _ = io.Copy(fileWriter, bytes.NewReader(file))
-	return fd
+	_, err = io.Copy(fileWriter, bytes.NewReader(file))
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (fd *formData) Set(data map[string]any) FormDataWriter {
+func (fd *formData) Set(data map[string]any) (err error) {
+	defer errs.Wrap(fd.errType, &err, "Set")
+
 	if data == nil || len(data) == 0 {
-		return fd
+		return nil
 	}
 
 	for key, value := range data {
-		fd.Add(key, value)
+		if err = fd.Add(key, value); err != nil {
+			return err
+		}
 	}
 
-	return fd
+	return nil
 }
 
 func (fd *formData) Boundary() string {
@@ -76,6 +91,7 @@ func (fd *formData) Buffer() *bytes.Buffer {
 	return &fd.body
 }
 
-func (fd *formData) Close() error {
+func (fd *formData) Close() (err error) {
+	defer errs.Wrap(fd.errType, &err, "Close")
 	return fd.writer.Close()
 }

@@ -55,3 +55,7 @@ func (response *Response) Context(ctx context.Context) context.Context {
 func (response *Response) TraceID() string {
 	return trace.FromResponse(response.raw)
 }
+
+func (response *Response) ContentType() string {
+	return response.raw.Header.Get("Content-Type")
+}

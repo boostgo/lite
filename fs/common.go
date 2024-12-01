@@ -44,16 +44,18 @@ func remove(path string, withContent bool) error {
 
 func exist(path string, mode int) bool {
 	stat, err := os.Stat(path)
-	isExist := os.IsExist(err)
+	if stat == nil || err != nil {
+		return false
+	}
 
 	switch mode {
 	case existModeBoth:
-		return isExist
+		return true
 	case existModeFile:
-		return isExist && !stat.IsDir()
+		return !stat.IsDir()
 	case existModeFolder:
-		return isExist && stat.IsDir()
+		return stat.IsDir()
 	default:
-		return isExist
+		return true
 	}
 }

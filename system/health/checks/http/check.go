@@ -11,7 +11,9 @@ import (
 
 func New(serviceName, url string, timeout ...time.Duration) health.Checker {
 	return health.NewChecker(serviceName, func(ctx context.Context) (status health.Status, err error) {
-		request := web.R(ctx)
+		request := web.
+			R(ctx).
+			Header("Connection", "close")
 		if len(timeout) > 0 {
 			request.Timeout(timeout[0])
 		}

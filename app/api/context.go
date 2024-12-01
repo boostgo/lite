@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"io"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 )
@@ -124,6 +125,18 @@ func Header(ctx echo.Context, key string) string {
 	return ctx.Request().Header.Get(key)
 }
 
+func HeadersRaw(ctx echo.Context) map[string][]string {
+	return ctx.Request().Header
+}
+
+func Headers(ctx echo.Context) map[string]any {
+	headers := make(map[string]any, len(ctx.Request().Header))
+	for key, value := range ctx.Request().Header {
+		headers[key] = strings.Join(value, ",")
+	}
+	return headers
+}
+
 // SetHeader sets new header to response
 func SetHeader(ctx echo.Context, key, value string) {
 	ctx.Response().Header().Set(key, value)
@@ -137,6 +150,18 @@ func Cookie(ctx echo.Context, key string) string {
 	}
 
 	return cookie.Value
+}
+
+func CookiesRaw(ctx echo.Context) []*http.Cookie {
+	return ctx.Request().Cookies()
+}
+
+func Cookies(ctx echo.Context) map[string]any {
+	cookies := make(map[string]any)
+	for _, cookie := range ctx.Request().Cookies() {
+		cookies[cookie.Name] = cookie.Value
+	}
+	return cookies
 }
 
 // SetCookie sets new cookie to response

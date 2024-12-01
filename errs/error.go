@@ -89,6 +89,10 @@ func (err *Error) Context() map[string]any {
 
 // SetContext append all key-value pairs to the current context map
 func (err *Error) SetContext(context map[string]any) *Error {
+	if context == nil || len(context) == 0 {
+		return err
+	}
+
 	for key, value := range context {
 		err.context[key] = value
 	}
@@ -331,15 +335,24 @@ func Is(err, target error) bool {
 // Wrap convert provided error to custom with the provided error type and message.
 // If provided error is built-in (default), then it will be converted to custom.
 // If it is already custom, just take custom and set to it one more type & message
-func Wrap(errType string, err *error, message string) {
+func Wrap(errType string, err *error, message string, ctx ...map[string]any) {
 	if *err != nil {
+		var applyContext map[string]any
+		if len(ctx) > 0 {
+			applyContext = ctx[0]
+		}
+
 		custom, ok := TryGet(*err)
 		if !ok {
-			*err = New(message).SetType(errType).SetError(*err)
+			*err = New(message).
+				SetType(errType).
+				SetError(*err).
+				SetContext(applyContext)
 		} else {
 			*err = custom.
 				SetType(errType).
-				setMessage(message)
+				setMessage(message).
+				SetContext(applyContext)
 		}
 	}
 }

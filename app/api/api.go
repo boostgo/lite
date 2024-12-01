@@ -99,8 +99,15 @@ func Success(ctx echo.Context, status int, body ...any) error {
 }
 
 // SuccessRaw returns response in "raw" way
-func SuccessRaw(ctx echo.Context, status int, body []byte) error {
-	return ctx.Blob(status, "application/octet-stream", body)
+func SuccessRaw(ctx echo.Context, status int, body []byte, contentType ...string) error {
+	const defaultContentType = "application/octet-stream"
+
+	cType := defaultContentType
+	if len(contentType) > 0 && contentType[0] != "" {
+		cType = contentType[0]
+	}
+
+	return ctx.Blob(status, cType, body)
 }
 
 // ReturnExcel returns response with Excel file content type
