@@ -17,6 +17,7 @@ type OfSlice[T any] interface {
 	Reverse() OfSlice[T]
 	Shuffle(source ...rand.Source) OfSlice[T]
 	Sort(less func(a, b T) bool) OfSlice[T]
+	Unique(fn func(a, b T) bool) []T
 
 	Join(joins ...[]T) OfSlice[T]
 	Add(elements ...T) OfSlice[T]
@@ -183,4 +184,8 @@ func (os *ofSlice[T]) Cap() int {
 
 func (os *ofSlice[T]) String() string {
 	return to.String(os.source)
+}
+
+func (os *ofSlice[T]) Unique(fn func(a, b T) bool) []T {
+	return Unique(os.source, fn)
 }

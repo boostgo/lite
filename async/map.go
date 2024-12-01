@@ -1,4 +1,4 @@
-package concurrent
+package async
 
 import (
 	"github.com/boostgo/lite/collections/list"

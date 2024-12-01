@@ -302,3 +302,26 @@ func JoinString[T any](source []T, joiner func(T) string, sep ...string) string 
 	}
 	return result.String()
 }
+
+func Unique[T any](source []T, fn func(a, b T) bool) []T {
+	if source == nil || len(source) == 0 {
+		return source
+	}
+
+	uniqueSource := make([]T, 0, len(source))
+
+	for _, element := range source {
+		isUnique := true
+		for _, uItem := range uniqueSource {
+			if fn(element, uItem) {
+				isUnique = false
+				break
+			}
+		}
+		if isUnique {
+			uniqueSource = append(uniqueSource, element)
+		}
+	}
+
+	return uniqueSource
+}

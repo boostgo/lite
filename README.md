@@ -487,28 +487,6 @@ func main() {
 }
 ```
 
-**Set:**
-Example:
-
-```go
-package main
-
-import (
-	"fmt"
-	"github.com/boostgo/lite/collections/set"
-)
-
-func main() {
-	texts := set.New[string]()
-	
-	texts.Add("param1")
-	texts.Add("param2")
-	texts.Add("param2") // add the same value as previous
-
-	fmt.Println(texts) // ["param1", "param2"]
-}
-```
-
 **list:**
 Example:
 
