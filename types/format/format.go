@@ -43,7 +43,7 @@ func Alpha(input string) string {
 
 	var result []rune
 	for _, r := range input {
-		if !unicode.IsDigit(r) {
+		if isLatin(r) || r == ' ' {
 			result = append(result, r)
 		}
 	}
@@ -79,17 +79,18 @@ func Cyrillic(input string) string {
 //
 //	Input: HELLO WORLD
 //	Output: Hello World
-func EveryTitle(text string) string {
-	return cases.Title(language.Und).String(strings.ToLower(clearInput(text)))
+func EveryTitle(input string) string {
+	return cases.Title(language.Und).String(strings.ToLower(clearInput(input)))
 }
 
-func Name(name string) string {
-	name = clearInput(name)
-	name = EveryTitle(name)
-	name = Alpha(name)
-	return name
+func Name(input string) string {
+	return EveryTitle(Alpha(input))
 }
 
 func clearInput(input string) string {
 	return _manySpacesReg.ReplaceAllString(strings.TrimSpace(input), " ")
+}
+
+func isLatin(r rune) bool {
+	return (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z')
 }
