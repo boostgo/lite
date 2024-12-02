@@ -33,7 +33,7 @@ func Code(input string) string {
 		return ""
 	}
 
-	return strings.ToLower(clearInput(input))
+	return strings.ReplaceAll(strings.ToLower(clearInput(input)), " ", "_")
 }
 
 func Alpha(input string) string {
