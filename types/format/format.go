@@ -63,7 +63,22 @@ func Numeric(input string) string {
 		}
 	}
 
-	return string(result)
+	return clearInput(string(result))
+}
+
+func AlphaNumeric(input string) string {
+	if input == "" {
+		return ""
+	}
+
+	var result []rune
+	for _, r := range input {
+		if unicode.IsDigit(r) || unicode.IsLetter(r) {
+			result = append(result, r)
+		}
+	}
+
+	return clearInput(string(result))
 }
 
 func Cyrillic(input string) string {
@@ -74,7 +89,7 @@ func Cyrillic(input string) string {
 	return Code(iuliia.Wikipedia.Translate(clearInput(input)))
 }
 
-// EveryTitle makes every word start with uppercase
+// EveryTitle makes every word start with uppercase.
 // Example:
 //
 //	Input: HELLO WORLD
@@ -83,6 +98,11 @@ func EveryTitle(input string) string {
 	return cases.Title(language.Und).String(strings.ToLower(clearInput(input)))
 }
 
+// Name format input to First/Last name format.
+// Example:
+//
+//	Input: john smith
+//	Output: John Smith
 func Name(input string) string {
 	return EveryTitle(Alpha(input))
 }

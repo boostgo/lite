@@ -11,16 +11,17 @@ import (
 type Formatter func(string) string
 
 const (
-	TypeTitle      = "title"
-	TypeEveryTitle = "every-title"
-	TypeCode       = "code"
-	TypeName       = "name"
-	TypeAlpha      = "alpha"
-	TypeNumeric    = "num"
-	TypeLower      = "lower"
-	TypeUpper      = "upper"
-	TypeTrim       = "trim"
-	TypeCyrillic   = "cyrillic"
+	TypeTitle        = "title"
+	TypeEveryTitle   = "every-title"
+	TypeCode         = "code"
+	TypeName         = "name"
+	TypeAlpha        = "alpha"
+	TypeNumeric      = "num"
+	TypeAlphaNumeric = "alphanum"
+	TypeLower        = "lower"
+	TypeUpper        = "upper"
+	TypeTrim         = "trim"
+	TypeCyrillic     = "cyrillic"
 )
 
 var DefaultConverter = NewConverter().
@@ -30,6 +31,7 @@ var DefaultConverter = NewConverter().
 	Register(TypeName, Name).
 	Register(TypeAlpha, Alpha).
 	Register(TypeNumeric, Numeric).
+	Register(TypeAlphaNumeric, AlphaNumeric).
 	Register(TypeLower, strings.ToLower).
 	Register(TypeUpper, strings.ToUpper).
 	Register(TypeTrim, strings.TrimSpace).
