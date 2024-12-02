@@ -25,7 +25,7 @@ func Title(input string) string {
 		runes[i] = unicode.ToLower(runes[i])
 	}
 
-	return string(runes)
+	return clearInput(string(runes))
 }
 
 func Code(input string) string {
@@ -33,14 +33,7 @@ func Code(input string) string {
 		return ""
 	}
 
-	return strings.ToLower(
-		strings.ReplaceAll(
-			strings.TrimSpace(
-				input,
-			),
-			" ", "_",
-		),
-	)
+	return strings.ToLower(clearInput(input))
 }
 
 func Alpha(input string) string {
@@ -55,7 +48,7 @@ func Alpha(input string) string {
 		}
 	}
 
-	return string(result)
+	return clearInput(string(result))
 }
 
 func Numeric(input string) string {
@@ -78,7 +71,7 @@ func Cyrillic(input string) string {
 		return ""
 	}
 
-	return Code(iuliia.Wikipedia.Translate(input))
+	return Code(iuliia.Wikipedia.Translate(clearInput(input)))
 }
 
 // EveryTitle makes every word start with uppercase
@@ -87,12 +80,16 @@ func Cyrillic(input string) string {
 //	Input: HELLO WORLD
 //	Output: Hello World
 func EveryTitle(text string) string {
-	return cases.Title(language.Und).String(strings.ToLower(text))
+	return cases.Title(language.Und).String(strings.ToLower(clearInput(text)))
 }
 
 func Name(name string) string {
-	name = _manySpacesReg.ReplaceAllString(name, " ")
+	name = clearInput(name)
 	name = EveryTitle(name)
 	name = Alpha(name)
 	return name
+}
+
+func clearInput(input string) string {
+	return _manySpacesReg.ReplaceAllString(strings.TrimSpace(input), " ")
 }
