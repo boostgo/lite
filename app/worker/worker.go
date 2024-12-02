@@ -23,7 +23,7 @@ type Worker struct {
 	timeout      time.Duration
 }
 
-// New creates Worker object
+// New creates [Worker] object
 func New(name string, duration time.Duration, action func(ctx context.Context) error) *Worker {
 	return &Worker{
 		name:        name,
@@ -126,7 +126,7 @@ func (worker *Worker) Run() {
 	}()
 }
 
-// Run created worker object and runs by itself. It is like "short" version of using Worker
+// Run created worker object and runs by itself. It is like "short" version of using [Worker]
 func Run(name string, duration time.Duration, action func(ctx context.Context) error, fromStart ...bool) {
 	worker := New(name, duration, action)
 	if len(fromStart) > 0 && fromStart[0] {

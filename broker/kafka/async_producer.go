@@ -13,7 +13,7 @@ type AsyncProducer struct {
 	traceMode bool
 }
 
-// AsyncProducerOption returns default async producer configuration as Option
+// AsyncProducerOption returns default async producer configuration as [Option]
 func AsyncProducerOption() Option {
 	return func(config *sarama.Config) {
 		config.Producer.Return.Successes = true
@@ -21,8 +21,8 @@ func AsyncProducerOption() Option {
 	}
 }
 
-// NewAsyncProducer creates AsyncProducer with configurations.
-// Creates async producer with default configuration as Option created by AsyncProducerOption function.
+// NewAsyncProducer creates [AsyncProducer] with configurations.
+// Creates async producer with default configuration as [Option] created by [AsyncProducerOption] function.
 // Adds producer close method to teardown
 func NewAsyncProducer(brokers []string, opts ...Option) (*AsyncProducer, error) {
 	config := sarama.NewConfig()
@@ -45,8 +45,8 @@ func NewAsyncProducer(brokers []string, opts ...Option) (*AsyncProducer, error) 
 	}, nil
 }
 
-// NewAsyncProducerFromClient creates AsyncProducer by provided client.
-// Creates async producer with default configuration as Option created by AsyncProducerOption function.
+// NewAsyncProducerFromClient creates [AsyncProducer] by provided client.
+// Creates async producer with default configuration as [Option] created by [AsyncProducerOption] function.
 // Adds producer close method to teardown
 func NewAsyncProducerFromClient(client sarama.Client) (*AsyncProducer, error) {
 	producer, err := sarama.NewAsyncProducerFromClient(client)
@@ -61,7 +61,7 @@ func NewAsyncProducerFromClient(client sarama.Client) (*AsyncProducer, error) {
 	}, nil
 }
 
-// MustAsyncProducer calls NewAsyncProducer function with calls panic if returns error
+// MustAsyncProducer calls [NewAsyncProducer] function with calls panic if returns error
 func MustAsyncProducer(brokers []string, opts ...Option) *AsyncProducer {
 	producer, err := NewAsyncProducer(brokers, opts...)
 	if err != nil {
@@ -71,7 +71,7 @@ func MustAsyncProducer(brokers []string, opts ...Option) *AsyncProducer {
 	return producer
 }
 
-// MustAsyncProducerFromClient calls NewAsyncProducerFromClient function with calls panic if returns error
+// MustAsyncProducerFromClient calls [NewAsyncProducerFromClient] function with calls panic if returns error
 func MustAsyncProducerFromClient(client sarama.Client) *AsyncProducer {
 	producer, err := NewAsyncProducerFromClient(client)
 	if err != nil {

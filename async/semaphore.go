@@ -1,7 +1,7 @@
 package async
 
 // Semaphore is tool for managing goroutines count at a time.
-// Create semaphore - async.NewSemaphore(N). N - num of max goroutines at a time
+// Create semaphore - [async.NewSemaphore](N). N - num of max goroutines at a time
 type Semaphore struct {
 	c chan struct{}
 }

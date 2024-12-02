@@ -11,7 +11,7 @@ import (
 type ConsumeHandler func(message *sarama.ConsumerMessage) error
 type ErrorHandler func(err error)
 
-// Consumer wrap structure for Consumer
+// Consumer wrap structure for [Consumer]
 type Consumer struct {
 	consumer     sarama.Consumer
 	errorHandler ErrorHandler
@@ -31,7 +31,7 @@ func ConsumerOption() Option {
 	}
 }
 
-// NewConsumer creates Consumer by options
+// NewConsumer creates [Consumer] by options
 func NewConsumer(cfg Config, opts ...Option) (*Consumer, error) {
 	if err := validateConsumerConfig(cfg); err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ func NewConsumer(cfg Config, opts ...Option) (*Consumer, error) {
 	}, nil
 }
 
-// NewConsumerFromClient creates Consumer by sarama client
+// NewConsumerFromClient creates [Consumer] by sarama client
 func NewConsumerFromClient(client sarama.Client) (*Consumer, error) {
 	consumer, err := sarama.NewConsumerFromClient(client)
 	if err != nil {
@@ -69,7 +69,7 @@ func NewConsumerFromClient(client sarama.Client) (*Consumer, error) {
 	}, nil
 }
 
-// MustConsumer calls NewConsumer and if error catch throws panic
+// MustConsumer calls [NewConsumer] and if error catch throws panic
 func MustConsumer(cfg Config, opts ...Option) *Consumer {
 	consumer, err := NewConsumer(cfg, opts...)
 	if err != nil {
@@ -79,7 +79,7 @@ func MustConsumer(cfg Config, opts ...Option) *Consumer {
 	return consumer
 }
 
-// MustConsumerFromClient calls NewConsumerFromClient and if error catch throws panic
+// MustConsumerFromClient calls [NewConsumerFromClient] and if error catch throws panic
 func MustConsumerFromClient(client sarama.Client) *Consumer {
 	consumer, err := NewConsumerFromClient(client)
 	if err != nil {
@@ -104,7 +104,8 @@ func (consumer *Consumer) Consume(topic string, handler ConsumeHandler) error {
 	}
 
 	for i := 0; i < len(partitions); i++ {
-		partitionConsumer, err := consumer.consumer.ConsumePartition(topic, partitions[i], sarama.OffsetNewest)
+		var partitionConsumer sarama.PartitionConsumer
+		partitionConsumer, err = consumer.consumer.ConsumePartition(topic, partitions[i], sarama.OffsetNewest)
 		if err != nil {
 			return err
 		}

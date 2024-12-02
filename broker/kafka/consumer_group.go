@@ -15,7 +15,7 @@ import (
 type GroupHandler sarama.ConsumerGroupHandler
 type GroupHandlerFunc func(msg *sarama.ConsumerMessage, session sarama.ConsumerGroupSession)
 
-// ConsumerGroup wrap structure for Consumer Group
+// ConsumerGroup wrap structure for [Consumer] Group
 type ConsumerGroup struct {
 	group sarama.ConsumerGroup
 }
@@ -42,7 +42,7 @@ func ConsumerGroupOption(offset ...int64) Option {
 	}
 }
 
-// NewConsumerGroup creates ConsumerGroup by options
+// NewConsumerGroup creates [ConsumerGroup] by options
 func NewConsumerGroup(cfg Config, opts ...Option) (*ConsumerGroup, error) {
 	consumerGroup, err := newConsumerGroup(cfg, opts...)
 	if err != nil {
@@ -53,7 +53,7 @@ func NewConsumerGroup(cfg Config, opts ...Option) (*ConsumerGroup, error) {
 	return consumerGroup, nil
 }
 
-// NewConsumerGroupFromClient creates ConsumerGroup by sarama client
+// NewConsumerGroupFromClient creates [ConsumerGroup] by sarama client
 func NewConsumerGroupFromClient(groupID string, client sarama.Client) (*ConsumerGroup, error) {
 	consumerGroup, err := newConsumerGroupFromClient(groupID, client)
 	if err != nil {
@@ -64,7 +64,7 @@ func NewConsumerGroupFromClient(groupID string, client sarama.Client) (*Consumer
 	return consumerGroup, nil
 }
 
-// MustConsumerGroup calls NewConsumerGroup and if error catch throws panic
+// MustConsumerGroup calls [NewConsumerGroup] and if error catch throws panic
 func MustConsumerGroup(cfg Config, opts ...Option) *ConsumerGroup {
 	consumer, err := NewConsumerGroup(cfg, opts...)
 	if err != nil {
@@ -74,7 +74,7 @@ func MustConsumerGroup(cfg Config, opts ...Option) *ConsumerGroup {
 	return consumer
 }
 
-// MustConsumerGroupFromClient calls NewConsumerGroupFromClient and if error catch throws panic
+// MustConsumerGroupFromClient calls [NewConsumerGroupFromClient] and if error catch throws panic
 func MustConsumerGroupFromClient(groupID string, client sarama.Client) *ConsumerGroup {
 	consumer, err := NewConsumerGroupFromClient(groupID, client)
 	if err != nil {
@@ -181,7 +181,7 @@ type consumerGroupHandler struct {
 	timeout time.Duration
 }
 
-// ConsumerGroupHandler creates sarama.ConsumerGroupHandler interface implementation object.
+// ConsumerGroupHandler creates [sarama.ConsumerGroupHandler] interface implementation object.
 // Provide 3 methods: claim, setup and cleanup for implementing interface.
 // Also, could be provided timeout for claiming every message
 func ConsumerGroupHandler(

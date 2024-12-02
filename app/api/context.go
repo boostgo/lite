@@ -24,7 +24,7 @@ func init() {
 	})
 }
 
-// Param returns param.Param object got from named path variable or not found param error.
+// Param returns [param.Param] object got from named path variable or not found param error.
 func Param(ctx echo.Context, paramName string) (param.Param, error) {
 	value := ctx.Param(paramName)
 	if value == "" {
@@ -37,7 +37,7 @@ func Param(ctx echo.Context, paramName string) (param.Param, error) {
 	return param.New(value), nil
 }
 
-// QueryParam returns query param variable as param.Param object or empty param.Param object if query param is not found.
+// QueryParam returns query param variable as [param.Param] object or empty [param.Param] object if query param is not found.
 func QueryParam(ctx echo.Context, queryParamName string) param.Param {
 	value := ctx.QueryParam(queryParamName)
 	if value == "" {
@@ -100,8 +100,8 @@ func File(ctx echo.Context, name string) (content []byte, err error) {
 	return io.ReadAll(file)
 }
 
-// ParseForm get all form data object and convert them to map with param.Param objects.
-// Notice: in this map no any files. Parse them by File function
+// ParseForm get all form data object and convert them to map with [param.Param] objects.
+// Notice: in this map no any files. Parse them by [File] function
 func ParseForm(ctx echo.Context) (map[string]param.Param, error) {
 	form, err := ctx.MultipartForm()
 	if err != nil {

@@ -13,7 +13,7 @@ type SyncProducer struct {
 	traceMode bool
 }
 
-// SyncProducerOption returns default sync producer configuration as Option
+// SyncProducerOption returns default sync producer configuration as [Option]
 func SyncProducerOption() Option {
 	return func(config *sarama.Config) {
 		config.Producer.Return.Successes = true
@@ -21,8 +21,8 @@ func SyncProducerOption() Option {
 	}
 }
 
-// NewSyncProducer creates SyncProducer with configurations.
-// Creates sync producer with default configuration as Option created by SyncProducerOption function.
+// NewSyncProducer creates [SyncProducer] with configurations.
+// Creates sync producer with default configuration as [Option] created by [SyncProducerOption] function.
 // Adds producer close method to teardown
 func NewSyncProducer(brokers []string, opts ...Option) (*SyncProducer, error) {
 	config := sarama.NewConfig()
@@ -45,7 +45,7 @@ func NewSyncProducer(brokers []string, opts ...Option) (*SyncProducer, error) {
 	}, nil
 }
 
-// NewSyncProducerFromClient creates SyncProducer by provided client.
+// NewSyncProducerFromClient creates [SyncProducer] by provided client.
 // Creates sync producer with default configuration as Option created by SyncProducerOption function.
 // Adds producer close method to teardown
 func NewSyncProducerFromClient(client sarama.Client) (*SyncProducer, error) {
@@ -61,7 +61,7 @@ func NewSyncProducerFromClient(client sarama.Client) (*SyncProducer, error) {
 	}, nil
 }
 
-// MustSyncProducer calls NewSyncProducer function with calls panic if returns error
+// MustSyncProducer calls [NewSyncProducer] function with calls panic if returns error
 func MustSyncProducer(brokers []string, opts ...Option) *SyncProducer {
 	producer, err := NewSyncProducer(brokers, opts...)
 	if err != nil {
@@ -71,7 +71,7 @@ func MustSyncProducer(brokers []string, opts ...Option) *SyncProducer {
 	return producer
 }
 
-// MustSyncProducerFromClient calls NewSyncProducerFromClient function with calls panic if returns error
+// MustSyncProducerFromClient calls [NewSyncProducerFromClient] function with calls panic if returns error
 func MustSyncProducerFromClient(client sarama.Client) *SyncProducer {
 	producer, err := NewSyncProducerFromClient(client)
 	if err != nil {

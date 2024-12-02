@@ -77,7 +77,7 @@ func Header(message *sarama.ConsumerMessage, name string) param.Param {
 	return param.Empty()
 }
 
-// Headers returns all headers from message as map and param.Param object
+// Headers returns all headers from message as map and [param.Param] object
 func Headers(message *sarama.ConsumerMessage) map[string]param.Param {
 	headers := make(map[string]param.Param, len(message.Headers))
 	for _, header := range message.Headers {

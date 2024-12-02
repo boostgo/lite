@@ -12,7 +12,7 @@ type Broker struct {
 	isTraceMaster bool
 }
 
-// NewBroker creates Broker with provided amqp channel
+// NewBroker creates [Broker] with provided amqp channel
 func NewBroker(channel *amqp.Channel) *Broker {
 	return &Broker{
 		channel:       channel,

@@ -63,7 +63,7 @@ func Failure(ctx echo.Context, status int, err error) error {
 	return ctx.JSONBlob(status, outputBlob)
 }
 
-// Error is wrap function above Failure function with auto defining status code by provided error.
+// Error is wrap function above [Failure] function with auto defining status code by provided error.
 // There is a list of errors in "errs" packages and if provided error is one of them, it has own code representation
 func Error(ctx echo.Context, err error) error {
 	return Failure(ctx, errStatusCode(err), err)
@@ -116,19 +116,19 @@ func ReturnExcel(ctx echo.Context, name string, file []byte) error {
 	return ctx.Blob(http.StatusOK, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", file)
 }
 
-// Ok is wrap function over Success function.
+// Ok is wrap function over [Success] function.
 // Set HTTP code "OK" 200
 func Ok(ctx echo.Context, body ...any) error {
 	return Success(ctx, http.StatusOK, body...)
 }
 
-// OkRaw is wrap function over SuccessRaw function.
+// OkRaw is wrap function over [SuccessRaw] function.
 // Set HTTP code "OK" 200
 func OkRaw(ctx echo.Context, body []byte) error {
 	return SuccessRaw(ctx, http.StatusOK, body)
 }
 
-// Created is wrap function over Success function.
+// Created is wrap function over [Success] function.
 // It provides HTTP code "Created" 201
 func Created(ctx echo.Context, body ...any) error {
 	if len(body) == 0 {
