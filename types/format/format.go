@@ -1,8 +1,16 @@
 package format
 
 import (
+	"github.com/mehanizm/iuliia-go"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+	"regexp"
 	"strings"
 	"unicode"
+)
+
+var (
+	_manySpacesReg = regexp.MustCompile("\\s{2,}")
 )
 
 func Title(input string) string {
@@ -20,7 +28,7 @@ func Title(input string) string {
 	return string(runes)
 }
 
-func Username(input string) string {
+func Code(input string) string {
 	if input == "" {
 		return ""
 	}
@@ -63,4 +71,28 @@ func Numeric(input string) string {
 	}
 
 	return string(result)
+}
+
+func Cyrillic(input string) string {
+	if input == "" {
+		return ""
+	}
+
+	return Code(iuliia.Wikipedia.Translate(input))
+}
+
+// EveryTitle makes every word start with uppercase
+// Example:
+//
+//	Input: HELLO WORLD
+//	Output: Hello World
+func EveryTitle(text string) string {
+	return cases.Title(language.Und).String(strings.ToLower(text))
+}
+
+func Name(name string) string {
+	name = _manySpacesReg.ReplaceAllString(name, " ")
+	name = EveryTitle(name)
+	name = Alpha(name)
+	return name
 }

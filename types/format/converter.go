@@ -11,23 +11,29 @@ import (
 type Formatter func(string) string
 
 const (
-	TypeTitle    = "title"
-	TypeUsername = "username"
-	TypeAlpha    = "alpha"
-	TypeNumeric  = "num"
-	TypeLower    = "lower"
-	TypeUpper    = "upper"
-	TypeTrim     = "trim"
+	TypeTitle      = "title"
+	TypeEveryTitle = "every-title"
+	TypeCode       = "code"
+	TypeName       = "name"
+	TypeAlpha      = "alpha"
+	TypeNumeric    = "num"
+	TypeLower      = "lower"
+	TypeUpper      = "upper"
+	TypeTrim       = "trim"
+	TypeCyrillic   = "cyrillic"
 )
 
 var DefaultConverter = NewConverter().
 	Register(TypeTitle, Title).
-	Register(TypeUsername, Username).
+	Register(TypeEveryTitle, EveryTitle).
+	Register(TypeCode, Code).
+	Register(TypeName, Name).
 	Register(TypeAlpha, Alpha).
 	Register(TypeNumeric, Numeric).
 	Register(TypeLower, strings.ToLower).
 	Register(TypeUpper, strings.ToUpper).
-	Register(TypeTrim, strings.TrimSpace)
+	Register(TypeTrim, strings.TrimSpace).
+	Register(TypeCyrillic, Cyrillic)
 
 type Converter struct {
 	formatters map[string]Formatter
