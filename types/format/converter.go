@@ -15,13 +15,19 @@ const (
 	TypeUsername = "username"
 	TypeAlpha    = "alpha"
 	TypeNumeric  = "num"
+	TypeLower    = "lower"
+	TypeUpper    = "upper"
+	TypeTrim     = "trim"
 )
 
 var DefaultConverter = NewConverter().
 	Register(TypeTitle, Title).
 	Register(TypeUsername, Username).
 	Register(TypeAlpha, Alpha).
-	Register(TypeNumeric, Numeric)
+	Register(TypeNumeric, Numeric).
+	Register(TypeLower, strings.ToLower).
+	Register(TypeUpper, strings.ToUpper).
+	Register(TypeTrim, strings.TrimSpace)
 
 type Converter struct {
 	formatters map[string]Formatter
