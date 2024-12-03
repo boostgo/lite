@@ -23,15 +23,37 @@ func toBytes(value any, memory bool) []byte {
 	}
 
 	switch v := value.(type) {
+	case []byte:
+		if v == nil {
+			return nil
+		}
+
+		return v
 	case string:
 		return BytesFromString(v)
+	case *string:
+		if v == nil {
+			return nil
+		}
+
+		return BytesFromString(*v)
 	case int, int8, int16, int32, int64,
 		uint, uint8, uint16, uint32, uint64, uintptr,
 		float32, float64, bool:
 		return BytesFromString(toString(v, false))
 	case uuid.UUID:
 		return BytesFromString(String(v))
+	case *uuid.UUID:
+		if v == nil {
+			return nil
+		}
+
+		return BytesFromString(String(*v))
 	case fmt.Stringer:
+		if v == nil {
+			return nil
+		}
+		
 		return BytesFromString(v.String())
 	}
 

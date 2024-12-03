@@ -30,6 +30,10 @@ func toString(value any, memory bool) string {
 		var buf [36]byte
 		encodeUuidHex(buf[:], v)
 		return StringFromBytes(buf[:])
+	case *uuid.UUID:
+		var buf [36]byte
+		encodeUuidHex(buf[:], *v)
+		return StringFromBytes(buf[:])
 	case fmt.Stringer:
 		return v.String()
 	case []byte:
