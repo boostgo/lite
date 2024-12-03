@@ -59,11 +59,11 @@ func (worker *Worker) ErrorHandler(handler func(error) bool) *Worker {
 
 // runAction runs provided action with context and try function and trace id.
 func (worker *Worker) runAction() error {
-	var ctx context.Context
+	ctx := context.Background()
 	var cancel context.CancelFunc
 
 	if worker.traceMaster {
-		ctx = trace.Set(context.Background(), trace.String())
+		ctx = trace.Set(ctx, trace.String())
 	}
 
 	if worker.duration > 0 {
@@ -80,7 +80,11 @@ func (worker *Worker) Run() {
 
 	if worker.fromStart {
 		if err := worker.runAction(); err != nil {
-			logger.Error().Str("worker", worker.name).Err(err).Msg("Start worker action")
+			logger.
+				Error().
+				Str("worker", worker.name).
+				Err(err).
+				Msg("Start worker action")
 		}
 	}
 
