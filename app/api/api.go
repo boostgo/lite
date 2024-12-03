@@ -5,6 +5,7 @@ import (
 	"github.com/boostgo/lite/errs"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/trace"
+	"github.com/boostgo/lite/types/content"
 	"github.com/boostgo/lite/types/to"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -100,9 +101,7 @@ func Success(ctx echo.Context, status int, body ...any) error {
 
 // SuccessRaw returns response in "raw" way
 func SuccessRaw(ctx echo.Context, status int, body []byte, contentType ...string) error {
-	const defaultContentType = "application/octet-stream"
-
-	cType := defaultContentType
+	cType := content.Bytes
 	if len(contentType) > 0 && contentType[0] != "" {
 		cType = contentType[0]
 	}
@@ -113,7 +112,7 @@ func SuccessRaw(ctx echo.Context, status int, body []byte, contentType ...string
 // ReturnExcel returns response with Excel file content type
 func ReturnExcel(ctx echo.Context, name string, file []byte) error {
 	ctx.Response().Header().Set("Content-Disposition", "attachment; filename="+name)
-	return ctx.Blob(http.StatusOK, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", file)
+	return ctx.Blob(http.StatusOK, content.Excel, file)
 }
 
 // Ok is wrap function over [Success] function.
