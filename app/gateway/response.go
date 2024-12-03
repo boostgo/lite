@@ -2,6 +2,7 @@ package gateway
 
 import "github.com/boostgo/lite/web"
 
+// Response is gateway response
 type Response interface {
 	Body() []byte
 	StatusCode() int

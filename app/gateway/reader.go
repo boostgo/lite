@@ -5,6 +5,7 @@ import (
 	"github.com/boostgo/lite/fs"
 )
 
+// ReadServices reads [Service] slice from .json file.
 func ReadServices(path string) ([]Service, error) {
 	type routeView struct {
 		Method       string `json:"method"`

@@ -1,5 +1,7 @@
 package gateway
 
+// Route description of what path need catch and what path need redirect to.
+// Must have 3 fields: method, catch path and redirect math
 type Route interface {
 	Method() string
 	CatchPath() string

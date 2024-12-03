@@ -7,10 +7,15 @@ import (
 	"strings"
 )
 
+// Service search for need route & redirect request to match path.
 type Service interface {
+	// RegisterRoute append new routes
 	RegisterRoute(routes ...Route) Service
+	// Routes return all service routes
 	Routes() []Route
-	Match(method string, path string) (Route, bool)
+	// Match find match [Route] searching by method & path
+	Match(method, path string) (Route, bool)
+	// Proxy make request to redirect path and proxy all headers, cookies and request body
 	Proxy(ctx context.Context, r Route, request Request) (Response, error)
 }
 

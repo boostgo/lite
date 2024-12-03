@@ -1,5 +1,6 @@
 package gateway
 
+// Request is gateway request
 type Request interface {
 	RequestBody() []byte
 	Headers() map[string]any
