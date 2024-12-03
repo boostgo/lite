@@ -1,6 +1,8 @@
 package to
 
-import "strings"
+import (
+	"strings"
+)
 
 // Bool convert any value to bool.
 // If value is string, convert it to string and then compare for "true" value.
@@ -17,7 +19,7 @@ func Bool(value any) bool {
 
 		return *v
 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64:
-		return v == 1
+		return Int(v) == 1
 	case *int, *int8, *int16, *int32, *int64, *uint, *uint8, *uint16, *uint32, *uint64, *float32, *float64:
 		if v == nil {
 			return false
