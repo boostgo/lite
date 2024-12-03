@@ -18,7 +18,7 @@ type Worker struct {
 	action       func(ctx context.Context) error
 	errorHandler func(error) bool
 	stopper      chan bool
-	lifeDown     chan bool
+	done         chan struct{}
 	traceMaster  bool
 	timeout      time.Duration
 }
@@ -30,7 +30,7 @@ func New(name string, duration time.Duration, action func(ctx context.Context) e
 		duration:    duration,
 		action:      action,
 		stopper:     make(chan bool),
-		lifeDown:    make(chan bool, 1),
+		done:        make(chan struct{}, 1),
 		traceMaster: trace.AmIMaster(),
 	}
 }
@@ -89,15 +89,12 @@ func (worker *Worker) Run() {
 	}
 
 	go func() {
-		defer func() {
-			worker.lifeDown <- true
-		}()
-
 		ticker := time.NewTicker(worker.duration)
 		defer ticker.Stop()
 
 		life.Tear(func() error {
-			<-worker.lifeDown
+			// teardown will make main goroutine wait till worker will not be done
+			<-worker.done
 			return nil
 		})
 
@@ -105,9 +102,11 @@ func (worker *Worker) Run() {
 			select {
 			case <-life.Context().Done():
 				logger.Info().Str("worker", worker.name).Msg("Stop worker by context")
+				worker.done <- struct{}{}
 				return
 			case <-worker.stopper:
 				logger.Info().Str("worker", worker.name).Msg("Stop worker by stopper")
+				worker.done <- struct{}{}
 				return
 			case <-ticker.C:
 				if err := worker.runAction(); err != nil {
