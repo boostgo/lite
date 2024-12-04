@@ -31,7 +31,7 @@ func Title(input string) string {
 		runes[i] = unicode.ToLower(runes[i])
 	}
 
-	return clearInput(string(runes))
+	return Clear(string(runes))
 }
 
 // Code format input to "code" format.
@@ -67,7 +67,7 @@ func Alpha(input string) string {
 		}
 	}
 
-	return clearInput(string(result))
+	return Clear(string(result))
 }
 
 // Numeric format input to only digit text
@@ -87,7 +87,7 @@ func Numeric(input string) string {
 		}
 	}
 
-	return clearInput(string(result))
+	return Clear(string(result))
 }
 
 // AlphaNumeric format input to text with latin letters & digits (other symbols - erase).
@@ -109,7 +109,7 @@ func AlphaNumeric(input string) string {
 		}
 	}
 
-	return clearInput(string(result))
+	return Clear(string(result))
 }
 
 // Cyrillic format input from cyrillic text to latin-code format.
@@ -122,7 +122,7 @@ func Cyrillic(input string) string {
 		return ""
 	}
 
-	return Code(iuliia.Wikipedia.Translate(clearInput(input)))
+	return Code(iuliia.Wikipedia.Translate(Clear(input)))
 }
 
 // EveryTitle makes every word start with uppercase.
@@ -131,7 +131,7 @@ func Cyrillic(input string) string {
 //	Input: HELLO WORLD
 //	Output: Hello World
 func EveryTitle(input string) string {
-	return cases.Title(language.Und).String(strings.ToLower(clearInput(input)))
+	return cases.Title(language.Und).String(strings.ToLower(Clear(input)))
 }
 
 // Name format input to First/Last name format.
@@ -143,7 +143,13 @@ func Name(input string) string {
 	return EveryTitle(Alpha(input))
 }
 
-func clearInput(input string) string {
+// Clear input text.
+// Remove many spaces into one space and trim at start & end of string.
+// Example:
+//
+//	Input: '  Some   text  '
+//	Output: 'Some text'
+func Clear(input string) string {
 	return _manySpacesReg.ReplaceAllString(strings.TrimSpace(input), " ")
 }
 

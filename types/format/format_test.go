@@ -322,8 +322,8 @@ func Test_clearInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := clearInput(tt.args.input); got != tt.want {
-				t.Errorf("clearInput() = %v, want %v", got, tt.want)
+			if got := Clear(tt.args.input); got != tt.want {
+				t.Errorf("Clear() = %v, want %v", got, tt.want)
 			}
 		})
 	}
