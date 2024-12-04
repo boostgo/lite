@@ -11,6 +11,7 @@ import (
 type Formatter func(string) string
 
 const (
+	TypeClear        = "clear"
 	TypeTitle        = "title"
 	TypeEveryTitle   = "every-title"
 	TypeCode         = "code"
@@ -25,6 +26,7 @@ const (
 )
 
 var DefaultConverter = NewConverter().
+	Register(TypeClear, Clear).
 	Register(TypeTitle, Title).
 	Register(TypeEveryTitle, EveryTitle).
 	Register(TypeCode, Code).
