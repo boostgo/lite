@@ -234,11 +234,11 @@ func (handler *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSe
 			}
 
 			func() {
-				var ctx context.Context
+				ctx := context.Background()
 				var cancel context.CancelFunc
 
 				if handler.timeout > 0 {
-					ctx, cancel = context.WithTimeout(context.Background(), handler.timeout)
+					ctx, cancel = context.WithTimeout(ctx, handler.timeout)
 					defer cancel()
 				}
 
