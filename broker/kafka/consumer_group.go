@@ -156,6 +156,10 @@ func (consumer *ConsumerGroup) consume(
 					Msg("Consumer group is done")
 				return
 			case <-time.After(consumer.restartDuration):
+				log.
+					Info().
+					Str("name", name).
+					Msg("Consumer group restarting...")
 				runConsumer()
 			}
 		}
