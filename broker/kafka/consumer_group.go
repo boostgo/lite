@@ -17,7 +17,8 @@ type GroupHandlerFunc func(msg *sarama.ConsumerMessage, session sarama.ConsumerG
 
 // ConsumerGroup wrap structure for [Consumer] Group
 type ConsumerGroup struct {
-	group sarama.ConsumerGroup
+	group           sarama.ConsumerGroup
+	restartDuration time.Duration
 }
 
 // ConsumerGroupOption returns default consumer group configs
@@ -100,8 +101,14 @@ func newConsumerGroupFromClient(groupID string, client sarama.Client) (*Consumer
 	}
 
 	return &ConsumerGroup{
-		group: consumerGroup,
+		group:           consumerGroup,
+		restartDuration: time.Second * 3,
 	}, nil
+}
+
+func (consumer *ConsumerGroup) RestartDuration(duration time.Duration) *ConsumerGroup {
+	consumer.restartDuration = duration
+	return consumer
 }
 
 func (consumer *ConsumerGroup) Close() error {
@@ -123,8 +130,7 @@ func (consumer *ConsumerGroup) consume(
 ) {
 	logger := log.Namespace("kafka.consumer.group")
 
-	// run consuming
-	go func() {
+	runConsumer := func() {
 		if err := consumer.group.Consume(ctx, topics, handler); err != nil {
 			logger.
 				Error().
@@ -134,12 +140,25 @@ func (consumer *ConsumerGroup) consume(
 				Msg("Consume group is done with error")
 			cancel()
 		}
-		
-		logger.
-			Info().
-			Str("name", name).
-			Strs("topics", topics).
-			Msg("Consumer group is done")
+	}
+
+	// run consuming
+	go func() {
+		runConsumer()
+
+		for {
+			select {
+			case <-ctx.Done():
+				logger.
+					Info().
+					Str("name", name).
+					Strs("topics", topics).
+					Msg("Consumer group is done")
+				return
+			case <-time.After(consumer.restartDuration):
+				runConsumer()
+			}
+		}
 	}()
 
 	// run catching consumer errors and context canceling
