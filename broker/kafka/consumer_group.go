@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"context"
+	"errors"
 	"github.com/IBM/sarama"
 	"github.com/boostgo/lite/collections/list"
 	"github.com/boostgo/lite/errs"
@@ -132,13 +133,22 @@ func (consumer *ConsumerGroup) consume(
 
 	runConsumer := func() {
 		if err := consumer.group.Consume(ctx, topics, handler); err != nil {
+			if errors.Is(err, sarama.ErrClosedConsumerGroup) {
+				logger.
+					Info().
+					Str("name", name).
+					Strs("topics", topics).
+					Err(sarama.ErrClosedConsumerGroup).
+					Msg("Consumer group catch closing")
+				return
+			}
+
 			logger.
 				Error().
 				Err(err).
 				Str("name", name).
 				Strs("topics", topics).
 				Msg("Consume group is done with error")
-			cancel()
 		}
 	}
 
@@ -159,6 +169,7 @@ func (consumer *ConsumerGroup) consume(
 				log.
 					Info().
 					Str("name", name).
+					Strs("topics", topics).
 					Msg("Consumer group restarting...")
 				runConsumer()
 			}
