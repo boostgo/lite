@@ -131,9 +131,15 @@ func (consumer *ConsumerGroup) consume(
 				Err(err).
 				Str("name", name).
 				Strs("topics", topics).
-				Msg("Consume kafka claim")
+				Msg("Consume group is done with error")
 			cancel()
 		}
+		
+		logger.
+			Info().
+			Str("name", name).
+			Strs("topics", topics).
+			Msg("Consumer group is done")
 	}()
 
 	// run catching consumer errors and context canceling
