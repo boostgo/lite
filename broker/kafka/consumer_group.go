@@ -103,7 +103,7 @@ func newConsumerGroupFromClient(groupID string, client sarama.Client) (*Consumer
 
 	return &ConsumerGroup{
 		group:           consumerGroup,
-		restartDuration: time.Second * 3,
+		restartDuration: 0,
 	}, nil
 }
 
