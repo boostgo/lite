@@ -25,6 +25,11 @@ func toString(value any, memory bool) string {
 		return ""
 	}
 
+	// rune case - converting from rune converts to "symbol" as a string, but required convert number
+	if runeCase, ok := value.(int32); ok {
+		return strconv.FormatInt(int64(runeCase), 10)
+	}
+
 	switch v := value.(type) {
 	case uuid.UUID:
 		var buf [36]byte
