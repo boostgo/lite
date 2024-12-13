@@ -7,7 +7,7 @@ import (
 
 func Health(router *echo.Echo) {
 	router.GET("/health", func(ctx echo.Context) error {
-		return Ok(ctx, "OK")
+		return Ok(ctx, "HEALTHY")
 	})
 }
 
