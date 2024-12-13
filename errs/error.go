@@ -2,7 +2,7 @@ package errs
 
 import (
 	"errors"
-	"github.com/boostgo/lite/collections/list"
+	"github.com/boostgo/lite/list"
 	"github.com/boostgo/lite/types/to"
 	"strings"
 )

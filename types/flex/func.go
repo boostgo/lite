@@ -3,7 +3,7 @@ package flex
 import (
 	"errors"
 	"fmt"
-	"github.com/boostgo/lite/collections/list"
+	"github.com/boostgo/lite/list"
 	"reflect"
 )
 

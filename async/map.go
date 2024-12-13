@@ -1,7 +1,7 @@
 package async
 
 import (
-	"github.com/boostgo/lite/collections/list"
+	"github.com/boostgo/lite/list"
 	"sync"
 )
 
