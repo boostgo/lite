@@ -11,6 +11,7 @@ type OfSlice[T any] interface {
 	Any(fn func(T) bool) bool
 	Each(fn func(int, T)) OfSlice[T]
 	EachErr(fn func(int, T) error) error
+	Equal(against []T, fn func(T, T) bool) bool
 
 	Filter(fn func(T) bool) OfSlice[T]
 	FilterNot(fn func(T) bool) OfSlice[T]
@@ -81,6 +82,10 @@ func (os *ofSlice[T]) Each(fn func(int, T)) OfSlice[T] {
 
 func (os *ofSlice[T]) EachErr(fn func(int, T) error) error {
 	return EachErr(os.source, fn)
+}
+
+func (os *ofSlice[T]) Equal(against []T, fn func(T, T) bool) bool {
+	return AreEqual(os.source, against, fn)
 }
 
 func (os *ofSlice[T]) Single(fn func(T) bool) *T {
