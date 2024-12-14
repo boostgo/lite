@@ -1,10 +1,15 @@
 package list
 
+import "math/rand"
+
 type Iterator[T any] interface {
 	Next() bool
 	Value() (T, bool)
 	MustValue() T
 	Skip(count int) Iterator[T]
+	Reverse() Iterator[T]
+	Shuffle(source ...rand.Source) Iterator[T]
+	Each(fn func(int, T)) Iterator[T]
 }
 
 type iterator[T any] struct {
@@ -16,6 +21,16 @@ func Iterate[T any](source []T) Iterator[T] {
 	return &iterator[T]{
 		source: Of(source),
 	}
+}
+
+func (it *iterator[T]) Reverse() Iterator[T] {
+	it.source = it.source.Reverse()
+	return it
+}
+
+func (it *iterator[T]) Shuffle(source ...rand.Source) Iterator[T] {
+	it.source = it.source.Shuffle(source...)
+	return it
 }
 
 func (it *iterator[T]) Next() bool {
@@ -40,5 +55,19 @@ func (it *iterator[T]) MustValue() T {
 
 func (it *iterator[T]) Skip(count int) Iterator[T] {
 	it.index += count
+	return it
+}
+
+func (it *iterator[T]) Each(fn func(int, T)) Iterator[T] {
+	for it.Next() {
+		idx := it.index
+
+		value, ok := it.Value()
+		if !ok {
+			break
+		}
+
+		fn(idx, value)
+	}
 	return it
 }
