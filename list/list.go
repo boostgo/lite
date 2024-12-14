@@ -29,8 +29,10 @@ type OfSlice[T any] interface {
 	IndexOf(fn func(T) bool) int
 	Clear(capacity ...int) OfSlice[T]
 
-	Single(fn func(T) bool) *T
+	Single(fn func(T) bool) (T, bool)
 	Exist(fn func(T) bool) bool
+	First(fn func(T) bool) (T, bool)
+	Last(fn func(T) bool) (T, bool)
 	Contains(value T, fn ...func(T, T) bool) bool
 	Get(index int) *T
 	Slice() []T
@@ -88,12 +90,20 @@ func (os *ofSlice[T]) Equal(against []T, fn func(T, T) bool) bool {
 	return AreEqual(os.source, against, fn)
 }
 
-func (os *ofSlice[T]) Single(fn func(T) bool) *T {
+func (os *ofSlice[T]) Single(fn func(T) bool) (T, bool) {
 	return Single(os.source, fn)
 }
 
 func (os *ofSlice[T]) Exist(fn func(T) bool) bool {
-	return Single(os.source, fn) != nil
+	return Exist(os.source, fn)
+}
+
+func (os *ofSlice[T]) First(fn func(T) bool) (T, bool) {
+	return First(os.source, fn)
+}
+
+func (os *ofSlice[T]) Last(fn func(T) bool) (T, bool) {
+	return Last(os.source, fn)
 }
 
 func (os *ofSlice[T]) Contains(value T, fn ...func(T, T) bool) bool {

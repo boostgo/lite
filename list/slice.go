@@ -63,14 +63,35 @@ func FilterNot[T any](source []T, fn func(T) bool) []T {
 	return dst
 }
 
-func Single[T any](source []T, fn func(T) bool) *T {
+func Single[T any](source []T, fn func(T) bool) (T, bool) {
 	for _, element := range source {
 		if fn(element) {
-			return &element
+			return element, true
 		}
 	}
 
-	return nil
+	var empty T
+	return empty, false
+}
+
+func Exist[T any](source []T, fn func(T) bool) bool {
+	_, ok := Single(source, func(t T) bool { return fn(t) })
+	return ok
+}
+
+func First[T any](source []T, fn func(T) bool) (T, bool) {
+	return Single(source, fn)
+}
+
+func Last[T any](source []T, fn func(T) bool) (T, bool) {
+	for i := len(source) - 1; i >= 0; i-- {
+		if fn(source[i]) {
+			return source[i], true
+		}
+	}
+
+	var empty T
+	return empty, false
 }
 
 func Contains[T any](source []T, value T, fn ...func(T, T) bool) bool {
@@ -85,9 +106,10 @@ func Contains[T any](source []T, value T, fn ...func(T, T) bool) bool {
 		}
 	}
 
-	return Single(source, func(element T) bool {
+	_, ok := Single(source, func(element T) bool {
 		return compareFunc(element, value)
-	}) != nil
+	})
+	return ok
 }
 
 func Get[T any](source []T, index int) *T {
