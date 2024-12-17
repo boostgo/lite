@@ -2,32 +2,47 @@ package log
 
 import (
 	"context"
+	"github.com/boostgo/lite/config"
 	"github.com/boostgo/lite/system/life"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"os"
 )
+
+var (
+	_logger = newLogger()
+)
+
+func newLogger() zerolog.Logger {
+	if config.Get("PRETTY_LOGGER").Bool() {
+		return log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	}
+
+	return zerolog.New(os.Stdout).With().Timestamp().Logger()
+}
 
 // Debug print log on debug level.
 // Provided context use trace id
 func Debug(ctx ...context.Context) Event {
-	return newEvent(log.Debug(), ctx...)
+	return newEvent(_logger.Debug(), ctx...)
 }
 
 // Info print log on debug level.
 // Provided context use trace id
 func Info(ctx ...context.Context) Event {
-	return newEvent(log.Info(), ctx...)
+	return newEvent(_logger.Info(), ctx...)
 }
 
 // Warn print log on debug level.
 // Provided context use trace id
 func Warn(ctx ...context.Context) Event {
-	return newEvent(log.Warn(), ctx...)
+	return newEvent(_logger.Warn(), ctx...)
 }
 
 // Error print log on debug level.
 // Provided context use trace id
 func Error(ctx ...context.Context) Event {
-	return newEvent(log.Error(), ctx...)
+	return newEvent(_logger.Error(), ctx...)
 }
 
 // Fatal print log on debug level.
@@ -35,7 +50,7 @@ func Error(ctx ...context.Context) Event {
 // Call life.Cancel() method which call graceful shutdown
 func Fatal(ctx ...context.Context) Event {
 	defer life.Cancel()
-	return newEvent(log.Error().Bool("fatal", true), ctx...)
+	return newEvent(_logger.Error().Bool("fatal", true), ctx...)
 }
 
 // Logger wrap interface for zerolog logger

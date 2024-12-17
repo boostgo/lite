@@ -101,7 +101,9 @@ func (e *event) Err(err error) Event {
 	if !ok {
 		e.inner.Err(err)
 	} else {
-		e.Str("errorType", custom.Type())
+		if custom.Type() != "" {
+			e.Str("errorType", custom.Type())
+		}
 
 		if custom.InnerError() != nil {
 			e.Str("innerError", custom.InnerError().Error())
