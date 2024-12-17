@@ -102,11 +102,11 @@ func (e *event) Err(err error) Event {
 		e.inner.Err(err)
 	} else {
 		if custom.Type() != "" {
-			e.Str("errorType", custom.Type())
+			e.Str("error_type", custom.Type())
 		}
 
 		if custom.InnerError() != nil {
-			e.Str("innerError", custom.InnerError().Error())
+			e.Str("inner_error", custom.InnerError().Error())
 		}
 
 		if custom.Context() != nil && len(custom.Context()) > 0 {
