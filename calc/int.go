@@ -56,7 +56,11 @@ func Pow[T Integer](base T, exp int) T {
 	return result
 }
 
-func Sum[T Integer](values []T) T {
+func Sum[T Integer](values ...T) T {
+	if len(values) == 0 {
+		return 0
+	}
+
 	var sum T
 	for _, value := range values {
 		sum += value
