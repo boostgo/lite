@@ -10,15 +10,25 @@ import (
 )
 
 var (
-	_logger = newLogger()
+	_logger    = newLogger()
+	_prettyLog = false
 )
 
 func newLogger() zerolog.Logger {
-	if config.Get("PRETTY_LOGGER").Bool() {
+	if config.Get("PRETTY_LOGGER").Bool() || _prettyLog {
 		return log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	}
 
-	return zerolog.New(os.Stdout).With().Timestamp().Logger()
+	return zerolog.
+		New(os.Stdout).
+		With().
+		Timestamp().
+		Logger()
+}
+
+func PrettyLog() {
+	_prettyLog = true
+	_logger = newLogger()
 }
 
 // Debug print log on debug level.
