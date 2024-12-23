@@ -23,16 +23,34 @@ type Event interface {
 	UUID(key string, id uuid.UUID) Event
 	Strs(key string, values []string) Event
 	Int(key string, val int) Event
+	Int8(key string, value int8) Event
+	Int16(key string, value int16) Event
 	Int32(key string, value int32) Event
 	Int64(key string, value int64) Event
 	Ints(key string, values []int) Event
+	Ints8(key string, values []int8) Event
+	Ints16(key string, values []int16) Event
+	Ints32(key string, values []int32) Event
+	Ints64(key string, values []int64) Event
+	Uint(key string, val uint) Event
+	Uint8(key string, value uint8) Event
+	Uint16(key string, value uint16) Event
+	Uint32(key string, value uint32) Event
+	Uint64(key string, value uint64) Event
+	Uints(key string, values []uint) Event
+	Uints8(key string, values []uint8) Event
+	Uints16(key string, values []uint16) Event
+	Uints32(key string, values []uint32) Event
+	Uints64(key string, values []uint64) Event
 	Float32(key string, value float32) Event
 	Floats32(key string, values []float32) Event
 	Float64(key string, value float64) Event
 	Floats64(key string, values []float64) Event
 	Bool(key string, val bool) Event
 	Time(key string, val time.Time) Event
+	Times(key string, value []time.Time) Event
 	Duration(key string, val time.Duration) Event
+	Durations(key string, value []time.Duration) Event
 	Obj(key string, obj any) Event
 	Bytes(key string, bytes []byte) Event
 	Type(key string, obj any) Event
@@ -155,6 +173,16 @@ func (e *event) Int(key string, value int) Event {
 	return e
 }
 
+func (e *event) Int8(key string, value int8) Event {
+	e.inner.Int8(key, value)
+	return e
+}
+
+func (e *event) Int16(key string, value int16) Event {
+	e.inner.Int16(key, value)
+	return e
+}
+
 func (e *event) Int32(key string, value int32) Event {
 	e.inner.Int32(key, value)
 	return e
@@ -167,6 +195,76 @@ func (e *event) Int64(key string, value int64) Event {
 
 func (e *event) Ints(key string, values []int) Event {
 	e.inner.Ints(key, values)
+	return e
+}
+
+func (e *event) Ints8(key string, values []int8) Event {
+	e.inner.Ints8(key, values)
+	return e
+}
+
+func (e *event) Ints16(key string, values []int16) Event {
+	e.inner.Ints16(key, values)
+	return e
+}
+
+func (e *event) Ints32(key string, values []int32) Event {
+	e.inner.Ints32(key, values)
+	return e
+}
+
+func (e *event) Ints64(key string, values []int64) Event {
+	e.inner.Ints64(key, values)
+	return e
+}
+
+func (e *event) Uint(key string, value uint) Event {
+	e.inner.Uint(key, value)
+	return e
+}
+
+func (e *event) Uint8(key string, value uint8) Event {
+	e.inner.Uint8(key, value)
+	return e
+}
+
+func (e *event) Uint16(key string, value uint16) Event {
+	e.inner.Uint16(key, value)
+	return e
+}
+
+func (e *event) Uint32(key string, value uint32) Event {
+	e.inner.Uint32(key, value)
+	return e
+}
+
+func (e *event) Uint64(key string, value uint64) Event {
+	e.inner.Uint64(key, value)
+	return e
+}
+
+func (e *event) Uints(key string, value []uint) Event {
+	e.inner.Uints(key, value)
+	return e
+}
+
+func (e *event) Uints8(key string, value []uint8) Event {
+	e.inner.Uints8(key, value)
+	return e
+}
+
+func (e *event) Uints16(key string, value []uint16) Event {
+	e.inner.Uints16(key, value)
+	return e
+}
+
+func (e *event) Uints32(key string, value []uint32) Event {
+	e.inner.Uints32(key, value)
+	return e
+}
+
+func (e *event) Uints64(key string, value []uint64) Event {
+	e.inner.Uints64(key, value)
 	return e
 }
 
@@ -200,8 +298,18 @@ func (e *event) Time(key string, value time.Time) Event {
 	return e
 }
 
+func (e *event) Times(key string, value []time.Time) Event {
+	e.inner.Times(key, value)
+	return e
+}
+
 func (e *event) Duration(key string, value time.Duration) Event {
 	e.inner.Dur(key, value)
+	return e
+}
+
+func (e *event) Durations(key string, value []time.Duration) Event {
+	e.inner.Durs(key, value)
 	return e
 }
 
