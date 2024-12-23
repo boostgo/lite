@@ -126,13 +126,33 @@ func Handler() *echo.Echo {
 func Run(address string, waitTime ...time.Duration) {
 	go func() {
 		if err := run(address); err != nil {
-			log.Namespace("handler").Error().Err(err).Send()
+			log.
+				Namespace("handler").
+				Error().
+				Err(err).
+				Send()
 			life.Cancel()
 		}
 	}()
 
 	life.GracefulLog(func() {
-		log.Namespace("lite").Info().Msg("Graceful shutdown...")
+		log.
+			Namespace("lite").
+			Info().
+			Msg("Graceful shutdown...")
 	})
 	life.Wait(waitTime...)
+}
+
+type Router interface {
+	Any(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) []*echo.Route
+	POST(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
+	GET(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
+	PUT(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
+	DELETE(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
+	HEAD(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
+	OPTIONS(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
+	Use(m ...echo.MiddlewareFunc)
+	RouteNotFound(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
+	Group(prefix string, m ...echo.MiddlewareFunc) (g *echo.Group)
 }
