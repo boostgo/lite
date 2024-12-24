@@ -34,7 +34,7 @@ type OfSlice[T any] interface {
 	First(fn func(T) bool) (T, bool)
 	Last(fn func(T) bool) (T, bool)
 	Contains(value T, fn ...func(T, T) bool) bool
-	Get(index int) *T
+	Get(index int) T
 	Slice() []T
 	SliceAny(fn ...func(T) any) []any
 	Sub(start, end int) OfSlice[T]
@@ -110,7 +110,7 @@ func (os *ofSlice[T]) Contains(value T, fn ...func(T, T) bool) bool {
 	return Contains(os.source, value, fn...)
 }
 
-func (os *ofSlice[T]) Get(index int) *T {
+func (os *ofSlice[T]) Get(index int) T {
 	return Get(os.source, index)
 }
 

@@ -39,7 +39,7 @@ func (it *iterator[T]) Next() bool {
 
 func (it *iterator[T]) Value() (T, bool) {
 	if it.Next() {
-		item := *it.source.Get(it.index)
+		item := it.source.Get(it.index)
 		it.index++
 		return item, true
 	}

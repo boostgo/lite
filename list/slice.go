@@ -112,12 +112,13 @@ func Contains[T any](source []T, value T, fn ...func(T, T) bool) bool {
 	return ok
 }
 
-func Get[T any](source []T, index int) *T {
+func Get[T any](source []T, index int) T {
 	if index < 0 || index > len(source) {
-		return nil
+		var empty T
+		return empty
 	}
 
-	return &source[index]
+	return source[index]
 }
 
 func Map[T any, U any](source []T, fn func(T) U) []U {
