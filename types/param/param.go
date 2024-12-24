@@ -51,8 +51,16 @@ func IsEmpty(param Param) bool {
 	return param.IsEmpty()
 }
 
+func Equals(p1, p2 Param) bool {
+	return p1.value == p2.value
+}
+
 func (param Param) IsEmpty() bool {
 	return param.value == ""
+}
+
+func (param Param) Equals(compare Param) bool {
+	return Equals(param, compare)
 }
 
 func (param Param) String(defaultValue ...string) string {
