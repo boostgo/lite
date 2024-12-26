@@ -7,6 +7,7 @@ import (
 )
 
 // Read export read config file to provided export object.
+//
 // Provided paths can contain as json/yaml file and also .env file
 func Read(export any, path ...string) error {
 	if len(path) == 0 {
