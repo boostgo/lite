@@ -49,7 +49,10 @@ func QueryParam(ctx echo.Context, queryParamName string) param.Param {
 }
 
 // Parse try to parse request body to provided export object (must be pointer to structure object).
-// After success parsing request body, run structure validation (for "validate" tags)
+//
+// After success parsing request body, run format converting (for "format" tags)
+//
+// After success format converting, run structure validation (for "validate" tags)
 func Parse(ctx echo.Context, export any) error {
 	if err := ctx.Bind(export); err != nil {
 		return errs.
@@ -87,6 +90,7 @@ func Context(ctx echo.Context) context.Context {
 }
 
 // File returns file as []byte (slice of bytes) from request by file name.
+//
 // Request body must be form data
 func File(ctx echo.Context, name string) (content []byte, err error) {
 	defer errs.Wrap("API", &err, "Read form file error")
@@ -106,6 +110,7 @@ func File(ctx echo.Context, name string) (content []byte, err error) {
 }
 
 // ParseForm get all form data object and convert them to map with [param.Param] objects.
+//
 // Notice: in this map no any files. Parse them by [File] function
 func ParseForm(ctx echo.Context) (map[string]param.Param, error) {
 	form, err := ctx.MultipartForm()
@@ -130,10 +135,12 @@ func Header(ctx echo.Context, key string) string {
 	return ctx.Request().Header.Get(key)
 }
 
+// HeadersRaw return all headers as map with slice of values
 func HeadersRaw(ctx echo.Context) map[string][]string {
 	return ctx.Request().Header
 }
 
+// Headers return all headers as map with joined values
 func Headers(ctx echo.Context) map[string]any {
 	headers := make(map[string]any, len(ctx.Request().Header))
 	for key, value := range ctx.Request().Header {
@@ -157,10 +164,12 @@ func Cookie(ctx echo.Context, key string) string {
 	return cookie.Value
 }
 
+// CookiesRaw return all cookies as http.Cookie slice
 func CookiesRaw(ctx echo.Context) []*http.Cookie {
 	return ctx.Request().Cookies()
 }
 
+// Cookies return all cookies as map
 func Cookies(ctx echo.Context) map[string]any {
 	cookies := make(map[string]any)
 	for _, cookie := range ctx.Request().Cookies() {

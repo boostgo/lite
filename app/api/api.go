@@ -15,8 +15,11 @@ import (
 
 // Failure returns response with some error status and convert provided error to
 // errorOutput object and then convert it to JSON response.
+//
 // Sets trace id to the response if it was in request context.
-// Also, if error is custom from package "errs", output will build from custom error.
+//
+// If error is custom from package "errs", output will build from custom error.
+//
 // If errors is custom and there is "trace" key in context, it will be ignored for outputError
 func Failure(ctx echo.Context, status int, err error) error {
 	const defaultErrorType = "ERROR"
@@ -65,15 +68,20 @@ func Failure(ctx echo.Context, status int, err error) error {
 }
 
 // Error is wrap function above [Failure] function with auto defining status code by provided error.
+//
 // There is a list of errors in "errs" packages and if provided error is one of them, it has own code representation
 func Error(ctx echo.Context, err error) error {
 	return Failure(ctx, errStatusCode(err), err)
 }
 
 // Success returns response with success code & successOutput object and convert it to JSON response.
+//
 // Sets trace id to the response if it was in request context.
+//
 // If provided body exist, and it is "primitive" response will be in raw (no successOutput object).
+//
 // If context contain "raw" middleware key, response will be in raw (no successOutput object).
+//
 // If body is not provided, will be returned empty string
 func Success(ctx echo.Context, status int, body ...any) error {
 	// set trace ID
@@ -116,19 +124,22 @@ func ReturnExcel(ctx echo.Context, name string, file []byte) error {
 }
 
 // Ok is wrap function over [Success] function.
-// Set HTTP code "OK" 200
+//
+// Sets HTTP code "OK" 200
 func Ok(ctx echo.Context, body ...any) error {
 	return Success(ctx, http.StatusOK, body...)
 }
 
 // OkRaw is wrap function over [SuccessRaw] function.
-// Set HTTP code "OK" 200
+//
+// Sets HTTP code "OK" 200
 func OkRaw(ctx echo.Context, body []byte) error {
 	return SuccessRaw(ctx, http.StatusOK, body)
 }
 
 // Created is wrap function over [Success] function.
-// It provides HTTP code "Created" 201
+//
+// Sets HTTP code "Created" 201
 func Created(ctx echo.Context, body ...any) error {
 	if len(body) == 0 {
 		return Success(ctx, http.StatusCreated)
