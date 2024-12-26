@@ -6,8 +6,11 @@ import (
 )
 
 // Map thread safe map implementation.
+//
 // Contain data map defend by [sync.RWMutex].
+//
 // Getting keys list is cached (no need iteration).
+//
 // Can get length/size of [Map]
 type Map[K comparable, V any] struct {
 	keys list.OfSlice[K]
