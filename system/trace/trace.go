@@ -15,12 +15,14 @@ var (
 )
 
 // IAmMaster set flag that current app is "Trace Master".
+//
 // "Trace Master" means that app will generate trace ids on every handler request, on kafka, rmq messages, etc...
 func IAmMaster() {
 	_masterMode.Store(true)
 }
 
 // AmIMaster returns flag if current app is "Trace Master".
+//
 // "Trace Master" means that app will generate trace ids on every handler request, on kafka, rmq messages, etc...
 func AmIMaster() bool {
 	return _masterMode.Load()

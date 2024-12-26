@@ -9,6 +9,7 @@ import (
 )
 
 // Try recovers if panic was thrown.
+//
 // Return error of provided function and recover error
 func Try(tryFunc func() error) (err error) {
 	defer func() {

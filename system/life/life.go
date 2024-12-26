@@ -16,6 +16,7 @@ var (
 )
 
 // life controls the application lifetime.
+//
 // Contain global app context, context's cancel function and teardown functions
 type life struct {
 	ctx         context.Context
@@ -69,6 +70,7 @@ func Tear(tear func() error) {
 }
 
 // Wait hold current goroutine till global context cancel.
+//
 // If provide wait time it will wait provided time after calling global context cancel
 func Wait(waitTime ...time.Duration) {
 	l := instance()
