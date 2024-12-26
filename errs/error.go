@@ -12,10 +12,12 @@ const (
 )
 
 // Error is custom error which implements built-in error interface.
+//
 // Struct contains hierarchy of error messages and their types; context (map) and inner error.
-// For example, error types could be like "User Handler - User Usecase - User Repository - SQL"
-// It means that first error created on "SQL" level (sql, sqlx or any other module), then error wrapped
-// by "User Repository" level, then "User Usecase" level and so on.
+//
+//	For example, error types could be like "User Handler - User Usecase - User Repository - SQL"
+//	It means that first error created on "SQL" level (sql, sqlx or any other module), then error wrapped
+//	by "User Repository" level, then "User Usecase" level and so on.
 type Error struct {
 	message    []string
 	errorTypes []string
@@ -36,7 +38,9 @@ func New(message string) *Error {
 }
 
 // Copy copies provided err to the new one.
+//
 // Inner errors sets inside new error as one inner error.
+//
 // If inner errors contains only 1 error it will be 1 error, if errors more than 1, it will be "Join error"
 func Copy(err error, innerErrors ...error) error {
 	custom, ok := TryGet(err)
@@ -56,13 +60,16 @@ func Copy(err error, innerErrors ...error) error {
 }
 
 // Copy copies current error to the new one.
+//
 // Inner errors sets inside new error as one inner error.
+//
 // If inner errors contains only 1 error it will be 1 error, if errors more than 1, it will be "Join error"
 func (err *Error) Copy(innerErrors ...error) error {
 	return Copy(err, innerErrors...)
 }
 
 // Message returns all messages joined in one and reverse them.
+//
 // For example, there are messages: ["QueryxContext", "GetUser", "GetByID"]
 // it will be "QueryxContext - GetByID - GetUser"
 func (err *Error) Message() string {
@@ -76,6 +83,7 @@ func (err *Error) SetType(errorType string) *Error {
 }
 
 // Type returns all types joined in one and reverse them.
+//
 // For example, there are types: ["SQL", "User Repository", "User Usecase"]
 // it will be "User Usecase - User Repository - SQL"
 func (err *Error) Type() string {
@@ -101,6 +109,7 @@ func (err *Error) SetContext(context map[string]any) *Error {
 }
 
 // AddContext append new key-value one pair to the current context map.
+//
 // But if provided key-value pair is array string as value and "trace" as key, it will be ignored
 func (err *Error) AddContext(key string, value any) *Error {
 	if value == nil {
@@ -124,6 +133,7 @@ func (err *Error) InnerError() error {
 }
 
 // SetError sets inner error.
+//
 // If inner errors more than 1 it will be "join error", if error is 1 it will be provided by itself
 func (err *Error) SetError(innerError ...error) *Error {
 	if len(innerError) == 0 {
@@ -146,7 +156,9 @@ func (err *Error) Error() string {
 }
 
 // String returns string representation of current error.
+//
 // Method uses string builder and it's grow method.
+//
 // Method prints: types, messages and context
 func (err *Error) String() string {
 	builder := strings.Builder{}
@@ -194,9 +206,11 @@ func (err *Error) String() string {
 }
 
 // Is compares current error with provided target error.
-// By comparing errors method check if provided error is custom or not,
-// if it is custom - use equals method.
-// If it is not custom - unwrap current error and compare unwrapped inner errors with provided target
+//
+// By comparing errors method check if provided error is custom or not:
+//
+//	if custom - use equals method.
+//	If not custom - unwrap current error and compare unwrapped inner errors with provided target
 func (err *Error) Is(target error) bool {
 	custom, ok := TryGet(target)
 	if !ok {
@@ -215,6 +229,7 @@ func (err *Error) Is(target error) bool {
 }
 
 // Unwrap takes inner error and try to take inside wrapped errors.
+//
 // Method works only for custom errors, otherwise to result error slice will be added just inner error by itself
 func (err *Error) Unwrap() []error {
 	if err.innerError == nil {
@@ -310,6 +325,7 @@ func IsType(err error, errorType string) bool {
 }
 
 // Is compare provided errors.
+//
 // Event if provided errors is not custom, comparing becomes by built-in "Is" function
 func Is(err, target error) bool {
 	if err == nil || target == nil {
@@ -333,7 +349,9 @@ func Is(err, target error) bool {
 }
 
 // Wrap convert provided error to custom with the provided error type and message.
+//
 // If provided error is built-in (default), then it will be converted to custom.
+//
 // If it is already custom, just take custom and set to it one more type & message
 func Wrap(errType string, err *error, message string, ctx ...map[string]any) {
 	if *err != nil {
@@ -358,6 +376,7 @@ func Wrap(errType string, err *error, message string, ctx ...map[string]any) {
 }
 
 // Type returns type of custom error.
+//
 // If provided error is built-in - return DefaultType
 func Type(err error) string {
 	custom, ok := TryGet(err)
