@@ -50,6 +50,7 @@ func (response *Response) Parse(export any) error {
 		return errs.
 			New("Unmarshal response body").
 			SetError(err).
+			AddContext("url", response.raw.Request.RequestURI).
 			AddContext("blob", response.bodyBlob)
 	}
 
