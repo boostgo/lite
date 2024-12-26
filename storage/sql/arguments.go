@@ -17,6 +17,7 @@ func NewArguments(args ...any) *Arguments {
 }
 
 // Add new argument and increment count.
+//
 // After adding argument use Number method to get "$number" string
 func (a *Arguments) Add(arg any) *Arguments {
 	a.args = append(a.args, arg)

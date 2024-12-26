@@ -14,6 +14,7 @@ import (
 )
 
 // Migrate runs migration by provided connection & database name.
+//
 // Use by default ./migrations directory in the root of project.
 func Migrate(ctx context.Context, conn *sqlx.DB, databaseName string, migrationsDir ...string) (err error) {
 	const errType = "Storage Migrate"

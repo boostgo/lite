@@ -9,6 +9,7 @@ import (
 )
 
 // Connect to the database.
+//
 // "options" can override default settings
 func Connect(connectionString string, options ...func(connection *sqlx.DB)) (*sqlx.DB, error) {
 	connection, err := sqlx.Open("postgres", connectionString)

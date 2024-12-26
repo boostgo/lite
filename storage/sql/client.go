@@ -16,6 +16,7 @@ func NotFound(err error) bool {
 }
 
 // DB description of all methods of sqlx package.
+//
 // Can be used as single client & shard client
 type DB interface {
 	Connection() *sqlx.DB
