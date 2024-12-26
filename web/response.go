@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/boostgo/lite/errs"
 	"github.com/boostgo/lite/system/trace"
 	"github.com/boostgo/lite/types/flex"
 	"net/http"
@@ -45,7 +46,14 @@ func (response *Response) Parse(export any) error {
 		return errors.New("provided export is not a pointer")
 	}
 
-	return json.Unmarshal(response.bodyBlob, export)
+	if err := json.Unmarshal(response.bodyBlob, export); err != nil {
+		return errs.
+			New("Unmarshal response body").
+			SetError(err).
+			AddContext("blob", response.bodyBlob)
+	}
+
+	return nil
 }
 
 func (response *Response) Context(ctx context.Context) context.Context {
