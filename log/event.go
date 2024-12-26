@@ -10,6 +10,10 @@ import (
 	"time"
 )
 
+// Event represents a log event. It is instanced by one of the level method of
+// Logger and finalized by the Msg or Msgf method.
+//
+// Notice: this is wrap over zerolog.Event
 type Event interface {
 	Ctx(ctx context.Context) Event
 	Send()

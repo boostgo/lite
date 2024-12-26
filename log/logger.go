@@ -26,6 +26,9 @@ func newLogger() zerolog.Logger {
 		Logger()
 }
 
+// PrettyLog enabled pretty logging mode.
+//
+// This mode could be activated by "PRETTY_LOGGER=true" env
 func PrettyLog() {
 	_prettyLog = true
 	_logger = newLogger()
@@ -57,18 +60,31 @@ func Error(ctx ...context.Context) Event {
 
 // Fatal print log on debug level.
 // Provided context use trace id.
+//
 // Call life.Cancel() method which call graceful shutdown
 func Fatal(ctx ...context.Context) Event {
 	defer life.Cancel()
 	return newEvent(_logger.Error().Bool("fatal", true), ctx...)
 }
 
-// Logger wrap interface for zerolog logger
+// Logger is wrap over zerolog logger
 type Logger interface {
+	// Debug print log on debug level.
+	// Provided context use trace id
 	Debug() Event
+	// Info print log on info level.
+	// Provided context use trace id
 	Info() Event
+	// Warn print log on warning level.
+	// Provided context use trace id
 	Warn() Event
+	// Error print log on error level.
+	// Provided context use trace id
 	Error() Event
+	// Fatal print log on fatal level.
+	// Provided context use trace id.
+	//
+	// Call life.Cancel() method which call graceful shutdown
 	Fatal() Event
 }
 
