@@ -8,6 +8,7 @@ import (
 )
 
 // All iterate over all slice elements and stop when func returns false.
+//
 // If was iterated all elements - returns true
 func All[T any](source []T, fn func(T) bool) bool {
 	for _, element := range source {
@@ -38,6 +39,7 @@ func Each[T any](source []T, fn func(int, T)) {
 }
 
 // EachErr iterate over all slice elements and run provided function.
+//
 // Stop iterating when provided function returns error
 func EachErr[T any](source []T, fn func(int, T) error) error {
 	for index, element := range source {
@@ -50,7 +52,9 @@ func EachErr[T any](source []T, fn func(int, T) error) error {
 }
 
 // Filter slice with provided condition func.
+//
 // Element appends to new slice if condition func returns true.
+//
 // Important: function returns new slice
 func Filter[T any](source []T, fn func(T) bool) []T {
 	dst := make([]T, 0, len(source))
@@ -63,7 +67,9 @@ func Filter[T any](source []T, fn func(T) bool) []T {
 }
 
 // FilterNot slice with provided condition func.
+//
 // Element appends to new slice if condition func returns false.
+//
 // Important: function returns new slice
 func FilterNot[T any](source []T, fn func(T) bool) []T {
 	dst := make([]T, 0, len(source))
@@ -76,6 +82,7 @@ func FilterNot[T any](source []T, fn func(T) bool) []T {
 }
 
 // Single returns element and found boolean by provided condition func.
+//
 // If element found - returns true
 func Single[T any](source []T, fn func(T) bool) (T, bool) {
 	for _, element := range source {
@@ -89,6 +96,7 @@ func Single[T any](source []T, fn func(T) bool) (T, bool) {
 }
 
 // Exist check if element exist by provided condition func.
+//
 // The check performs on first matched element
 func Exist[T any](source []T, fn func(T) bool) bool {
 	_, ok := Single(source, func(t T) bool { return fn(t) })
@@ -96,14 +104,18 @@ func Exist[T any](source []T, fn func(T) bool) bool {
 }
 
 // First returns element and found boolean by provided condition func.
+//
 // If element found - returns true.
+//
 // Element start matching from the start of the slice
 func First[T any](source []T, fn func(T) bool) (T, bool) {
 	return Single(source, fn)
 }
 
 // Last returns element and found boolean by provided condition func.
+//
 // If element found - returns true.
+//
 // Element start matching from the end of the slice
 func Last[T any](source []T, fn func(T) bool) (T, bool) {
 	for i := len(source) - 1; i >= 0; i-- {
@@ -117,8 +129,10 @@ func Last[T any](source []T, fn func(T) bool) (T, bool) {
 }
 
 // Contains check if element exist in slice.
+//
 // Could be provided custom comparing function, by default compares by using reflect.DeepEqual.
-// The check performs on first matched element.
+//
+// The check performs on first matched element
 func Contains[T any](source []T, value T, fn ...func(T, T) bool) bool {
 	var compareFunc func(T, T) bool
 	if len(fn) > 0 {
@@ -138,6 +152,7 @@ func Contains[T any](source []T, value T, fn ...func(T, T) bool) bool {
 }
 
 // Get return element by index.
+//
 // If index is out of slice range - returns empty value of slice type
 func Get[T any](source []T, index int) T {
 	if index < 0 || index > len(source) {
@@ -158,6 +173,7 @@ func Map[T any, U any](source []T, fn func(T) U) []U {
 }
 
 // MapErr convert slice to another type of slice by provided converting function.
+//
 // Converting function can return error
 func MapErr[T any, U any](source []T, fn func(T) (U, error)) ([]U, error) {
 	newSlice := make([]U, len(source))
@@ -172,7 +188,8 @@ func MapErr[T any, U any](source []T, fn func(T) (U, error)) ([]U, error) {
 	return newSlice, nil
 }
 
-// Reverse slice.
+// Reverse slice
+//
 // Important: function returns new slice
 func Reverse[T any](source []T) []T {
 	length := len(source)
@@ -185,7 +202,9 @@ func Reverse[T any](source []T) []T {
 }
 
 // Shuffle set elements in slice by random indexes.
+//
 // Could be provided custom rand.Source implementation.
+//
 // Important: function returns new slice
 func Shuffle[T any](source []T, r ...rand.Source) []T {
 	out := make([]T, len(source))
@@ -206,6 +225,7 @@ func Shuffle[T any](source []T, r ...rand.Source) []T {
 }
 
 // Sort slice by provided compare function.
+//
 // Important: function returns new slice
 func Sort[T any](source []T, less func(a, b T) bool) []T {
 	if len(source) <= 1 {
@@ -221,6 +241,7 @@ func Sort[T any](source []T, less func(a, b T) bool) []T {
 }
 
 // Add appends new elements to slice.
+//
 // Important: function returns new slice
 func Add[T any](source []T, elements ...T) []T {
 	return Set(source, len(source), elements...)
@@ -241,12 +262,14 @@ func Join[T any](joins ...[]T) []T {
 }
 
 // AddLeft append new elements to the start of slice.
+//
 // Important: function returns new slice
 func AddLeft[T any](source []T, elements ...T) []T {
 	return Set(source, 0, elements...)
 }
 
 // Set append new elements to slice on provided index.
+//
 // Important: function returns new slice
 func Set[T any](source []T, index int, elements ...T) []T {
 	if index < 0 {
@@ -261,6 +284,7 @@ func Set[T any](source []T, index int, elements ...T) []T {
 }
 
 // Remove delete elements from slice by provided indexes.
+//
 // Important: function returns new slice
 func Remove[T any](source []T, index ...int) []T {
 	if len(index) == 0 {
@@ -295,6 +319,7 @@ func Remove[T any](source []T, index ...int) []T {
 }
 
 // IndexOf return index of found element by provided condition func.
+//
 // If element not found - returns -1
 func IndexOf[T any](source []T, fn func(T) bool) int {
 	for index, element := range source {
@@ -307,6 +332,7 @@ func IndexOf[T any](source []T, fn func(T) bool) int {
 }
 
 // RemoveWhere delete element from slice by provided condition func.
+//
 // Important: function returns new slice
 func RemoveWhere[T any](source []T, fn func(T) bool) []T {
 	index := IndexOf(source, fn)
@@ -336,6 +362,7 @@ func SliceAny[T any](source []T, fn ...func(T) any) []any {
 }
 
 // Sub return "sub slice" by provided start & end indexes.
+//
 // Important: function returns new slice
 func Sub[T any](source []T, start, end int) []T {
 	sub := make([]T, 0)
@@ -364,7 +391,9 @@ func Sub[T any](source []T, start, end int) []T {
 }
 
 // JoinString build string from slice elements.
+//
 // Every element string builds from provided func.
+//
 // Could be provided custom separator between element strings
 func JoinString[T any](source []T, joiner func(T) string, sep ...string) string {
 	result := strings.Builder{}
@@ -383,6 +412,7 @@ func JoinString[T any](source []T, joiner func(T) string, sep ...string) string 
 }
 
 // Unique make slice unique by provided condition func.
+//
 // Important: function returns new slice
 func Unique[T any](source []T, fn func(a, b T) bool) []T {
 	if source == nil || len(source) == 0 {
@@ -408,6 +438,7 @@ func Unique[T any](source []T, fn func(a, b T) bool) []T {
 }
 
 // UniqueComparable make slice unique.
+//
 // Important: function returns new slice
 func UniqueComparable[T comparable](source []T) []T {
 	if source == nil || len(source) == 0 {

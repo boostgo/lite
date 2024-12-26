@@ -7,9 +7,11 @@ import (
 )
 
 // OfSlice wrap over slice with helpful methods.
+//
 // Important: every method creates new slice but not modify current slice
 type OfSlice[T any] interface {
 	// All iterate over all slice elements and stop when func returns false.
+	//
 	// If was iterated all elements - returns true
 	All(fn func(T) bool) bool
 	// Any find element by provided condition func and if found - returns true
@@ -17,20 +19,24 @@ type OfSlice[T any] interface {
 	// Each iterate over all slice elements and run provided function
 	Each(fn func(int, T)) OfSlice[T]
 	// EachErr iterate over all slice elements and run provided function.
+	//
 	// Stop iterating when provided function returns error
 	EachErr(fn func(int, T) error) error
 	// Equal compares with provided slice by using provided func
 	Equal(against []T, fn func(T, T) bool) bool
 
 	// Filter slice with provided condition func.
+	//
 	// Element appends to new slice if condition func returns true
 	Filter(fn func(T) bool) OfSlice[T]
 	// FilterNot slice with provided condition func.
+	//
 	// Element appends to new slice if condition func returns false
 	FilterNot(fn func(T) bool) OfSlice[T]
 	// Reverse slice
 	Reverse() OfSlice[T]
 	// Shuffle set elements in slice by random indexes.
+	//
 	// Could be provided custom rand.Source implementation
 	Shuffle(source ...rand.Source) OfSlice[T]
 	// Sort slice by provided compare function
@@ -51,30 +57,40 @@ type OfSlice[T any] interface {
 	// RemoveWhere delete element from slice by provided condition func
 	RemoveWhere(fn func(T) bool) OfSlice[T]
 	// IndexOf return index of found element by provided condition func.
+	//
 	// If element not found - returns -1
 	IndexOf(fn func(T) bool) int
 	// Clear recreate current slice with new capacity (which could be provided)
 	Clear(capacity ...int) OfSlice[T]
 
 	// Single returns element and found boolean by provided condition func.
+	//
 	// If element found - returns true
 	Single(fn func(T) bool) (T, bool)
 	// Exist check if element exist by provided condition func.
+	//
 	// The check performs on first matched element
 	Exist(fn func(T) bool) bool
 	// First returns element and found boolean by provided condition func.
+	//
 	// If element found - returns true.
+	//
 	// Element start matching from the start of the slice
 	First(fn func(T) bool) (T, bool)
 	// Last returns element and found boolean by provided condition func.
+	//
 	// If element found - returns true.
+	//
 	// Element start matching from the end of the slice
 	Last(fn func(T) bool) (T, bool)
 	// Contains check if element exist in slice.
+	//
 	// Could be provided custom comparing function, by default compares by using reflect.DeepEqual.
+	//
 	// The check performs on first matched element.
 	Contains(value T, fn ...func(T, T) bool) bool
 	// Get return element by index.
+	//
 	// If index is out of slice range - returns empty value of slice type
 	Get(index int) T
 	// Slice returns OfSlice slice
@@ -88,7 +104,9 @@ type OfSlice[T any] interface {
 	// MapErr create new slice and fill with values by provided convert func and may return error
 	MapErr(fn func(T) (T, error)) ([]T, error)
 	// JoinString build string from slice elements.
+	//
 	// Every element string builds from provided func.
+	//
 	// Could be provided custom separator between element strings
 	JoinString(fn func(T) string, sep ...string) string
 

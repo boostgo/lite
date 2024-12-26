@@ -3,6 +3,7 @@ package list
 import "math/rand"
 
 // Iterator tool for iterating by provided slice.
+//
 // Use Next() and Value() methods to iterate & get values
 type Iterator[T any] interface {
 	// Next check is iterator reached last element
