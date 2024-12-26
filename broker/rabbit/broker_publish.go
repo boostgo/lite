@@ -23,6 +23,7 @@ func defaultPublishConfig() PublishConfig {
 }
 
 // Publish send provided body to queue and optional configurations.
+//
 // If context has trace id it provides to header of sending message
 func (broker *Broker) Publish(ctx context.Context, queue string, body any, cfg ...PublishConfig) error {
 	bodyInBytes, err := json.Marshal(body)

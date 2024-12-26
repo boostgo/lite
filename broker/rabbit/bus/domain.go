@@ -15,6 +15,7 @@ import (
 type ListenerAction func(event EventContext) error
 
 // Dispatcher event sender by "message bus" pattern (read above).
+//
 // To create dispatcher use boost.NewDispatcher(MessageBusConnector)
 type Dispatcher interface {
 	// Dispatch sends event
@@ -22,6 +23,7 @@ type Dispatcher interface {
 }
 
 // Listener listen for events by "message bus" pattern (read above).
+//
 // To create listener call app.Listener()
 type Listener interface {
 	// Run Listener
