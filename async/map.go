@@ -15,6 +15,7 @@ type Map[K comparable, V any] struct {
 	mx   sync.RWMutex
 }
 
+// NewMap creates Map
 func NewMap[K comparable, V any](size ...int) *Map[K, V] {
 	mapSize := 8
 	if len(size) > 0 {
@@ -27,6 +28,7 @@ func NewMap[K comparable, V any](size ...int) *Map[K, V] {
 	}
 }
 
+// Store provided key & value pair
 func (am *Map[K, V]) Store(key K, value V) *Map[K, V] {
 	am.mx.Lock()
 	defer am.mx.Unlock()
@@ -36,6 +38,7 @@ func (am *Map[K, V]) Store(key K, value V) *Map[K, V] {
 	return am
 }
 
+// Load get value by provided key
 func (am *Map[K, V]) Load(key K) (V, bool) {
 	am.mx.RLock()
 	defer am.mx.RUnlock()
@@ -43,18 +46,21 @@ func (am *Map[K, V]) Load(key K) (V, bool) {
 	return v, ok
 }
 
+// Keys return all keys
 func (am *Map[K, V]) Keys() []K {
 	am.mx.RLock()
 	defer am.mx.RUnlock()
 	return am.keys.Slice()
 }
 
+// Len returns length of map
 func (am *Map[K, V]) Len() int {
 	am.mx.RLock()
 	defer am.mx.RUnlock()
 	return len(am.data)
 }
 
+// Delete element by key
 func (am *Map[K, V]) Delete(key K) *Map[K, V] {
 	am.mx.Lock()
 	defer am.mx.Unlock()
@@ -67,6 +73,8 @@ func (am *Map[K, V]) Delete(key K) *Map[K, V] {
 	return am
 }
 
+// Each iterate over all map elements.
+// Stops when provided function return false or when all were keys iterated
 func (am *Map[K, V]) Each(fn func(key K, value V) bool) *Map[K, V] {
 	for _, key := range am.Keys() {
 		value, ok := am.Load(key)

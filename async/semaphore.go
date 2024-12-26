@@ -6,6 +6,7 @@ type Semaphore struct {
 	c chan struct{}
 }
 
+// NewSemaphore create Semaphore
 func NewSemaphore(size int) *Semaphore {
 	return &Semaphore{
 		c: make(chan struct{}, size),
