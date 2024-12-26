@@ -8,7 +8,9 @@ import (
 )
 
 // Client web client which allow to send HTTP requests.
+//
 // It can simplify sending requests by containing base url, headers and cookies for created requests from this client.
+//
 // There is retry mechanism for many request sending till it proceed success.
 type Client struct {
 	baseURL string
@@ -49,7 +51,8 @@ func (client *Client) SetBaseURL(baseURL string) *Client {
 }
 
 // Logging setting logging mode.
-// Logging mode turns on inner logs (mostly errors).
+//
+// Logging mode turns on inner logs (mostly errors)
 func (client *Client) Logging(logging bool) *Client {
 	client.logging = logging
 	return client
@@ -62,6 +65,7 @@ func (client *Client) Client(httpClient http.Client) *Client {
 }
 
 // RetryCount sets count of retries need.
+//
 // By default, retry count is 1
 func (client *Client) RetryCount(count int) *Client {
 	if count <= 1 {
@@ -73,6 +77,7 @@ func (client *Client) RetryCount(count int) *Client {
 }
 
 // RetryWait sets wait time between retry requests.
+//
 // Default wait time is 100ms.
 func (client *Client) RetryWait(wait time.Duration) *Client {
 	if wait <= 0 {
@@ -84,6 +89,7 @@ func (client *Client) RetryWait(wait time.Duration) *Client {
 }
 
 // Timeout sets timeout for waiting for request.
+//
 // By default, there is no timeout
 func (client *Client) Timeout(timeout time.Duration) *Client {
 	if timeout <= 0 {
@@ -105,6 +111,7 @@ func (client *Client) BasicAuth(username, password string) *Client {
 }
 
 // BearerToken sets token for "Authorization" header.
+//
 // Prefix "Bearer " sets automatically.
 func (client *Client) BearerToken(token string) *Client {
 	client.bearerToken = token
@@ -122,14 +129,16 @@ func (client *Client) Options(opts ...RequestOption) *Client {
 }
 
 // Header set one more key-value pair to headers.
-// If key already exist it rewrites existing key value.
+//
+// If key already exist it rewrites existing key value
 func (client *Client) Header(key string, value any) *Client {
 	client.headers[key] = to.String(value)
 	return client
 }
 
 // Headers sets map of key-value pairs.
-// Existing keys will be rewritten.
+//
+// Existing keys will be rewritten
 func (client *Client) Headers(headers map[string]any) *Client {
 	for key, value := range headers {
 		client.headers[key] = value
@@ -138,6 +147,7 @@ func (client *Client) Headers(headers map[string]any) *Client {
 }
 
 // Authorization sets authorization token for "Authorization" header.
+//
 // Prefix "Bearer " will set automatically
 func (client *Client) Authorization(token string) *Client {
 	client.headers["Authorization"] = "Bearer " + token
@@ -151,14 +161,16 @@ func (client *Client) ContentType(contentType string) *Client {
 }
 
 // Cookie sets new cookie to request.
-// Existing key will be rewritten.
+//
+// Existing key will be rewritten
 func (client *Client) Cookie(key string, value any) *Client {
 	client.cookies[key] = to.String(value)
 	return client
 }
 
 // Cookies sets new cookies map to request.
-// Existing keys will be rewritten.
+//
+// Existing keys will be rewritten
 func (client *Client) Cookies(cookies map[string]any) *Client {
 	for key, value := range cookies {
 		client.cookies[key] = value
@@ -174,6 +186,7 @@ func (client *Client) Query(key string, value any) *Client {
 }
 
 // Queries sets query params to request.
+//
 // Existing keys will be rewritten
 func (client *Client) Queries(queries map[string]any) *Client {
 	for key, value := range queries {
