@@ -1,5 +1,6 @@
 package list
 
+// Keys returns all keys of provided map
 func Keys[K comparable, V any](provide map[K]V) []K {
 	if provide == nil || len(provide) == 0 {
 		return []K{}
@@ -12,6 +13,7 @@ func Keys[K comparable, V any](provide map[K]V) []K {
 	return keys
 }
 
+// Values return all values of provided map
 func Values[K comparable, V any](provide map[K]V) []V {
 	if provide == nil || len(provide) == 0 {
 		return []V{}
@@ -24,11 +26,12 @@ func Values[K comparable, V any](provide map[K]V) []V {
 	return values
 }
 
+// CopyMap return copy of provided map
 func CopyMap[K comparable, V any](provide map[K]V) map[K]V {
 	if provide == nil || len(provide) == 0 {
 		return map[K]V{}
 	}
-	
+
 	copied := make(map[K]V, len(provide))
 	for key, value := range provide {
 		copied[key] = value

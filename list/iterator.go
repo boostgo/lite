@@ -2,13 +2,22 @@ package list
 
 import "math/rand"
 
+// Iterator tool for iterating by provided slice.
+// Use Next() and Value() methods to iterate & get values
 type Iterator[T any] interface {
+	// Next check is iterator reached last element
 	Next() bool
+	// Value return current iterator value & increment current index
 	Value() (T, bool)
+	// MustValue calls Value, but with no "exist" boolean
 	MustValue() T
+	// Skip skips iterator values for provided count
 	Skip(count int) Iterator[T]
+	// Reverse reverses slice inside Iterator
 	Reverse() Iterator[T]
+	// Shuffle shuffles slice inside Iterator
 	Shuffle(source ...rand.Source) Iterator[T]
+	// Each iterate every element of Iterator and stops when Value returns false
 	Each(fn func(int, T)) Iterator[T]
 }
 
@@ -17,6 +26,7 @@ type iterator[T any] struct {
 	index  int
 }
 
+// Iterate creates Iterator with provided slice
 func Iterate[T any](source []T) Iterator[T] {
 	return &iterator[T]{
 		source: Of(source),
