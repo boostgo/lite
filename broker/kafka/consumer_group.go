@@ -117,6 +117,7 @@ func (consumer *ConsumerGroup) Close() error {
 }
 
 // Consume starts consuming topic with consumer group.
+//
 // Catch consumer group errors and provided context done (for graceful shutdown).
 func (consumer *ConsumerGroup) Consume(name string, topics []string, handler GroupHandler) {
 	consumer.consume(life.Context(), name, topics, handler, life.Cancel)
@@ -222,8 +223,10 @@ type consumerGroupHandler struct {
 }
 
 // ConsumerGroupHandler creates [sarama.ConsumerGroupHandler] interface implementation object.
+//
 // Provide 3 methods: claim, setup and cleanup for implementing interface.
-// Also, could be provided timeout for claiming every message
+//
+// Could be provided timeout for claiming every message
 func ConsumerGroupHandler(
 	name string,
 	handler ConsumerGroupClaim,

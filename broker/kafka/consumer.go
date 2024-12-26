@@ -94,6 +94,7 @@ func (consumer *Consumer) SetErrorHandler(handler ErrorHandler) {
 }
 
 // Consume starts consuming topic with consumer.
+//
 // Catch consumer errors and provided context done (for graceful shutdown).
 func (consumer *Consumer) Consume(topic string, handler ConsumeHandler) error {
 	logger := log.Namespace("kafka.consumer")

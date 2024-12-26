@@ -22,7 +22,9 @@ func AsyncProducerOption() Option {
 }
 
 // NewAsyncProducer creates [AsyncProducer] with configurations.
+//
 // Creates async producer with default configuration as [Option] created by [AsyncProducerOption] function.
+//
 // Adds producer close method to teardown
 func NewAsyncProducer(brokers []string, opts ...Option) (*AsyncProducer, error) {
 	config := sarama.NewConfig()
@@ -46,7 +48,9 @@ func NewAsyncProducer(brokers []string, opts ...Option) (*AsyncProducer, error) 
 }
 
 // NewAsyncProducerFromClient creates [AsyncProducer] by provided client.
+//
 // Creates async producer with default configuration as [Option] created by [AsyncProducerOption] function.
+//
 // Adds producer close method to teardown
 func NewAsyncProducerFromClient(client sarama.Client) (*AsyncProducer, error) {
 	producer, err := sarama.NewAsyncProducerFromClient(client)
@@ -82,6 +86,7 @@ func MustAsyncProducerFromClient(client sarama.Client) *AsyncProducer {
 }
 
 // Produce sends provided message(s) in other goroutine.
+//
 // Sets trace id to provided messages to header
 func (producer *AsyncProducer) Produce(ctx context.Context, messages ...*sarama.ProducerMessage) error {
 	if len(messages) == 0 {

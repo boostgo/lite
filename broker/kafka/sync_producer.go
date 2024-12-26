@@ -22,7 +22,9 @@ func SyncProducerOption() Option {
 }
 
 // NewSyncProducer creates [SyncProducer] with configurations.
+//
 // Creates sync producer with default configuration as [Option] created by [SyncProducerOption] function.
+//
 // Adds producer close method to teardown
 func NewSyncProducer(brokers []string, opts ...Option) (*SyncProducer, error) {
 	config := sarama.NewConfig()
@@ -46,7 +48,9 @@ func NewSyncProducer(brokers []string, opts ...Option) (*SyncProducer, error) {
 }
 
 // NewSyncProducerFromClient creates [SyncProducer] by provided client.
+//
 // Creates sync producer with default configuration as Option created by SyncProducerOption function.
+//
 // Adds producer close method to teardown
 func NewSyncProducerFromClient(client sarama.Client) (*SyncProducer, error) {
 	producer, err := sarama.NewSyncProducerFromClient(client)
@@ -82,6 +86,7 @@ func MustSyncProducerFromClient(client sarama.Client) *SyncProducer {
 }
 
 // Produce sends provided message(s) in the same goroutine.
+//
 // Sets trace id to provided messages to header
 func (producer *SyncProducer) Produce(ctx context.Context, messages ...*sarama.ProducerMessage) error {
 	if len(messages) == 0 {

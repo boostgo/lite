@@ -23,6 +23,7 @@ func init() {
 	})
 }
 
+// GetOffsets return all offsets from topic
 func GetOffsets(brokers []string, cfg *sarama.Config, topic string, offset int64) (map[int32]int64, error) {
 	client, err := sarama.NewClient(brokers, cfg)
 	if err != nil {

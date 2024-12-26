@@ -9,6 +9,7 @@ import (
 type SnapshotClaim func(message *sarama.ConsumerMessage) error
 
 // Snapshot copy all messages from topic.
+//
 // Creates temporary consumer group and read messages till all offsets will not be read.
 func Snapshot(cfg Config, name, topic string, snapshotClaim SnapshotClaim, commit ...bool) error {
 	offsets, err := GetOffsets(cfg.Brokers, sarama.NewConfig(), topic, sarama.OffsetNewest)

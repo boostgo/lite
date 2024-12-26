@@ -36,6 +36,7 @@ func (l *saramaLogger) Println(v ...interface{}) {
 		Msg("[Sarama] Print")
 }
 
+// BuildLogger create custom logger for "sarama" library for debugging
 func BuildLogger() sarama.StdLogger {
 	return &saramaLogger{}
 }
