@@ -11,13 +11,15 @@ import (
 )
 
 type Response struct {
+	request  *Request
 	raw      *http.Response
 	bodyBlob []byte
 }
 
-func newResponse(resp *http.Response) *Response {
+func newResponse(request *Request, resp *http.Response) *Response {
 	return &Response{
-		raw: resp,
+		request: request,
+		raw:     resp,
 	}
 }
 
@@ -50,7 +52,8 @@ func (response *Response) Parse(export any) error {
 		return errs.
 			New("Unmarshal response body").
 			SetError(err).
-			AddContext("url", response.raw.Request.RequestURI).
+			AddContext("url", response.request.req.RequestURI).
+			AddContext("code", response.raw.StatusCode).
 			AddContext("blob", response.bodyBlob)
 	}
 

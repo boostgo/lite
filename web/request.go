@@ -409,7 +409,7 @@ func (request *Request) do(method, url string, body ...any) (*Response, error) {
 		}
 	}()
 
-	request.response = newResponse(request.resp)
+	request.response = newResponse(request, request.resp)
 
 	var respBlob []byte
 	respBlob, err = io.ReadAll(request.resp.Body)
