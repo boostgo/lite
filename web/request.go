@@ -12,6 +12,7 @@ import (
 	"github.com/boostgo/lite/types/to"
 	"io"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -45,9 +46,11 @@ type Request struct {
 	response *Response
 
 	errType string
+
+	mx sync.Locker
 }
 
-// R creates Request object with context.
+// R creates Request object with context
 func R(ctx context.Context) *Request {
 	const errType = "Request"
 
@@ -71,6 +74,8 @@ func R(ctx context.Context) *Request {
 		traceMode: trace.AmIMaster(),
 
 		errType: errType,
+
+		mx: &sync.Mutex{},
 	}
 }
 
@@ -395,6 +400,9 @@ func (request *Request) retryDo(method, url string, body ...any) (_ *Response, e
 		"url":    url,
 		"body":   len(body) > 0 && body[0] != nil,
 	})
+
+	request.mx.Lock()
+	defer request.mx.Unlock()
 
 	if request.timeout > 0 {
 		var cancel context.CancelFunc
