@@ -2,7 +2,10 @@ package kafka
 
 import (
 	"context"
+	"errors"
 	"github.com/IBM/sarama"
+	"github.com/boostgo/lite/errs"
+	"github.com/boostgo/lite/list"
 	"github.com/boostgo/lite/system/life"
 	"github.com/boostgo/lite/system/trace"
 )
@@ -98,5 +101,20 @@ func (producer *SyncProducer) Produce(ctx context.Context, messages ...*sarama.P
 	}
 
 	trace.SetKafka(ctx, messages...)
-	return producer.producer.SendMessages(messages)
+
+	if err := producer.producer.SendMessages(messages); err != nil {
+		var pErrs sarama.ProducerErrors
+		if ok := errors.As(err, &pErrs); ok {
+			return errs.
+				New("Send Messages").
+				AddContext("size", len(pErrs)).
+				SetError(list.Map(pErrs, func(pErr *sarama.ProducerError) error {
+					return pErr
+				})...)
+		}
+
+		return err
+	}
+
+	return nil
 }
