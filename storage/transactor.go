@@ -3,16 +3,14 @@ package storage
 import (
 	"context"
 	"github.com/boostgo/lite/async"
-)
-
-const (
-	TransactionContextKey = "lite_tx"
+	"github.com/boostgo/lite/list"
 )
 
 // Transactor is common representation of transactions for any type of database.
 //
 // Reason to use this: hide from usecase/service layer of using "sql" or "mongo" database
 type Transactor interface {
+	Key() string
 	Begin(ctx context.Context) (Transaction, error)
 	BeginCtx(ctx context.Context) (context.Context, error)
 	CommitCtx(ctx context.Context) error
@@ -27,13 +25,13 @@ type Transaction interface {
 }
 
 // RewriteTx take transaction key from original context and copy key to toCopy context
-func RewriteTx(original context.Context, toCopy context.Context) context.Context {
-	tx := original.Value(TransactionContextKey)
+func RewriteTx(key string, original context.Context, toCopy context.Context) context.Context {
+	tx := original.Value(key)
 	if tx == nil {
 		return toCopy
 	}
 
-	return context.WithValue(toCopy, TransactionContextKey, tx)
+	return context.WithValue(toCopy, key, tx)
 }
 
 type transactor struct {
@@ -44,6 +42,14 @@ func NewTransactor(transactors ...Transactor) Transactor {
 	return &transactor{
 		transactors: transactors,
 	}
+}
+
+func (t *transactor) Key() string {
+	return list.JoinString(list.Map(t.transactors, func(t Transactor) string {
+		return t.Key()
+	}), func(s string) string {
+		return s
+	})
 }
 
 func (t *transactor) Begin(ctx context.Context) (Transaction, error) {
@@ -61,32 +67,15 @@ func (t *transactor) Begin(ctx context.Context) (Transaction, error) {
 }
 
 func (t *transactor) BeginCtx(ctx context.Context) (context.Context, error) {
-	tasks := make([]async.Task, 0, len(t.transactors))
-	contexts := make(chan context.Context, len(t.transactors))
+	var err error
 	for _, tr := range t.transactors {
-		tasks = append(tasks, func() error {
-			trCtx, err := tr.BeginCtx(ctx)
-			if err != nil {
-				return err
-			}
-
-			contexts <- trCtx
-			return nil
-		})
+		ctx, err = tr.BeginCtx(ctx)
+		if err != nil {
+			return ctx, err
+		}
 	}
 
-	if err := async.WaitAll(tasks...); err != nil {
-		return nil, err
-	}
-
-	close(contexts)
-
-	ctxList := make([]context.Context, 0, len(t.transactors))
-	for trCtx := range contexts {
-		ctxList = append(ctxList, trCtx)
-	}
-
-	return newTransactorContext(ctxList...), nil
+	return ctx, nil
 }
 
 func (t *transactor) CommitCtx(ctx context.Context) error {

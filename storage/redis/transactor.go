@@ -6,6 +6,10 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+const (
+	transactionKey = "lite_redis_tx"
+)
+
 type TransactorClientProvider interface {
 	TxPipeline(ctx context.Context) (redis.Pipeliner, error)
 }
@@ -58,6 +62,10 @@ func (rt *redisTransactor) RollbackCtx(ctx context.Context) error {
 	return nil
 }
 
+func (rt *redisTransactor) Key() string {
+	return transactionKey
+}
+
 type redisTransaction struct {
 	tx        redis.Pipeliner
 	parentCtx context.Context
@@ -86,12 +94,12 @@ func (tx *redisTransaction) Context() context.Context {
 
 // SetTx sets transaction key to new context
 func SetTx(ctx context.Context, tx redis.Pipeliner) context.Context {
-	return context.WithValue(ctx, storage.TransactionContextKey, tx)
+	return context.WithValue(ctx, transactionKey, tx)
 }
 
 // GetTx returns sql transaction object from context if it exist
 func GetTx(ctx context.Context) (redis.Pipeliner, bool) {
-	transaction := ctx.Value(storage.TransactionContextKey)
+	transaction := ctx.Value(transactionKey)
 	if transaction == nil {
 		return nil, false
 	}

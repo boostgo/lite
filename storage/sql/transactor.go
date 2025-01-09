@@ -23,6 +23,10 @@ func NewTransactor(provider TransactorConnectionProvider) storage.Transactor {
 	}
 }
 
+func (st *sqlTransactor) Key() string {
+	return transactionKey
+}
+
 func (st *sqlTransactor) Begin(ctx context.Context) (storage.Transaction, error) {
 	tx, err := st.provider.BeginTxx(ctx, &sql.TxOptions{
 		Isolation: sql.LevelReadCommitted,
