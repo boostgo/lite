@@ -61,16 +61,32 @@ func (t *transactor) Begin(ctx context.Context) (Transaction, error) {
 }
 
 func (t *transactor) BeginCtx(ctx context.Context) (context.Context, error) {
-	//tasks := make([]async.Task, 0, len(t.transactors))
-	//for _, tr := range t.transactors {
-	//	tasks = append(tasks, func() error {
-	//		return tr.BeginCtx(ctx)
-	//	})
-	//}
-	//
-	//return async.WaitAll(tasks...)
-	// todo: impl BeginCtx
-	return nil, nil
+	tasks := make([]async.Task, 0, len(t.transactors))
+	contexts := make(chan context.Context, len(t.transactors))
+	for _, tr := range t.transactors {
+		tasks = append(tasks, func() error {
+			trCtx, err := tr.BeginCtx(ctx)
+			if err != nil {
+				return err
+			}
+
+			contexts <- trCtx
+			return nil
+		})
+	}
+
+	if err := async.WaitAll(tasks...); err != nil {
+		return nil, err
+	}
+
+	close(contexts)
+
+	ctxList := make([]context.Context, 0, len(t.transactors))
+	for trCtx := range contexts {
+		ctxList = append(ctxList, trCtx)
+	}
+
+	return newTransactorContext(ctxList...), nil
 }
 
 func (t *transactor) CommitCtx(ctx context.Context) error {
