@@ -66,6 +66,11 @@ func (client *shardClient) Keys(ctx context.Context, pattern string) (keys []str
 		return nil, err
 	}
 
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.Keys(ctx, pattern).Result()
+	}
+
 	return raw.Client().Keys(ctx, pattern).Result()
 }
 
@@ -90,6 +95,11 @@ func (client *shardClient) Delete(ctx context.Context, keys ...string) (err erro
 		return nil
 	}
 
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.Del(ctx, keys...).Err()
+	}
+
 	return raw.Client().Del(ctx, keys...).Err()
 }
 
@@ -103,6 +113,11 @@ func (client *shardClient) Dump(ctx context.Context, key string) (result string,
 	raw, err := client.clients.Get(ctx)
 	if err != nil {
 		return result, err
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.Dump(ctx, key).Result()
 	}
 
 	return raw.Client().Dump(ctx, key).Result()
@@ -128,6 +143,11 @@ func (client *shardClient) Rename(ctx context.Context, oldKey, newKey string) (e
 		return err
 	}
 
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.Rename(ctx, oldKey, newKey).Err()
+	}
+
 	return raw.Client().Rename(ctx, oldKey, newKey).Err()
 }
 
@@ -141,6 +161,11 @@ func (client *shardClient) Refresh(ctx context.Context, key string, ttl time.Dur
 	raw, err := client.clients.Get(ctx)
 	if err != nil {
 		return err
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.Expire(ctx, key, ttl).Err()
 	}
 
 	return raw.Client().Expire(ctx, key, ttl).Err()
@@ -158,6 +183,11 @@ func (client *shardClient) RefreshAt(ctx context.Context, key string, at time.Ti
 		return err
 	}
 
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.ExpireAt(ctx, key, at).Err()
+	}
+
 	return raw.Client().ExpireAt(ctx, key, at).Err()
 }
 
@@ -173,7 +203,12 @@ func (client *shardClient) TTL(ctx context.Context, key string) (ttl time.Durati
 		return ttl, err
 	}
 
-	ttl, err = raw.Client().TTL(ctx, key).Result()
+	tx, ok := GetTx(ctx)
+	if ok {
+		ttl, err = tx.TTL(ctx, key).Result()
+	} else {
+		ttl, err = raw.Client().TTL(ctx, key).Result()
+	}
 	if err != nil {
 		return ttl, err
 	}
@@ -203,6 +238,11 @@ func (client *shardClient) Set(ctx context.Context, key string, value any, ttl .
 		return err
 	}
 
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.Set(ctx, key, value, expireAt).Err()
+	}
+
 	return raw.Client().Set(ctx, key, value, expireAt).Err()
 }
 
@@ -218,7 +258,12 @@ func (client *shardClient) Get(ctx context.Context, key string) (result string, 
 		return result, err
 	}
 
-	result, err = raw.Client().Get(ctx, key).Result()
+	tx, ok := GetTx(ctx)
+	if ok {
+		result, err = tx.Get(ctx, key).Result()
+	} else {
+		result, err = raw.Client().Get(ctx, key).Result()
+	}
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return result, errs.
@@ -245,6 +290,11 @@ func (client *shardClient) Exist(ctx context.Context, key string) (result int64,
 		return result, err
 	}
 
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.Exists(ctx, key).Result()
+	}
+
 	return raw.Client().Exists(ctx, key).Result()
 }
 
@@ -260,7 +310,12 @@ func (client *shardClient) GetBytes(ctx context.Context, key string) (result []b
 		return nil, err
 	}
 
-	result, err = raw.Client().Get(ctx, key).Bytes()
+	tx, ok := GetTx(ctx)
+	if ok {
+		result, err = tx.Get(ctx, key).Bytes()
+	} else {
+		result, err = raw.Client().Get(ctx, key).Bytes()
+	}
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return result, errs.
@@ -287,7 +342,12 @@ func (client *shardClient) GetInt(ctx context.Context, key string) (result int, 
 		return result, err
 	}
 
-	result, err = raw.Client().Get(ctx, key).Int()
+	tx, ok := GetTx(ctx)
+	if ok {
+		result, err = tx.Get(ctx, key).Int()
+	} else {
+		result, err = raw.Client().Get(ctx, key).Int()
+	}
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return result, errs.
@@ -315,7 +375,12 @@ func (client *shardClient) Parse(ctx context.Context, key string, export any) (e
 	}
 
 	var result []byte
-	result, err = raw.Client().Get(ctx, key).Bytes()
+	tx, ok := GetTx(ctx)
+	if ok {
+		result, err = tx.Get(ctx, key).Bytes()
+	} else {
+		result, err = raw.Client().Get(ctx, key).Bytes()
+	}
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return errs.
@@ -342,6 +407,11 @@ func (client *shardClient) HSet(ctx context.Context, key string, value map[strin
 		return err
 	}
 
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HSet(ctx, key, value).Err()
+	}
+
 	return raw.Client().HSet(ctx, key, value).Err()
 }
 
@@ -355,6 +425,11 @@ func (client *shardClient) HGetAll(ctx context.Context, key string) (result map[
 	raw, err := client.clients.Get(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HGetAll(ctx, key).Result()
 	}
 
 	return raw.Client().HGetAll(ctx, key).Result()
@@ -372,6 +447,11 @@ func (client *shardClient) HGet(ctx context.Context, key, field string) (result 
 		return result, err
 	}
 
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HGet(ctx, key, field).Result()
+	}
+
 	return raw.Client().HGet(ctx, key, field).Result()
 }
 
@@ -385,6 +465,11 @@ func (client *shardClient) HGetInt(ctx context.Context, key, field string) (resu
 	raw, err := client.clients.Get(ctx)
 	if err != nil {
 		return result, err
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HGet(ctx, key, field).Int()
 	}
 
 	return raw.Client().HGet(ctx, key, field).Int()
@@ -402,6 +487,11 @@ func (client *shardClient) HGetBool(ctx context.Context, key, field string) (res
 		return result, err
 	}
 
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HGet(ctx, key, field).Bool()
+	}
+
 	return raw.Client().HGet(ctx, key, field).Bool()
 }
 
@@ -417,6 +507,11 @@ func (client *shardClient) HExist(ctx context.Context, key, field string) (exist
 		return exist, err
 	}
 
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HExists(ctx, key, field).Result()
+	}
+
 	return raw.Client().HExists(ctx, key, field).Result()
 }
 
@@ -426,6 +521,11 @@ func (client *shardClient) Scan(ctx context.Context, cursor uint64, pattern stri
 	raw, err := client.clients.Get(ctx)
 	if err != nil {
 		return keys, nextCursor, err
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.Scan(ctx, cursor, pattern, count).Result()
 	}
 
 	return raw.Client().Scan(ctx, cursor, pattern, count).Result()

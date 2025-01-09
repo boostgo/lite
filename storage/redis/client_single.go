@@ -58,6 +58,12 @@ func (client *singleClient) TxPipeline(_ context.Context) (redis.Pipeliner, erro
 
 func (client *singleClient) Keys(ctx context.Context, pattern string) (keys []string, err error) {
 	defer errs.Wrap(errType, &err, "Keys")
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.Keys(ctx, pattern).Result()
+	}
+
 	return client.client.Keys(ctx, pattern).Result()
 }
 
@@ -77,6 +83,11 @@ func (client *singleClient) Delete(ctx context.Context, keys ...string) (err err
 		return nil
 	}
 
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.Del(ctx, keys...).Err()
+	}
+
 	return client.client.Del(ctx, keys...).Err()
 }
 
@@ -85,6 +96,11 @@ func (client *singleClient) Dump(ctx context.Context, key string) (result string
 
 	if err = validateKey(key); err != nil {
 		return result, err
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.Dump(ctx, key).Result()
 	}
 
 	return client.client.Dump(ctx, key).Result()
@@ -105,6 +121,11 @@ func (client *singleClient) Rename(ctx context.Context, oldKey, newKey string) (
 			SetError(err)
 	}
 
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.Rename(ctx, oldKey, newKey).Err()
+	}
+
 	return client.client.Rename(ctx, oldKey, newKey).Err()
 }
 
@@ -113,6 +134,11 @@ func (client *singleClient) Refresh(ctx context.Context, key string, ttl time.Du
 
 	if err = validateKey(key); err != nil {
 		return err
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.Expire(ctx, key, ttl).Err()
 	}
 
 	return client.client.Expire(ctx, key, ttl).Err()
@@ -125,6 +151,11 @@ func (client *singleClient) RefreshAt(ctx context.Context, key string, at time.T
 		return err
 	}
 
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.ExpireAt(ctx, key, at).Err()
+	}
+
 	return client.client.ExpireAt(ctx, key, at).Err()
 }
 
@@ -135,7 +166,12 @@ func (client *singleClient) TTL(ctx context.Context, key string) (ttl time.Durat
 		return ttl, err
 	}
 
-	ttl, err = client.client.TTL(ctx, key).Result()
+	tx, ok := GetTx(ctx)
+	if ok {
+		ttl, err = tx.TTL(ctx, key).Result()
+	} else {
+		ttl, err = client.client.TTL(ctx, key).Result()
+	}
 	if err != nil {
 		return ttl, err
 	}
@@ -160,6 +196,11 @@ func (client *singleClient) Set(ctx context.Context, key string, value any, ttl 
 		expireAt = ttl[0]
 	}
 
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.Set(ctx, key, value, expireAt).Err()
+	}
+
 	return client.client.Set(ctx, key, value, expireAt).Err()
 }
 
@@ -170,7 +211,12 @@ func (client *singleClient) Get(ctx context.Context, key string) (result string,
 		return result, err
 	}
 
-	result, err = client.client.Get(ctx, key).Result()
+	tx, ok := GetTx(ctx)
+	if ok {
+		result, err = tx.Get(ctx, key).Result()
+	} else {
+		result, err = client.client.Get(ctx, key).Result()
+	}
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return result, errs.
@@ -192,6 +238,11 @@ func (client *singleClient) Exist(ctx context.Context, key string) (result int64
 		return result, err
 	}
 
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.Exists(ctx, key).Result()
+	}
+
 	return client.client.Exists(ctx, key).Result()
 }
 
@@ -202,7 +253,12 @@ func (client *singleClient) GetBytes(ctx context.Context, key string) (result []
 		return result, err
 	}
 
-	result, err = client.client.Get(ctx, key).Bytes()
+	tx, ok := GetTx(ctx)
+	if ok {
+		result, err = tx.Get(ctx, key).Bytes()
+	} else {
+		result, err = client.client.Get(ctx, key).Bytes()
+	}
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return result, errs.
@@ -224,7 +280,12 @@ func (client *singleClient) GetInt(ctx context.Context, key string) (result int,
 		return result, err
 	}
 
-	result, err = client.client.Get(ctx, key).Int()
+	tx, ok := GetTx(ctx)
+	if ok {
+		result, err = tx.Get(ctx, key).Int()
+	} else {
+		result, err = client.client.Get(ctx, key).Int()
+	}
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return result, errs.
@@ -247,7 +308,12 @@ func (client *singleClient) Parse(ctx context.Context, key string, export any) (
 	}
 
 	var result []byte
-	result, err = client.client.Get(ctx, key).Bytes()
+	tx, ok := GetTx(ctx)
+	if ok {
+		result, err = tx.Get(ctx, key).Bytes()
+	} else {
+		result, err = client.client.Get(ctx, key).Bytes()
+	}
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return errs.
@@ -269,6 +335,11 @@ func (client *singleClient) HSet(ctx context.Context, key string, value map[stri
 		return err
 	}
 
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HSet(ctx, key, value).Err()
+	}
+
 	return client.client.HSet(ctx, key, value).Err()
 }
 
@@ -277,6 +348,11 @@ func (client *singleClient) HGetAll(ctx context.Context, key string) (result map
 
 	if err = validateKey(key); err != nil {
 		return result, err
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HGetAll(ctx, key).Result()
 	}
 
 	return client.client.HGetAll(ctx, key).Result()
@@ -289,6 +365,11 @@ func (client *singleClient) HGet(ctx context.Context, key, field string) (result
 		return result, err
 	}
 
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HGet(ctx, key, field).Result()
+	}
+
 	return client.client.HGet(ctx, key, field).Result()
 }
 
@@ -297,6 +378,11 @@ func (client *singleClient) HGetInt(ctx context.Context, key, field string) (res
 
 	if err = validateKey(key); err != nil {
 		return result, err
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HGet(ctx, key, field).Int()
 	}
 
 	return client.client.HGet(ctx, key, field).Int()
@@ -309,6 +395,11 @@ func (client *singleClient) HGetBool(ctx context.Context, key, field string) (re
 		return result, err
 	}
 
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HGet(ctx, key, field).Bool()
+	}
+
 	return client.client.HGet(ctx, key, field).Bool()
 }
 
@@ -319,10 +410,21 @@ func (client *singleClient) HExist(ctx context.Context, key, field string) (exis
 		return exist, err
 	}
 
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HExists(ctx, key, field).Result()
+	}
+
 	return client.client.HExists(ctx, key, field).Result()
 }
 
 func (client *singleClient) Scan(ctx context.Context, cursor uint64, pattern string, count int64) (keys []string, nextCursor uint64, err error) {
 	defer errs.Wrap(errType, &err, "Scan")
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.Scan(ctx, cursor, pattern, count).Result()
+	}
+
 	return client.client.Scan(ctx, cursor, pattern, count).Result()
 }

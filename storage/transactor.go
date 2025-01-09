@@ -1,6 +1,9 @@
 package storage
 
-import "context"
+import (
+	"context"
+	"github.com/boostgo/lite/async"
+)
 
 const (
 	TransactionContextKey = "lite_tx"
@@ -31,4 +34,99 @@ func RewriteTx(original context.Context, toCopy context.Context) context.Context
 	}
 
 	return context.WithValue(toCopy, TransactionContextKey, tx)
+}
+
+type transactor struct {
+	transactors []Transactor
+}
+
+func NewTransactor(transactors ...Transactor) Transactor {
+	return &transactor{
+		transactors: transactors,
+	}
+}
+
+func (t *transactor) Begin(ctx context.Context) (Transaction, error) {
+	transactions := make([]Transaction, 0, len(t.transactors))
+	for _, tr := range t.transactors {
+		tx, err := tr.Begin(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		transactions = append(transactions, tx)
+	}
+
+	return newTransaction(transactions), nil
+}
+
+func (t *transactor) BeginCtx(ctx context.Context) (context.Context, error) {
+	//tasks := make([]async.Task, 0, len(t.transactors))
+	//for _, tr := range t.transactors {
+	//	tasks = append(tasks, func() error {
+	//		return tr.BeginCtx(ctx)
+	//	})
+	//}
+	//
+	//return async.WaitAll(tasks...)
+	// todo: impl BeginCtx
+	return nil, nil
+}
+
+func (t *transactor) CommitCtx(ctx context.Context) error {
+	tasks := make([]async.Task, 0, len(t.transactors))
+	for _, tr := range t.transactors {
+		tasks = append(tasks, func() error {
+			return tr.CommitCtx(ctx)
+		})
+	}
+
+	return async.WaitAll(tasks...)
+}
+
+func (t *transactor) RollbackCtx(ctx context.Context) error {
+	tasks := make([]async.Task, 0, len(t.transactors))
+	for _, tr := range t.transactors {
+		tasks = append(tasks, func() error {
+			return tr.RollbackCtx(ctx)
+		})
+	}
+
+	return async.WaitAll(tasks...)
+}
+
+type transaction struct {
+	transactions []Transaction
+}
+
+func (t *transaction) Context() context.Context {
+	return nil
+}
+
+func (t *transaction) Commit(ctx context.Context) error {
+	tasks := make([]async.Task, 0, len(t.transactions))
+	for _, tx := range t.transactions {
+		tasks = append(tasks, func() error {
+			return tx.Commit(ctx)
+		})
+	}
+
+	return async.WaitAll(tasks...)
+}
+
+func (t *transaction) Rollback(ctx context.Context) error {
+	tasks := make([]async.Task, 0, len(t.transactions))
+	for _, tx := range t.transactions {
+		tasks = append(tasks, func() error {
+			return tx.Rollback(ctx)
+		})
+	}
+
+	return async.WaitAll(tasks...)
+}
+
+func newTransaction(transactions []Transaction) Transaction {
+	return &transaction{
+		transactions: transactions,
+	}
 }
