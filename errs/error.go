@@ -3,6 +3,7 @@ package errs
 import (
 	"errors"
 	"github.com/boostgo/lite/list"
+	"github.com/boostgo/lite/types/str"
 	"github.com/boostgo/lite/types/to"
 	"strings"
 )
@@ -161,20 +162,17 @@ func (err *Error) Error() string {
 //
 // Method prints: types, messages and context
 func (err *Error) String() string {
-	builder := strings.Builder{}
-	builder.Grow(err.grow())
+	builder := str.NewBuilder(err.grow())
 
 	if len(err.errorTypes) > 0 {
-		builder.WriteString("[")
-		builder.WriteString(err.Type())
-		builder.WriteString("] ")
+		builder.WriteString("[", err.Type(), "] ")
 	}
+	
 	builder.WriteString(err.Message())
 
 	if err.innerError != nil {
 		innerMessage := err.innerError.Error()
-		builder.WriteString(": ")
-		builder.WriteString(innerMessage)
+		builder.WriteString(": ", innerMessage)
 	}
 
 	if err.context != nil && len(err.context) > 0 {
@@ -183,22 +181,17 @@ func (err *Error) String() string {
 			if key == "trace" {
 				trace, ok := value.([]string)
 				if !ok {
-					builder.WriteString("\n\t")
-					builder.WriteString(value.(string))
+					builder.WriteString("\n\t", value.(string))
 					continue
 				}
 
-				for _, traceLine := range trace {
-					builder.WriteString("\n\t")
-					builder.WriteString(traceLine)
-				}
+				builder.WriteString(list.Map(trace, func(line string) string {
+					return "\n\t" + line
+				})...)
 				continue
 			}
 
-			builder.WriteString(key)
-			builder.WriteString("=")
-			builder.WriteString(to.String(value))
-			builder.WriteString(";")
+			builder.WriteString(key, "=", to.String(value), ";")
 		}
 	}
 
