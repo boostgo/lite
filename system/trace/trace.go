@@ -7,7 +7,11 @@ import (
 )
 
 const (
-	key = "X-Lite-Trace-ID"
+	defaultKey = "X-Lite-Trace-ID"
+)
+
+var (
+	_key = defaultKey
 )
 
 var (
@@ -28,9 +32,14 @@ func AmIMaster() bool {
 	return _masterMode.Load()
 }
 
+// SetMasterKey sets new master key for any kind of resource (HTTP, Kafka, RMQ, etc...)
+func SetMasterKey(key string) {
+	_key = key
+}
+
 // Key returns trace id key from HTTP request, kafka/rmq message, etc...
 func Key() string {
-	return key
+	return _key
 }
 
 // Set sets trace id to new context
@@ -39,7 +48,7 @@ func Set(ctx context.Context, id string) context.Context {
 		return ctx
 	}
 
-	return context.WithValue(ctx, key, id)
+	return context.WithValue(ctx, _key, id)
 }
 
 // Get returns trace id from provided context
@@ -48,7 +57,7 @@ func Get(ctx context.Context) string {
 		return ""
 	}
 
-	traceID := ctx.Value(key)
+	traceID := ctx.Value(_key)
 	if traceID == nil {
 		return ""
 	}
@@ -74,7 +83,7 @@ func GetUUID(ctx context.Context) uuid.UUID {
 		return uuid.Nil
 	}
 
-	traceID := ctx.Value(key)
+	traceID := ctx.Value(_key)
 	if traceID == nil {
 		return uuid.Nil
 	}

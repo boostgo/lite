@@ -9,7 +9,7 @@ import (
 // GetKafka return request id from kafka message
 func GetKafka(message *sarama.ConsumerMessage) string {
 	for _, header := range message.Headers {
-		if to.String(header.Key) != key {
+		if to.String(header.Key) != _key {
 			continue
 		}
 
@@ -22,7 +22,7 @@ func GetKafka(message *sarama.ConsumerMessage) string {
 // GetKafkaCtx returns context with trace id from message
 func GetKafkaCtx(ctx context.Context, message *sarama.ConsumerMessage) context.Context {
 	for _, header := range message.Headers {
-		if to.String(header.Key) != key {
+		if to.String(header.Key) != _key {
 			continue
 		}
 
@@ -46,7 +46,7 @@ func SetKafka(ctx context.Context, messages ...*sarama.ProducerMessage) {
 	traceIdBlob := to.Bytes(traceID)
 	for i := 0; i < len(messages); i++ {
 		messages[i].Headers = append(messages[i].Headers, sarama.RecordHeader{
-			Key:   []byte(key),
+			Key:   []byte(_key),
 			Value: traceIdBlob,
 		})
 	}

@@ -12,9 +12,9 @@ func FromRequest(request *http.Request) string {
 		return ""
 	}
 
-	traceID := request.Header.Get(key)
+	traceID := request.Header.Get(_key)
 	if traceID == "" {
-		c, err := request.Cookie(key)
+		c, err := request.Cookie(_key)
 		if err == nil {
 			traceID = c.Value
 		}
@@ -29,7 +29,7 @@ func FromResponse(response *http.Response) string {
 		return ""
 	}
 
-	return response.Header.Get(key)
+	return response.Header.Get(_key)
 }
 
 // SetRequest sets trace id to HTTP request
@@ -38,7 +38,7 @@ func SetRequest(request *http.Request, traceID string) {
 		return
 	}
 
-	request.Header.Set(key, traceID)
+	request.Header.Set(_key, traceID)
 }
 
 // SetRequestCtx sets trace id from context to HTTP request
@@ -57,7 +57,7 @@ func SetEchoCtx(ctx echo.Context, traceID string) {
 		return
 	}
 
-	ctx.SetRequest(ctx.Request().WithContext(context.WithValue(ctx.Request().Context(), key, traceID)))
+	ctx.SetRequest(ctx.Request().WithContext(context.WithValue(ctx.Request().Context(), _key, traceID)))
 }
 
 // GetEchoCtx returns trace id from request in echo context

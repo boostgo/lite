@@ -12,7 +12,7 @@ func GetAMQP(message *amqp.Delivery) string {
 		return ""
 	}
 
-	traceID := message.Headers[key]
+	traceID := message.Headers[_key]
 	if traceID == nil {
 		return ""
 	}
@@ -34,7 +34,7 @@ func SetAmqp(table amqp.Table, ctx context.Context) {
 		return
 	}
 
-	table[key] = traceID
+	table[_key] = traceID
 }
 
 // SetAmqpCtx set trace id to RMQ headers table
@@ -44,6 +44,6 @@ func SetAmqpCtx(ctx context.Context, table amqp.Table) bool {
 		return false
 	}
 
-	table[key] = traceID
+	table[_key] = traceID
 	return true
 }
