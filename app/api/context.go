@@ -89,6 +89,7 @@ func Context(ctx echo.Context) context.Context {
 	return ctx.Request().Context()
 }
 
+// SetContext sets new context to echo.Context
 func SetContext(ctx echo.Context, native context.Context) {
 	ctx.SetRequest(ctx.Request().WithContext(native))
 }
