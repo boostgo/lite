@@ -89,6 +89,10 @@ func Context(ctx echo.Context) context.Context {
 	return ctx.Request().Context()
 }
 
+func SetContext(ctx echo.Context, native context.Context) {
+	ctx.SetRequest(ctx.Request().WithContext(native))
+}
+
 // File returns file as []byte (slice of bytes) from request by file name.
 //
 // Request body must be form data
