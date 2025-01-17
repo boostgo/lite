@@ -42,7 +42,18 @@ func Transaction(conn *sqlx.DB, transactionActions func(tx *sqlx.Tx) error) erro
 }
 
 func Atomic(ctx context.Context, conn *sqlx.DB, fn func(ctx context.Context) error) error {
-	tx, err := conn.Beginx()
+	var tx *sqlx.Tx
+	var ok bool
+	var err error
+
+	tx, ok = GetTx(ctx)
+	if ok {
+		return try.Try(func() error {
+			return fn(ctx)
+		})
+	}
+
+	tx, err = conn.Beginx()
 	if err != nil {
 		return err
 	}
