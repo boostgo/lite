@@ -66,6 +66,15 @@ func (rt *redisTransactor) Key() string {
 	return transactionKey
 }
 
+func (rt *redisTransactor) IsTx(ctx context.Context) bool {
+	if ctx == nil {
+		return false
+	}
+
+	_, ok := GetTx(ctx)
+	return ok
+}
+
 type redisTransaction struct {
 	tx        redis.Pipeliner
 	parentCtx context.Context

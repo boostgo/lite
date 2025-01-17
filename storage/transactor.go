@@ -11,6 +11,7 @@ import (
 // Reason to use this: hide from usecase/service layer of using "sql" or "mongo" database
 type Transactor interface {
 	Key() string
+	IsTx(ctx context.Context) bool
 	Begin(ctx context.Context) (Transaction, error)
 	BeginCtx(ctx context.Context) (context.Context, error)
 	CommitCtx(ctx context.Context) error
@@ -50,6 +51,16 @@ func (t *transactor) Key() string {
 	}), func(s string) string {
 		return s
 	})
+}
+
+func (t *transactor) IsTx(ctx context.Context) bool {
+	for _, tr := range t.transactors {
+		if tr.IsTx(ctx) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (t *transactor) Begin(ctx context.Context) (Transaction, error) {

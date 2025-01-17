@@ -69,6 +69,15 @@ func (st *sqlTransactor) RollbackCtx(ctx context.Context) error {
 	return tx.Rollback()
 }
 
+func (st *sqlTransactor) IsTx(ctx context.Context) bool {
+	if ctx == nil {
+		return false
+	}
+
+	_, ok := GetTx(ctx)
+	return ok
+}
+
 type sqlTransaction struct {
 	tx        *sqlx.Tx
 	parentCtx context.Context
