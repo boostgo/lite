@@ -414,11 +414,11 @@ func (request *Request) retryDo(method, url string, body ...any) (_ *Response, e
 		isLast := i == request.retryCount-1
 
 		request.response, err = request.do(method, url, body...)
-		if err != nil && isLast {
-			return nil, err
-		}
+		if err != nil {
+			if isLast {
+				return nil, err
+			}
 
-		if request.response == nil {
 			time.Sleep(request.retryWait)
 		}
 	}
