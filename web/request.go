@@ -413,31 +413,39 @@ func (request *Request) retryDo(method, url string, body ...any) (_ *Response, e
 	for i := 0; i < request.retryCount; i++ {
 		isLast := i == request.retryCount-1
 
-		request.response, err = request.do(method, url, body...)
-		if err != nil {
+		if err = request.do(method, url, body...); err != nil {
 			if isLast {
 				return nil, err
 			}
 
 			time.Sleep(request.retryWait)
+			continue
 		}
 	}
 
 	return request.response, nil
 }
 
-func (request *Request) do(method, url string, body ...any) (*Response, error) {
+func (request *Request) do(method, url string, body ...any) error {
 	logger := log.Context(request.ctx, "web.request")
 
 	var err error
 
 	if err = request.initRequest(method, url, body...); err != nil {
-		return nil, err
+		return err
 	}
 
 	request.resp, err = request.getClient().Do(request.req)
 	if err != nil {
-		return nil, err
+		blob, _ := io.ReadAll(request.resp.Body)
+		log.
+			Error(request.ctx).
+			Err(err).
+			Str("method", method).
+			Str("url", url).
+			Bytes("body", blob).
+			Msg("Request failed")
+		return err
 	}
 	defer func() {
 		if err = request.resp.Body.Close(); err != nil {
@@ -450,7 +458,7 @@ func (request *Request) do(method, url string, body ...any) (*Response, error) {
 	var respBlob []byte
 	respBlob, err = io.ReadAll(request.resp.Body)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	request.response.bodyBlob = respBlob
 
@@ -460,7 +468,7 @@ func (request *Request) do(method, url string, body ...any) (*Response, error) {
 		}
 	}
 
-	return request.response, nil
+	return nil
 }
 
 func (request *Request) logError(logger log.Logger, err error, msg string) {
