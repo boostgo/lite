@@ -5,6 +5,7 @@ import (
 	"github.com/boostgo/lite/errs"
 	"github.com/go-redsync/redsync/v4"
 	"github.com/go-redsync/redsync/v4/redis/goredis/v9"
+	"time"
 )
 
 const lockerErrType = "Redis Locker"
@@ -38,10 +39,15 @@ func MustLocker(client Client) *Locker {
 	return locker
 }
 
-func (locker *Locker) Lock(ctx context.Context, lockKey string) (mx Mutex, err error) {
+func (locker *Locker) Lock(ctx context.Context, lockKey string, expiresAfter ...time.Duration) (mx Mutex, err error) {
 	defer errs.Wrap(lockerErrType, &err, "Lock")
 
-	redisMx := locker.client.NewMutex(lockKey)
+	expiry := time.Second * 60
+	if len(expiresAfter) > 0 {
+		expiry = expiresAfter[0]
+	}
+
+	redisMx := locker.client.NewMutex(lockKey, redsync.WithExpiry(expiry))
 	mx = newLockMutex(redisMx)
 	if err = mx.Lock(ctx); err != nil {
 		return nil, err
