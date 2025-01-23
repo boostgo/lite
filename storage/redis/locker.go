@@ -38,9 +38,9 @@ func MustLocker(client Client) *Locker {
 	return locker
 }
 
-func (locker *Locker) lock(ctx context.Context, lockKey string) (mx Mutex, err error) {
-	defer errs.Wrap(lockerErrType, &err, "lock")
-	
+func (locker *Locker) Lock(ctx context.Context, lockKey string) (mx Mutex, err error) {
+	defer errs.Wrap(lockerErrType, &err, "Lock")
+
 	redisMx := locker.client.NewMutex(lockKey)
 	mx = newLockMutex(redisMx)
 	if err = mx.Lock(ctx); err != nil {
@@ -48,6 +48,13 @@ func (locker *Locker) lock(ctx context.Context, lockKey string) (mx Mutex, err e
 	}
 
 	return mx, nil
+}
+
+func (locker *Locker) Unlock(ctx context.Context, unlockKey string) (err error) {
+	defer errs.Wrap(lockerErrType, &err, "Unlock")
+
+	redisMx := locker.client.NewMutex(unlockKey)
+	return newLockMutex(redisMx).Unlock(ctx)
 }
 
 type lockMutex struct {
