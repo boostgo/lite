@@ -7,6 +7,7 @@ toolchain go1.22.3
 require (
 	github.com/IBM/sarama v1.43.2
 	github.com/go-playground/validator/v10 v10.22.0
+	github.com/go-redsync/redsync/v4 v4.13.0
 	github.com/golang-migrate/migrate/v4 v4.18.1
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jmoiron/sqlx v1.4.0
@@ -21,6 +22,7 @@ require (
 	go.mongodb.org/mongo-driver/v2 v2.0.0-beta2
 	golang.org/x/sync v0.8.0
 	golang.org/x/text v0.18.0
+	google.golang.org/grpc v1.64.1
 )
 
 require (
@@ -46,6 +48,8 @@ require (
 	github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	golang.org/x/tools v0.24.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240513163218-0867130af1f8 // indirect
+	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	olympos.io/encoding/edn v0.0.0-20201019073823-d3554ca0b0a3 // indirect
