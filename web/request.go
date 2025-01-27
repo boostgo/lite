@@ -437,7 +437,11 @@ func (request *Request) do(method, url string, body ...any) error {
 
 	request.resp, err = request.getClient().Do(request.req)
 	if err != nil {
-		blob, _ := io.ReadAll(request.resp.Body)
+		var blob []byte
+		if request.resp != nil {
+			blob, _ = io.ReadAll(request.resp.Body)
+		}
+
 		log.
 			Error(request.ctx).
 			Err(err).
