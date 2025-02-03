@@ -21,6 +21,10 @@ func SyncProducerOption() Option {
 	return func(config *sarama.Config) {
 		config.Producer.Return.Successes = true
 		config.Producer.Return.Errors = true
+		config.Producer.RequiredAcks = sarama.WaitForAll
+		config.Producer.Compression = sarama.CompressionSnappy
+		config.Producer.Retry.Max = 5
+		config.Producer.Partitioner = sarama.NewRandomPartitioner
 	}
 }
 
