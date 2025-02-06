@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"github.com/boostgo/lite/errs"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/trace"
@@ -401,15 +402,36 @@ func (request *Request) retryDo(method, url string, body ...any) (_ *Response, e
 		"body":   len(body) > 0 && body[0] != nil,
 	})
 
+	// block sending request
 	request.mx.Lock()
 	defer request.mx.Unlock()
 
+	// context is done
+	select {
+	case <-request.ctx.Done():
+		if err = request.ctx.Err(); err != nil {
+			return nil, errs.
+				New("Context is done and has error").
+				SetError(err)
+		}
+
+		return nil, errors.New("context is done")
+	default:
+	}
+
+	// context has error
+	if request.ctx.Err() != nil {
+		return nil, request.ctx.Err()
+	}
+
+	// set context timeout if provided
 	if request.timeout > 0 {
 		var cancel context.CancelFunc
 		request.ctx, cancel = context.WithTimeout(context.Background(), request.timeout)
 		defer cancel()
 	}
 
+	// run request with retries
 	for i := 0; i < request.retryCount; i++ {
 		isLast := i == request.retryCount-1
 
@@ -431,10 +453,12 @@ func (request *Request) do(method, url string, body ...any) error {
 
 	var err error
 
+	// create request object, if request does again it uses cached request (created before)
 	if err = request.initRequest(method, url, body...); err != nil {
 		return err
 	}
 
+	// do request
 	request.resp, err = request.getClient().Do(request.req)
 	if err != nil {
 		var blob []byte
@@ -457,8 +481,10 @@ func (request *Request) do(method, url string, body ...any) error {
 		}
 	}()
 
+	// build *web.Response object
 	request.response = newResponse(request, request.resp)
 
+	// parse response body
 	var respBlob []byte
 	respBlob, err = io.ReadAll(request.resp.Body)
 	if err != nil {
@@ -466,6 +492,7 @@ func (request *Request) do(method, url string, body ...any) error {
 	}
 	request.response.bodyBlob = respBlob
 
+	// try to parse response body and set to export
 	if request.export != nil {
 		if err = request.response.Parse(request.export); err != nil {
 			request.logError(logger, err, "Parse response body")
@@ -485,9 +512,11 @@ func (request *Request) logError(logger log.Logger, err error, msg string) {
 
 func (request *Request) getClient() *http.Client {
 	if request.client != nil {
+		// return provided client
 		return request.client
 	}
 
+	// return default client
 	return &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{

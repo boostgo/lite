@@ -6,6 +6,11 @@ import (
 	"io"
 )
 
+// BytesWriter request body parser implementation.
+//
+// Provide any type of request body and write is as bytes.
+//
+// By default, content type is "application/octet-stream". But possible to provide custom content type
 type BytesWriter interface {
 	io.Writer
 	ContentType() string
@@ -20,6 +25,7 @@ type bytesBuffer struct {
 	errType     string
 }
 
+// NewBytesWriter creates BytesWriter
 func NewBytesWriter() BytesWriter {
 	const (
 		defaultContentType = "application/octet-stream"

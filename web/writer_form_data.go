@@ -25,6 +25,7 @@ type formData struct {
 	errType string
 }
 
+// NewFormData creates FormDataWriter
 func NewFormData(initial ...map[string]any) FormDataWriter {
 	const errType = "Form Data Writer"
 
