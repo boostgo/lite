@@ -35,9 +35,7 @@ func ConsumerGroupOption(offset ...int64) Option {
 
 		config.Consumer.Offsets.AutoCommit.Enable = true
 		config.Consumer.Offsets.AutoCommit.Interval = time.Second
-
-		//config.Consumer.Group.Rebalance.GroupStrategies = append(
-		//	config.Consumer.Group.Rebalance.GroupStrategies, sarama.NewBalanceStrategyRoundRobin())
+		
 		config.Consumer.Fetch.Default = 1 << 20 // 1MB
 		config.Consumer.Fetch.Max = 10 << 20    // 10MB
 		config.ChannelBufferSize = 256
