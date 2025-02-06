@@ -128,6 +128,21 @@ func (err *Error) AddContext(key string, value any) *Error {
 	return err
 }
 
+// RemoveContext removes value from context map by provided key
+func (err *Error) RemoveContext(key string) *Error {
+	if key == "" {
+		return err
+	}
+
+	_, ok := err.context[key]
+	if !ok {
+		return err
+	}
+
+	delete(err.context, key)
+	return err
+}
+
 // InnerError returns inner error
 func (err *Error) InnerError() error {
 	return err.innerError
@@ -167,7 +182,7 @@ func (err *Error) String() string {
 	if len(err.errorTypes) > 0 {
 		builder.WriteString("[", err.Type(), "] ")
 	}
-	
+
 	builder.WriteString(err.Message())
 
 	if err.innerError != nil {
