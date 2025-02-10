@@ -1,8 +1,6 @@
 package api
 
 import (
-	"encoding/json"
-	"github.com/boostgo/lite/errs"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/trace"
 	"github.com/boostgo/lite/types/content"
@@ -22,30 +20,11 @@ import (
 //
 // If errors is custom and there is "trace" key in context, it will be ignored for outputError
 func Failure(ctx echo.Context, status int, err error) error {
-	const defaultErrorType = "ERROR"
-
 	// set trace ID
 	traceID := trace.Get(Context(ctx))
 	if traceID != "" {
 		ctx.Response().Header().Set(trace.Key(), traceID)
 		ctx.Response().Header().Set("X-Request-ID", traceID)
-	}
-
-	var output errorOutput
-	output.Status = statusFailure
-
-	// build/collect error output
-	custom, ok := errs.TryGet(err)
-	if ok {
-		output.Message = custom.Message()
-		output.Type = custom.Type()
-		output.Context = custom.Context()
-		if custom.InnerError() != nil {
-			output.Inner = custom.InnerError().Error()
-		}
-	} else {
-		output.Message = err.Error()
-		output.Type = defaultErrorType
 	}
 
 	log.
@@ -55,16 +34,8 @@ func Failure(ctx echo.Context, status int, err error) error {
 		Err(err).
 		Msg("Failure request")
 
-	// clear from trace
-	if output.Context != nil {
-		if _, traceExist := output.Context["trace"]; traceExist {
-			delete(output.Context, "trace")
-		}
-	}
-
 	// convert output object to bytes
-	outputBlob, _ := json.Marshal(output)
-	return ctx.JSONBlob(status, outputBlob)
+	return ctx.JSONBlob(status, WrapErrorBlob(err))
 }
 
 // Error is wrap function above [Failure] function with auto defining status code by provided error.
