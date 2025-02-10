@@ -1,7 +1,6 @@
 package api
 
 import (
-	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/trace"
 	"github.com/boostgo/lite/types/content"
 	"github.com/boostgo/lite/types/to"
@@ -26,13 +25,6 @@ func Failure(ctx echo.Context, status int, err error) error {
 		ctx.Response().Header().Set(trace.Key(), traceID)
 		ctx.Response().Header().Set("X-Request-ID", traceID)
 	}
-
-	log.
-		Context(Context(ctx), "API").
-		Error().
-		Int("status", status).
-		Err(err).
-		Msg("Failure request")
 
 	// convert output object to bytes
 	return ctx.JSONBlob(status, WrapErrorBlob(err))
