@@ -278,6 +278,29 @@ func (client *shardClient) Get(ctx context.Context, key string) (result string, 
 	return result, nil
 }
 
+func (client *shardClient) MGet(ctx context.Context, keys []string) (result []any, err error) {
+	defer errs.Wrap(errType, &err, "MGet")
+
+	validateKeys(keys)
+
+	raw, err := client.clients.Get(ctx)
+	if err != nil {
+		return result, err
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		result, err = tx.MGet(ctx, keys...).Result()
+	} else {
+		result, err = raw.Client().MGet(ctx, keys...).Result()
+	}
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
+}
+
 func (client *shardClient) Exist(ctx context.Context, key string) (result int64, err error) {
 	defer errs.Wrap(errType, &err, "Exist")
 

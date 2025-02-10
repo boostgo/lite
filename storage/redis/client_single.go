@@ -231,6 +231,11 @@ func (client *singleClient) Get(ctx context.Context, key string) (result string,
 	return result, nil
 }
 
+func (client *singleClient) MGet(ctx context.Context, keys []string) (result []any, err error) {
+	defer errs.Wrap(errType, &err, "MGet")
+	return client.client.MGet(ctx, keys...).Result()
+}
+
 func (client *singleClient) Exist(ctx context.Context, key string) (result int64, err error) {
 	defer errs.Wrap(errType, &err, "Exist")
 

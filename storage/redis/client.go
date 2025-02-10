@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 	"errors"
+	"github.com/boostgo/lite/list"
 	"github.com/redis/go-redis/v9"
 	"io"
 	"time"
@@ -30,6 +31,7 @@ type Client interface {
 	TTL(ctx context.Context, key string) (time.Duration, error)
 	Set(ctx context.Context, key string, value any, ttl ...time.Duration) error
 	Get(ctx context.Context, key string) (string, error)
+	MGet(ctx context.Context, keys []string) ([]any, error)
 	Exist(ctx context.Context, key string) (int64, error)
 	GetBytes(ctx context.Context, key string) ([]byte, error)
 	GetInt(ctx context.Context, key string) (int, error)
@@ -50,4 +52,10 @@ func validateKey(key string) error {
 	}
 
 	return nil
+}
+
+func validateKeys(keys []string) {
+	keys = list.Filter(keys, func(s string) bool {
+		return validateKey(s) != nil
+	})
 }
