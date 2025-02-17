@@ -19,9 +19,12 @@ import (
 var (
 	handler *echo.Echo
 	_debug  = atomic.Bool{}
+	_podID  string
 )
 
 func init() {
+	_podID = uuid.New().String()
+
 	handler = echo.New()
 
 	handler.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -142,6 +145,10 @@ func Run(address string, waitTime ...time.Duration) {
 			Msg("Graceful shutdown...")
 	})
 	life.Wait(waitTime...)
+}
+
+func PodID() string {
+	return _podID
 }
 
 type Router interface {
