@@ -62,19 +62,22 @@ func MustConnect(address string, port, db int, password string, opts ...Option) 
 // ShardConnect contain connection & it's key for shard client
 type ShardConnect interface {
 	Key() string
+	Conditions() []string
 	Client() redis.UniversalClient
 	Close() error
 }
 
 type shardConnect struct {
-	key    string
-	client redis.UniversalClient
+	key        string
+	conditions []string
+	client     redis.UniversalClient
 }
 
-func newShardConnect(key string, client redis.UniversalClient) ShardConnect {
+func newShardConnect(key string, conditions []string, client redis.UniversalClient) ShardConnect {
 	return &shardConnect{
-		key:    key,
-		client: client,
+		key:        key,
+		conditions: conditions,
+		client:     client,
 	}
 }
 
@@ -86,6 +89,14 @@ func (conn *shardConnect) Key() string {
 // Client return single client
 func (conn *shardConnect) Client() redis.UniversalClient {
 	return conn.client
+}
+
+func (conn *shardConnect) Conditions() []string {
+	if conn.conditions == nil {
+		return []string{}
+	}
+
+	return conn.conditions
 }
 
 func (conn *shardConnect) Close() error {
@@ -131,7 +142,7 @@ func ConnectShards(connectionStrings []ShardConnectConfig, selector ClientSelect
 			return nil, err
 		}
 
-		connections[idx] = newShardConnect(cs.Key, connection)
+		connections[idx] = newShardConnect(cs.Key, cs.Conditions, connection)
 	}
 
 	return newClients(connections, selector), nil

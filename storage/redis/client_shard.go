@@ -556,6 +556,7 @@ func (client *shardClient) Scan(ctx context.Context, cursor uint64, pattern stri
 
 type ShardClient interface {
 	Key() string
+	Conditions() []string
 	Client() redis.UniversalClient
 	Close() error
 }
