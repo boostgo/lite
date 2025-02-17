@@ -16,7 +16,7 @@ type ShardConnectConfig struct {
 	Address    string   `json:"address"`
 	Port       int      `json:"port"`
 	DB         int      `json:"db"`
-	Password   string   `json:"password" env:"REDIS_PASSWORD"`
+	Password   string   `json:"password"`
 	Conditions []string `json:"conditions"`
 }
 
