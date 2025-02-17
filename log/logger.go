@@ -40,25 +40,25 @@ func Debug(ctx ...context.Context) Event {
 	return newEvent(_logger.Debug(), ctx...)
 }
 
-// Info print log on debug level.
+// Info print log on info level.
 // Provided context use trace id
 func Info(ctx ...context.Context) Event {
 	return newEvent(_logger.Info(), ctx...)
 }
 
-// Warn print log on debug level.
+// Warn print log on warning level.
 // Provided context use trace id
 func Warn(ctx ...context.Context) Event {
 	return newEvent(_logger.Warn(), ctx...)
 }
 
-// Error print log on debug level.
+// Error print log on error level.
 // Provided context use trace id
 func Error(ctx ...context.Context) Event {
 	return newEvent(_logger.Error(), ctx...)
 }
 
-// Fatal print log on debug level.
+// Fatal print log on error level but with bool fatal=true.
 // Provided context use trace id.
 //
 // Call life.Cancel() method which call graceful shutdown
