@@ -53,6 +53,7 @@ type Connector struct {
 	username string
 	password string
 	database string
+	schema   string
 
 	binaryParameters bool
 }
@@ -92,6 +93,12 @@ func (connector *Connector) Database(database string) *Connector {
 	return connector
 }
 
+// Schema set schema name
+func (connector *Connector) Schema(schema string) *Connector {
+	connector.schema = schema
+	return connector
+}
+
 // BinaryParameters set binary_parameters=yes param
 func (connector *Connector) BinaryParameters() *Connector {
 	connector.binaryParameters = true
@@ -105,12 +112,18 @@ func (connector *Connector) Build() string {
 		binaryParameters = " binary_parameters=yes"
 	}
 
+	var schema string
+	if connector.schema != "" {
+		schema = " search_path=" + connector.schema
+	}
+
 	return fmt.Sprintf(
-		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable%s",
+		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable%s%s",
 		connector.host, connector.port,
 		connector.username, connector.password,
 		connector.database,
 		binaryParameters,
+		schema,
 	)
 }
 
