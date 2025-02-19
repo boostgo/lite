@@ -400,6 +400,10 @@ func Limit[T any](source []T, limit int) []T {
 		return []T{}
 	}
 
+	if limit > len(source) {
+		return source
+	}
+
 	return Sub(source, 0, limit)
 }
 
