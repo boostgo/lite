@@ -44,6 +44,7 @@ type Client interface {
 	HGetInt(ctx context.Context, key, field string) (int, error)
 	HGetBool(ctx context.Context, key, field string) (bool, error)
 	HExist(ctx context.Context, key, field string) (bool, error)
+	HDelete(ctx context.Context, key string, fields ...string) error
 }
 
 func validateKey(key string) error {

@@ -423,6 +423,21 @@ func (client *singleClient) HExist(ctx context.Context, key, field string) (exis
 	return client.client.HExists(ctx, key, field).Result()
 }
 
+func (client *singleClient) HDelete(ctx context.Context, key string, fields ...string) (err error) {
+	defer errs.Wrap(errType, &err, "HDelete")
+
+	if err = validateKey(key); err != nil {
+		return err
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HDel(ctx, key, fields...).Err()
+	}
+
+	return client.client.HDel(ctx, key, fields...).Err()
+}
+
 func (client *singleClient) Scan(ctx context.Context, cursor uint64, pattern string, count int64) (keys []string, nextCursor uint64, err error) {
 	defer errs.Wrap(errType, &err, "Scan")
 

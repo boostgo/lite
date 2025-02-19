@@ -538,6 +538,26 @@ func (client *shardClient) HExist(ctx context.Context, key, field string) (exist
 	return raw.Client().HExists(ctx, key, field).Result()
 }
 
+func (client *shardClient) HDelete(ctx context.Context, key string, fields ...string) (err error) {
+	defer errs.Wrap(errType, &err, "HDelete")
+
+	if err = validateKey(key); err != nil {
+		return err
+	}
+
+	raw, err := client.clients.Get(ctx)
+	if err != nil {
+		return err
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HDel(ctx, key, fields...).Err()
+	}
+
+	return raw.Client().HDel(ctx, key, fields...).Err()
+}
+
 func (client *shardClient) Scan(ctx context.Context, cursor uint64, pattern string, count int64) (keys []string, nextCursor uint64, err error) {
 	defer errs.Wrap(errType, &err, "Scan")
 
