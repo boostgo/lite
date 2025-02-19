@@ -52,11 +52,10 @@ func init() {
 }
 
 func TimeoutMiddleware(duration time.Duration) echo.MiddlewareFunc {
-	return middleware.TimeoutWithConfig(middleware.TimeoutConfig{
-		Skipper:      middleware.DefaultSkipper,
-		ErrorMessage: "Request reached timeout",
-		OnTimeoutRouteErrorHandler: func(err error, ctx echo.Context) {
-			_ = api.Error(
+	return middleware.ContextTimeoutWithConfig(middleware.ContextTimeoutConfig{
+		Skipper: middleware.DefaultSkipper,
+		ErrorHandler: func(err error, ctx echo.Context) error {
+			return api.Error(
 				ctx,
 				errs.
 					New("Request reached timeout").
