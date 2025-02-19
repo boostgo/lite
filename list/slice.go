@@ -390,6 +390,19 @@ func Sub[T any](source []T, start, end int) []T {
 	return sub
 }
 
+// Limit return "limited slice" by provided limit size.
+//
+// # If provided limit is 0 or slice is empty returns empty slice
+//
+// Important: function returns new slice
+func Limit[T any](source []T, limit int) []T {
+	if limit == 0 || source == nil || len(source) == 0 {
+		return []T{}
+	}
+
+	return Sub(source, 0, limit)
+}
+
 // JoinString build string from slice elements.
 //
 // Every element string builds from provided func.

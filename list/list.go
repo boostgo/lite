@@ -99,6 +99,8 @@ type OfSlice[T any] interface {
 	SliceAny(fn ...func(T) any) []any
 	// Sub return "sub slice" by provided start & end indexes.
 	Sub(start, end int) OfSlice[T]
+	// Limit return "limited slice" by provided limit size.
+	Limit(limit int) OfSlice[T]
 	// Map create new slice and fill with values by provided convert func
 	Map(fn func(T) T) []T
 	// MapErr create new slice and fill with values by provided convert func and may return error
@@ -246,6 +248,10 @@ func (os *ofSlice[T]) SliceAny(fn ...func(T) any) []any {
 
 func (os *ofSlice[T]) Sub(start, end int) OfSlice[T] {
 	return newOf(Sub(os.source, start, end))
+}
+
+func (os *ofSlice[T]) Limit(limit int) OfSlice[T] {
+	return newOf(Limit(os.source, limit))
 }
 
 func (os *ofSlice[T]) Map(fn func(T) T) []T {
