@@ -45,6 +45,20 @@ type Client interface {
 	HGetBool(ctx context.Context, key, field string) (bool, error)
 	HExist(ctx context.Context, key, field string) (bool, error)
 	HDelete(ctx context.Context, key string, fields ...string) error
+	HScan(ctx context.Context, key string, cursor uint64, pattern string, count int64) ([]string, uint64, error)
+	HIncrBy(ctx context.Context, key, field string, incr int64) error
+	HIncrByFloat(ctx context.Context, key, field string, incr float64) error
+	HKeys(ctx context.Context, key string) ([]string, error)
+	HLen(ctx context.Context, key string) (int64, error)
+	HMGet(ctx context.Context, key string, fields ...string) ([]any, error)
+	HMSet(ctx context.Context, key string, values ...any) error
+	HSetNX(ctx context.Context, key, field string, value any) error
+	HScanNoValues(ctx context.Context, key string, cursor uint64, pattern string, count int64) ([]string, uint64, error)
+	HVals(ctx context.Context, key string) ([]string, error)
+	HRandField(ctx context.Context, key string, count int) ([]string, error)
+	HRandFieldWithValues(ctx context.Context, key string, count int) ([]redis.KeyValue, error)
+	HExpire(ctx context.Context, key string, expiration time.Duration, fields ...string) ([]int64, error)
+	HTTL(ctx context.Context, key string, fields ...string) ([]int64, error)
 }
 
 func validateKey(key string) error {

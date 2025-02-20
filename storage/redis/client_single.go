@@ -423,6 +423,51 @@ func (client *singleClient) HExist(ctx context.Context, key, field string) (exis
 	return client.client.HExists(ctx, key, field).Result()
 }
 
+func (client *singleClient) HScan(ctx context.Context, key string, cursor uint64, pattern string, count int64) (keys []string, nextCursor uint64, err error) {
+	defer errs.Wrap(errType, &err, "HScan")
+
+	if err = validateKey(key); err != nil {
+		return keys, nextCursor, err
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HScan(ctx, key, cursor, pattern, count).Result()
+	}
+
+	return client.client.HScan(ctx, key, cursor, pattern, count).Result()
+}
+
+func (client *singleClient) HIncrBy(ctx context.Context, key, field string, incr int64) (err error) {
+	defer errs.Wrap(errType, &err, "HIncrBy")
+
+	if err = validateKey(key); err != nil {
+		return err
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HIncrBy(ctx, key, field, incr).Err()
+	}
+
+	return client.client.HIncrBy(ctx, key, field, incr).Err()
+}
+
+func (client *singleClient) HIncrByFloat(ctx context.Context, key, field string, incr float64) (err error) {
+	defer errs.Wrap(errType, &err, "HIncrByFloat")
+
+	if err = validateKey(key); err != nil {
+		return err
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HIncrByFloat(ctx, key, field, incr).Err()
+	}
+
+	return client.client.HIncrByFloat(ctx, key, field, incr).Err()
+}
+
 func (client *singleClient) HDelete(ctx context.Context, key string, fields ...string) (err error) {
 	defer errs.Wrap(errType, &err, "HDelete")
 
@@ -438,6 +483,89 @@ func (client *singleClient) HDelete(ctx context.Context, key string, fields ...s
 	return client.client.HDel(ctx, key, fields...).Err()
 }
 
+func (client *singleClient) HKeys(ctx context.Context, key string) (keys []string, err error) {
+	defer errs.Wrap(errType, &err, "HKeys")
+
+	if err = validateKey(key); err != nil {
+		return keys, err
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HKeys(ctx, key).Result()
+	}
+
+	return client.client.HKeys(ctx, key).Result()
+}
+
+func (client *singleClient) HLen(ctx context.Context, key string) (length int64, err error) {
+	defer errs.Wrap(errType, &err, "HLen")
+
+	if err = validateKey(key); err != nil {
+		return length, err
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HLen(ctx, key).Result()
+	}
+
+	return client.client.HLen(ctx, key).Result()
+}
+
+func (client *singleClient) HMGet(ctx context.Context, key string, fields ...string) (result []any, err error) {
+	defer errs.Wrap(errType, &err, "HMGet")
+
+	if len(fields) == 0 {
+		return []any{}, nil
+	}
+
+	if err = validateKey(key); err != nil {
+		return result, err
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HMGet(ctx, key, fields...).Result()
+	}
+
+	return client.client.HMGet(ctx, key, fields...).Result()
+}
+
+func (client *singleClient) HMSet(ctx context.Context, key string, values ...any) (err error) {
+	defer errs.Wrap(errType, &err, "HMSet")
+
+	if len(values) == 0 {
+		return nil
+	}
+
+	if err = validateKey(key); err != nil {
+		return err
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HMSet(ctx, key, values...).Err()
+	}
+
+	return client.client.HMSet(ctx, key, values...).Err()
+}
+
+func (client *singleClient) HSetNX(ctx context.Context, key, field string, value any) (err error) {
+	defer errs.Wrap(errType, &err, "HSetNX")
+
+	if err = validateKey(key); err != nil {
+		return err
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HSetNX(ctx, key, field, value).Err()
+	}
+
+	return client.client.HSetNX(ctx, key, field, value).Err()
+}
+
 func (client *singleClient) Scan(ctx context.Context, cursor uint64, pattern string, count int64) (keys []string, nextCursor uint64, err error) {
 	defer errs.Wrap(errType, &err, "Scan")
 
@@ -447,4 +575,103 @@ func (client *singleClient) Scan(ctx context.Context, cursor uint64, pattern str
 	}
 
 	return client.client.Scan(ctx, cursor, pattern, count).Result()
+}
+
+func (client *singleClient) HScanNoValues(ctx context.Context, key string, cursor uint64, pattern string, count int64) (keys []string, nextCursor uint64, err error) {
+	defer errs.Wrap(errType, &err, "HScaNoValues")
+
+	if err = validateKey(key); err != nil {
+		return keys, cursor, err
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HScanNoValues(ctx, key, cursor, pattern, count).Result()
+	}
+
+	return client.client.HScanNoValues(ctx, key, cursor, pattern, count).Result()
+}
+
+func (client *singleClient) HVals(ctx context.Context, key string) (values []string, err error) {
+	defer errs.Wrap(errType, &err, "HVals")
+
+	if err = validateKey(key); err != nil {
+		return values, err
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HVals(ctx, key).Result()
+	}
+
+	return client.client.HVals(ctx, key).Result()
+}
+
+func (client *singleClient) HRandField(ctx context.Context, key string, count int) (keys []string, err error) {
+	defer errs.Wrap(errType, &err, "HRandField")
+
+	if err = validateKey(key); err != nil {
+		return keys, err
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HRandField(ctx, key, count).Result()
+	}
+
+	return client.client.HRandField(ctx, key, count).Result()
+}
+
+func (client *singleClient) HRandFieldWithValues(ctx context.Context, key string, count int) (values []redis.KeyValue, err error) {
+	defer errs.Wrap(errType, &err, "HRandFieldWithValues")
+
+	if err = validateKey(key); err != nil {
+		return values, err
+
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HRandFieldWithValues(ctx, key, count).Result()
+	}
+
+	return client.client.HRandFieldWithValues(ctx, key, count).Result()
+}
+
+func (client *singleClient) HExpire(ctx context.Context, key string, expiration time.Duration, fields ...string) (states []int64, err error) {
+	defer errs.Wrap(errType, &err, "HExpire")
+
+	if len(fields) == 0 {
+		return states, nil
+	}
+
+	if err = validateKey(key); err != nil {
+		return states, err
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HExpire(ctx, key, expiration, fields...).Result()
+	}
+
+	return client.client.HExpire(ctx, key, expiration, fields...).Result()
+}
+
+func (client *singleClient) HTTL(ctx context.Context, key string, fields ...string) (ttls []int64, err error) {
+	defer errs.Wrap(errType, &err, "HTTL")
+
+	if len(fields) == 0 {
+		return ttls, nil
+	}
+
+	if err = validateKey(key); err != nil {
+		return ttls, err
+	}
+
+	tx, ok := GetTx(ctx)
+	if ok {
+		return tx.HTTL(ctx, key, fields...).Result()
+	}
+
+	return client.client.HTTL(ctx, key, fields...).Result()
 }
