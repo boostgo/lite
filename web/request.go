@@ -443,6 +443,9 @@ func (request *Request) retryDo(method, url string, body ...any) (_ *Response, e
 			time.Sleep(request.retryWait)
 			continue
 		}
+
+		// break retry cycle if request was success
+		break
 	}
 
 	return request.response, nil
