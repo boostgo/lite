@@ -81,7 +81,7 @@ type Logger interface {
 	// Error print log on error level.
 	// Provided context use trace id
 	Error() Event
-	// Fatal print log on fatal level.
+	// Fatal print log on error level but with bool fatal=true.
 	// Provided context use trace id.
 	//
 	// Call life.Cancel() method which call graceful shutdown

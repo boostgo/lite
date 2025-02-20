@@ -594,44 +594,44 @@ func (client *shardClient) Scan(ctx context.Context, cursor uint64, pattern stri
 	return raw.Client().Scan(ctx, cursor, pattern, count).Result()
 }
 
-func (client *shardClient) HIncrBy(ctx context.Context, key, field string, incr int64) (err error) {
+func (client *shardClient) HIncrBy(ctx context.Context, key, field string, incr int64) (value int64, err error) {
 	defer errs.Wrap(errType, &err, "HIncrBy")
 
 	if err = validateKey(key); err != nil {
-		return err
+		return value, err
 	}
 
 	raw, err := client.clients.Get(ctx)
 	if err != nil {
-		return err
+		return value, err
 	}
 
 	tx, ok := GetTx(ctx)
 	if ok {
-		return tx.HIncrBy(ctx, key, field, incr).Err()
+		return tx.HIncrBy(ctx, key, field, incr).Result()
 	}
 
-	return raw.Client().HIncrBy(ctx, key, field, incr).Err()
+	return raw.Client().HIncrBy(ctx, key, field, incr).Result()
 }
 
-func (client *shardClient) HIncrByFloat(ctx context.Context, key, field string, incr float64) (err error) {
+func (client *shardClient) HIncrByFloat(ctx context.Context, key, field string, incr float64) (value float64, err error) {
 	defer errs.Wrap(errType, &err, "HIncrByFloat")
 
 	if err = validateKey(key); err != nil {
-		return err
+		return value, err
 	}
 
 	raw, err := client.clients.Get(ctx)
 	if err != nil {
-		return err
+		return value, err
 	}
 
 	tx, ok := GetTx(ctx)
 	if ok {
-		return tx.HIncrByFloat(ctx, key, field, incr).Err()
+		return tx.HIncrByFloat(ctx, key, field, incr).Result()
 	}
 
-	return raw.Client().HIncrByFloat(ctx, key, field, incr).Err()
+	return raw.Client().HIncrByFloat(ctx, key, field, incr).Result()
 }
 
 func (client *shardClient) HKeys(ctx context.Context, key string) (keys []string, err error) {

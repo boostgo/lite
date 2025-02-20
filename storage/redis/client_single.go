@@ -438,34 +438,34 @@ func (client *singleClient) HScan(ctx context.Context, key string, cursor uint64
 	return client.client.HScan(ctx, key, cursor, pattern, count).Result()
 }
 
-func (client *singleClient) HIncrBy(ctx context.Context, key, field string, incr int64) (err error) {
+func (client *singleClient) HIncrBy(ctx context.Context, key, field string, incr int64) (value int64, err error) {
 	defer errs.Wrap(errType, &err, "HIncrBy")
 
 	if err = validateKey(key); err != nil {
-		return err
+		return value, err
 	}
 
 	tx, ok := GetTx(ctx)
 	if ok {
-		return tx.HIncrBy(ctx, key, field, incr).Err()
+		return tx.HIncrBy(ctx, key, field, incr).Result()
 	}
 
-	return client.client.HIncrBy(ctx, key, field, incr).Err()
+	return client.client.HIncrBy(ctx, key, field, incr).Result()
 }
 
-func (client *singleClient) HIncrByFloat(ctx context.Context, key, field string, incr float64) (err error) {
+func (client *singleClient) HIncrByFloat(ctx context.Context, key, field string, incr float64) (value float64, err error) {
 	defer errs.Wrap(errType, &err, "HIncrByFloat")
 
 	if err = validateKey(key); err != nil {
-		return err
+		return value, err
 	}
 
 	tx, ok := GetTx(ctx)
 	if ok {
-		return tx.HIncrByFloat(ctx, key, field, incr).Err()
+		return tx.HIncrByFloat(ctx, key, field, incr).Result()
 	}
 
-	return client.client.HIncrByFloat(ctx, key, field, incr).Err()
+	return client.client.HIncrByFloat(ctx, key, field, incr).Result()
 }
 
 func (client *singleClient) HDelete(ctx context.Context, key string, fields ...string) (err error) {
