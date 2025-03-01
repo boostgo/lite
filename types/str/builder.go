@@ -86,3 +86,20 @@ func (builder *Builder) WriteFormat(format string, args ...any) *Builder {
 	_, _ = fmt.Fprintf(builder.builder, format, args...)
 	return builder
 }
+
+func String(s ...string) string {
+	var grow int
+	for _, v := range s {
+		grow += len(v)
+	}
+
+	return NewBuilder(grow).
+		WriteString(s...).
+		String()
+}
+
+func Format(format string, args ...any) string {
+	return NewBuilder().
+		WriteFormat(format, args...).
+		String()
+}
