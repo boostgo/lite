@@ -2,22 +2,22 @@ package gateway
 
 import (
 	"encoding/json"
-	"github.com/boostgo/lite/fs"
+	"os"
 )
 
 // ReadServices reads [Service] slice from .json file.
 func ReadServices(path string) ([]Service, error) {
 	type routeView struct {
-		Method       string `json:"method"`
-		MatchPath    string `json:"match_path"`
-		RedirectPath string `json:"redirect_path"`
+		Method       string `json:"method" yaml:"method"`
+		MatchPath    string `json:"match_path" yaml:"matchPath"`
+		RedirectPath string `json:"redirect_path" yaml:"redirectPath"`
 	}
 	type serviceView struct {
-		BaseURL string      `json:"base_url"`
-		Routes  []routeView `json:"routes"`
+		BaseURL string      `json:"base_url" yaml:"baseUrl"`
+		Routes  []routeView `json:"routes" yaml:"routes"`
 	}
 
-	file, err := fs.FileRead(path)
+	file, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}

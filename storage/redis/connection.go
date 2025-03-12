@@ -12,12 +12,12 @@ import (
 type Option func(options *redis.Options)
 
 type ShardConnectConfig struct {
-	Key        string   `json:"key"`
-	Address    string   `json:"address"`
-	Port       int      `json:"port"`
-	DB         int      `json:"db"`
-	Password   string   `json:"password"`
-	Conditions []string `json:"conditions"`
+	Key        string   `json:"key" yaml:"key"`
+	Address    string   `json:"address" yaml:"address"`
+	Port       int      `json:"port" yaml:"port"`
+	DB         int      `json:"db" yaml:"db"`
+	Password   string   `json:"password" yaml:"password"`
+	Conditions []string `json:"conditions" yaml:"conditions"`
 }
 
 type ConnectionConfig struct {
