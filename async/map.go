@@ -92,3 +92,8 @@ func (am *Map[K, V]) Each(fn func(key K, value V) bool) *Map[K, V] {
 
 	return am
 }
+
+// Map returns inner map
+func (am *Map[K, V]) Map() map[K]V {
+	return am.data
+}
