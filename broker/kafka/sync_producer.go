@@ -106,6 +106,13 @@ func (producer *SyncProducer) Produce(ctx context.Context, messages ...*sarama.P
 
 	trace.SetKafka(ctx, messages...)
 
+	tx, txOk := getTx(ctx)
+	if txOk {
+		if addMessagesToTx(tx, messages) {
+			return nil
+		}
+	}
+
 	if err := producer.producer.SendMessages(messages); err != nil {
 		var pErrs sarama.ProducerErrors
 		if ok := errors.As(err, &pErrs); ok {
