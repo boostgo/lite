@@ -4,13 +4,15 @@ import (
 	"context"
 	"github.com/IBM/sarama"
 	"github.com/boostgo/lite/storage"
+	"github.com/boostgo/lite/types/to"
 )
 
 var _ storage.Transaction = new(kafkaTransaction)
 var _ storage.Transactor = new(kafkaTransactor)
 
 const (
-	txKey = "kafka_tx"
+	txKey   = "kafka_tx"
+	noTxKey = "kafka_no_tx"
 )
 
 type kafkaTransactor struct {
@@ -105,7 +107,16 @@ func (tx *kafkaTransaction) Rollback(_ context.Context) error {
 	return nil
 }
 
+func NoTxContext(ctx context.Context) context.Context {
+	return context.WithValue(ctx, noTxKey, true)
+}
+
 func getTx(ctx context.Context) (storage.Transaction, bool) {
+	noTx := ctx.Value(noTxKey)
+	if noTx != nil && to.Bool(noTx) {
+		return nil, false
+	}
+
 	txObject := ctx.Value(txKey)
 	if txObject == nil {
 		return nil, false
