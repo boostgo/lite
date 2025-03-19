@@ -12,12 +12,14 @@ import (
 
 type httpCacheDistributor struct {
 	client  Client
+	prefix  string
 	errType string
 }
 
-func NewHttpCacheDistributor(client Client) api.HttpCacheDistributor {
+func NewHttpCacheDistributor(client Client, prefix string) api.HttpCacheDistributor {
 	return &httpCacheDistributor{
 		client:  client,
+		prefix:  prefix,
 		errType: "Redis HTTP Cache Distributor",
 	}
 }
@@ -48,7 +50,7 @@ func (distributor *httpCacheDistributor) generateKey(request *http.Request) stri
 		url = url[1:]
 	}
 
-	return str.String(str.Replace(url, map[string]string{
+	return str.String(distributor.prefix, str.Replace(url, map[string]string{
 		"/": "_",
 		"?": "-",
 		"=": "_",
