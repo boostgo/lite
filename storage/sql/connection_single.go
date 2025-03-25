@@ -26,6 +26,9 @@ const (
 	ChDriver  = "clickhouse"
 )
 
+// RegisterDriver sql package wrap for sql.Register function.
+//
+// For simple usage of common pkg names (sql)
 func RegisterDriver(driverName string, driver driver.Driver) {
 	sql.Register(driverName, driver)
 }
@@ -87,6 +90,7 @@ func MustConnect(
 	return connection
 }
 
+// MaxConnectionsOption sets max open & idle connections
 func MaxConnectionsOption(open, idle int) func(conn *sqlx.DB) {
 	return func(conn *sqlx.DB) {
 		conn.SetMaxOpenConns(open)
@@ -94,6 +98,7 @@ func MaxConnectionsOption(open, idle int) func(conn *sqlx.DB) {
 	}
 }
 
+// MaxTimeOption sets connection max lifetime & max idle time settings
 func MaxTimeOption(lifetime, idle time.Duration) func(conn *sqlx.DB) {
 	return func(conn *sqlx.DB) {
 		conn.SetConnMaxLifetime(lifetime)
@@ -184,26 +189,25 @@ func (connector *Connector) Timeout(timeout time.Duration) *Connector {
 	return connector
 }
 
+// MaxOpenConnections set max open connections option for connection setting
 func (connector *Connector) MaxOpenConnections(maxOpenConnections int) *Connector {
 	connector.maxOpenConnections = maxOpenConnections
 	return connector
 }
 
+// MaxIdleConnections set max idle connections option for connection setting
 func (connector *Connector) MaxIdleConnections(maxIdleConnections int) *Connector {
 	connector.maxIdleConnections = maxIdleConnections
 	return connector
 }
 
-func (connector *Connector) MaxConnLifetime(maxConnLifetime time.Duration) *Connector {
-	connector.maxConnLifetime = maxConnLifetime
-	return connector
-}
-
+// MaxIdleTime set max idle time option for connection setting
 func (connector *Connector) MaxIdleTime(maxIdleTime time.Duration) *Connector {
 	connector.maxIdleTime = maxIdleTime
 	return connector
 }
 
+// ConnectionMaxLifetime set max connection lifetime option for connection setting
 func (connector *Connector) ConnectionMaxLifetime(connectionMaxLifetime time.Duration) *Connector {
 	connector.maxConnLifetime = connectionMaxLifetime
 	return connector
@@ -268,6 +272,7 @@ func (connector *Connector) MustConnect(
 	)
 }
 
+// ConnectionString returns built connection string by provided params for sqlx lib
 func ConnectionString(
 	host string,
 	port int,
