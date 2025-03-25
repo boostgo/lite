@@ -5,18 +5,26 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
+	"github.com/lib/pq"
+	"github.com/mailru/go-clickhouse"
 	"time"
 
 	"github.com/boostgo/lite/log"
-	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
 )
 
 func init() {
 	// register drivers
-	//sql.Register("postgres", &pq.Driver{}) // !!! no need, lib/pq driver imports automatically by "init" func
-	sql.Register("pgx", stdlib.GetDefaultDriver())
+	pq.QuoteIdentifier("") // call package pq to register pq driver
+	//sql.Register("pgx", stdlib.GetDefaultDriver())
+	clickhouse.Map("") // call package clickhouse to register ch driver
 }
+
+const (
+	PqDriver  = "postgres"
+	PgxDriver = "pgx"
+	ChDriver  = "clickhouse"
+)
 
 func RegisterDriver(driverName string, driver driver.Driver) {
 	sql.Register(driverName, driver)
