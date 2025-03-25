@@ -3,6 +3,8 @@ package sql
 import (
 	"context"
 	"database/sql"
+	"time"
+	
 	"github.com/boostgo/lite/errs"
 	"github.com/boostgo/lite/storage"
 	"github.com/jmoiron/sqlx"
@@ -48,7 +50,13 @@ func (conn *shardConnect) Close() error {
 }
 
 // ConnectShards connect all provided connections and create Connections object
-func ConnectShards(connectionStrings []ShardConnectString, selector ConnectionSelector, options ...func(connection *sqlx.DB)) (*Connections, error) {
+func ConnectShards(
+	driverName string,
+	connectionStrings []ShardConnectString,
+	selector ConnectionSelector,
+	timeout time.Duration,
+	options ...func(connection *sqlx.DB),
+) (*Connections, error) {
 	// validate for connection key unique and for empty
 	// also, validate for empty connection string
 	keys := make(map[string]struct{}, len(connectionStrings))
@@ -75,7 +83,7 @@ func ConnectShards(connectionStrings []ShardConnectString, selector ConnectionSe
 	// connect every shard
 	connections := make([]ShardConnect, len(connectionStrings))
 	for idx, cs := range connectionStrings {
-		connection, err := Connect(cs.ConnectionString, options...)
+		connection, err := Connect(driverName, cs.ConnectionString, timeout, options...)
 		if err != nil {
 			return nil, err
 		}
@@ -87,8 +95,13 @@ func ConnectShards(connectionStrings []ShardConnectString, selector ConnectionSe
 }
 
 // MustConnectShards calls ConnectShards and if error catch throws panic
-func MustConnectShards(connectionStrings []ShardConnectString, selector ConnectionSelector, options ...func(connection *sqlx.DB)) *Connections {
-	connections, err := ConnectShards(connectionStrings, selector, options...)
+func MustConnectShards(
+	driverName string,
+	connectionStrings []ShardConnectString,
+	selector ConnectionSelector,
+	timeout time.Duration,
+	options ...func(connection *sqlx.DB)) *Connections {
+	connections, err := ConnectShards(driverName, connectionStrings, selector, timeout, options...)
 	if err != nil {
 		panic(err)
 	}

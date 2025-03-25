@@ -1,18 +1,36 @@
 package sql
 
 import (
+	"context"
+	"database/sql"
+	"database/sql/driver"
 	"fmt"
-	"github.com/boostgo/lite/log"
-	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
 	"time"
+
+	"github.com/boostgo/lite/log"
+	"github.com/jackc/pgx/v5/stdlib"
+	"github.com/jmoiron/sqlx"
 )
+
+func init() {
+	// register drivers
+	//sql.Register("postgres", &pq.Driver{}) // !!! no need, lib/pq driver imports automatically by "init" func
+	sql.Register("pgx", stdlib.GetDefaultDriver())
+}
+
+func RegisterDriver(driverName string, driver driver.Driver) {
+	sql.Register(driverName, driver)
+}
 
 // Connect to the database.
 //
 // "options" can override default settings
-func Connect(connectionString string, options ...func(connection *sqlx.DB)) (*sqlx.DB, error) {
-	connection, err := sqlx.Open("postgres", connectionString)
+func Connect(
+	driverName, connectionString string,
+	timeout time.Duration,
+	options ...func(connection *sqlx.DB),
+) (*sqlx.DB, error) {
+	connection, err := sqlx.Open(driverName, connectionString)
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +47,14 @@ func Connect(connectionString string, options ...func(connection *sqlx.DB)) (*sq
 	}
 
 	// make ping
-	if err = connection.Ping(); err != nil {
+	ctx := context.Background()
+	if timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel()
+	}
+
+	if err = connection.PingContext(ctx); err != nil {
 		return nil, err
 	}
 
@@ -37,30 +62,70 @@ func Connect(connectionString string, options ...func(connection *sqlx.DB)) (*sq
 }
 
 // MustConnect calls Connect and if err catch throws panic
-func MustConnect(connectionString string, options ...func(connection *sqlx.DB)) *sqlx.DB {
-	connection, err := Connect(connectionString, options...)
+func MustConnect(
+	driverName, connectionString string,
+	timeout time.Duration,
+	options ...func(connection *sqlx.DB),
+) *sqlx.DB {
+	connection, err := Connect(driverName, connectionString, timeout, options...)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Connect to Database").Namespace("storage.sql")
+		log.
+			Fatal().
+			Namespace("storage.sql").
+			Err(err).
+			Msg("Connect to Database")
 	}
 
 	return connection
 }
 
+func MaxConnectionsOption(open, idle int) func(conn *sqlx.DB) {
+	return func(conn *sqlx.DB) {
+		conn.SetMaxOpenConns(open)
+		conn.SetMaxIdleConns(idle)
+	}
+}
+
+func MaxTimeOption(lifetime, idle time.Duration) func(conn *sqlx.DB) {
+	return func(conn *sqlx.DB) {
+		conn.SetConnMaxLifetime(lifetime)
+		conn.SetConnMaxIdleTime(idle)
+	}
+}
+
 // Connector helper for creating connection
 type Connector struct {
-	host     string
-	port     int
-	username string
-	password string
-	database string
-	schema   string
-
+	host             string
+	port             int
+	username         string
+	password         string
+	database         string
+	schema           string
 	binaryParameters bool
+
+	timeout time.Duration
+
+	maxOpenConnections int
+	maxIdleConnections int
+	maxConnLifetime    time.Duration
+	maxIdleTime        time.Duration
 }
 
 // NewConnector creates Connector object
 func NewConnector() *Connector {
-	return &Connector{}
+	const (
+		defaultMaxOpenConnections = 10
+		defaultMaxIdleConnections = 10
+		defaultMaxConnLifetime    = time.Second * 10
+		defaultMaxIdleTime        = time.Second * 10
+	)
+
+	return &Connector{
+		maxOpenConnections: defaultMaxOpenConnections,
+		maxIdleConnections: defaultMaxIdleConnections,
+		maxConnLifetime:    defaultMaxConnLifetime,
+		maxIdleTime:        defaultMaxIdleTime,
+	}
 }
 
 // Host set host of database
@@ -100,8 +165,39 @@ func (connector *Connector) Schema(schema string) *Connector {
 }
 
 // BinaryParameters set binary_parameters=yes param
-func (connector *Connector) BinaryParameters() *Connector {
-	connector.binaryParameters = true
+func (connector *Connector) BinaryParameters(binaryParameters bool) *Connector {
+	connector.binaryParameters = binaryParameters
+	return connector
+}
+
+// Timeout set timeout for connect & ping (via [context.Context])
+func (connector *Connector) Timeout(timeout time.Duration) *Connector {
+	connector.timeout = timeout
+	return connector
+}
+
+func (connector *Connector) MaxOpenConnections(maxOpenConnections int) *Connector {
+	connector.maxOpenConnections = maxOpenConnections
+	return connector
+}
+
+func (connector *Connector) MaxIdleConnections(maxIdleConnections int) *Connector {
+	connector.maxIdleConnections = maxIdleConnections
+	return connector
+}
+
+func (connector *Connector) MaxConnLifetime(maxConnLifetime time.Duration) *Connector {
+	connector.maxConnLifetime = maxConnLifetime
+	return connector
+}
+
+func (connector *Connector) MaxIdleTime(maxIdleTime time.Duration) *Connector {
+	connector.maxIdleTime = maxIdleTime
+	return connector
+}
+
+func (connector *Connector) ConnectionMaxLifetime(connectionMaxLifetime time.Duration) *Connector {
+	connector.maxConnLifetime = connectionMaxLifetime
 	return connector
 }
 
@@ -133,11 +229,50 @@ func (connector *Connector) String() string {
 }
 
 // Connect calls Build method and call Connect function
-func (connector *Connector) Connect(options ...func(connection *sqlx.DB)) (*sqlx.DB, error) {
-	return Connect(connector.Build(), options...)
+func (connector *Connector) Connect(
+	driverName string,
+	options ...func(connection *sqlx.DB),
+) (*sqlx.DB, error) {
+	options = append(
+		options,
+		MaxConnectionsOption(connector.maxOpenConnections, connector.maxIdleConnections),
+		MaxTimeOption(connector.maxConnLifetime, connector.maxIdleTime),
+	)
+
+	return Connect(
+		driverName,
+		connector.Build(),
+		connector.timeout,
+		options...,
+	)
 }
 
 // MustConnect calls MustConnect function
-func (connector *Connector) MustConnect(options ...func(connection *sqlx.DB)) *sqlx.DB {
-	return MustConnect(connector.Build(), options...)
+func (connector *Connector) MustConnect(
+	driverName string,
+	options ...func(connection *sqlx.DB),
+) *sqlx.DB {
+	return MustConnect(
+		driverName,
+		connector.Build(),
+		connector.timeout,
+		options...,
+	)
+}
+
+func ConnectionString(
+	host string,
+	port int,
+	username, password string,
+	database string,
+	binaryParameters bool,
+) string {
+	return NewConnector().
+		Host(host).
+		Port(port).
+		Username(username).
+		Password(password).
+		Database(database).
+		BinaryParameters(binaryParameters).
+		String()
 }
