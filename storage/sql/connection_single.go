@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
+	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/lib/pq"
 	"github.com/mailru/go-clickhouse"
 	"time"
@@ -15,9 +16,9 @@ import (
 
 func init() {
 	// register drivers
-	pq.QuoteIdentifier("") // call package pq to register pq driver
-	//sql.Register("pgx", stdlib.GetDefaultDriver())
-	clickhouse.Map("") // call package clickhouse to register ch driver
+	pq.QuoteIdentifier("")    // call package pq to register pq driver
+	stdlib.GetDefaultDriver() // call package stdlib to register pgx driver
+	clickhouse.Map("")        // call package clickhouse to register ch driver
 }
 
 const (
