@@ -2,7 +2,7 @@ package health
 
 import (
 	"context"
-	"github.com/boostgo/lite/app/api"
+	api2 "github.com/boostgo/lite/api"
 	"github.com/boostgo/lite/system/trace"
 	"github.com/boostgo/lite/types/to"
 	"github.com/labstack/echo/v4"
@@ -56,20 +56,20 @@ func (health *Health) Handler() echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		status, statuses := health.StatusInfo()
 
-		pretty := api.QueryParam(ctx, "pretty").Bool()
+		pretty := api2.QueryParam(ctx, "pretty").Bool()
 		if pretty {
-			return api.Ok(ctx, map[string]any{
+			return api2.Ok(ctx, map[string]any{
 				"status":   status,
 				"statuses": statuses,
 			})
 		}
 
-		return api.SuccessRaw(ctx, http.StatusOK, to.Bytes(status))
+		return api2.SuccessRaw(ctx, http.StatusOK, to.Bytes(status))
 	}
 }
 
 func (health *Health) RegisterHandler(router *echo.Echo, path string) *Health {
-	router.GET(path, health.Handler(), api.Raw())
+	router.GET(path, health.Handler(), api2.Raw())
 	return health
 }
 

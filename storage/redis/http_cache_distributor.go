@@ -3,7 +3,7 @@ package redis
 import (
 	"context"
 	"errors"
-	"github.com/boostgo/lite/app/api"
+	"github.com/boostgo/lite/api"
 	"github.com/boostgo/lite/errs"
 	"github.com/boostgo/lite/types/str"
 	"net/http"

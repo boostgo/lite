@@ -2,7 +2,7 @@ package lite
 
 import (
 	"errors"
-	"github.com/boostgo/lite/app/api"
+	"github.com/boostgo/lite/api"
 	"github.com/boostgo/lite/errs"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/life"

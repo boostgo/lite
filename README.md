@@ -19,12 +19,13 @@ Simple Golang library with basic tools
 - - [fs](#fs)
 
 ### Get started
+
 ```go
 package main
 
 import (
 	"github.com/boostgo/lite"
-	"github.com/boostgo/lite/app/api"
+	"github.com/boostgo/lite/api"
 	"github.com/boostgo/lite/config"
 	"github.com/labstack/echo/v4"
 )
@@ -36,13 +37,13 @@ type Config struct {
 func main() {
 	// set debug mode
 	lite.SetDebug(true)
-	
+
 	// parse custom config structure from env
 	var cfg Config
 	config.MustRead(&cfg) // throws panic if could not parse config
-	
+
 	setupRoutes()
-	
+
 	// run http server
 	lite.Run("localhost:8080")
 }
@@ -52,7 +53,7 @@ func setupRoutes() {
 		return api.Ok(ctx, map[string]any{
 			"Message": "OK",
 		})
-    })
+	})
 
 	users := lite.Group("/api/v1/user")
 	users.GET("/get", getUser)
@@ -76,7 +77,7 @@ func getUser(ctx echo.Context) error {
 			FirstName: "Doe",
 			Age:       42,
 		}
-    })
+	})
 }
 ```
 
