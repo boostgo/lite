@@ -2,12 +2,13 @@ package life
 
 import (
 	"context"
-	"github.com/boostgo/lite/list"
-	"github.com/boostgo/lite/system/try"
 	"os"
 	"os/signal"
 	"sync"
 	"time"
+
+	"github.com/boostgo/lite/list"
+	"github.com/boostgo/lite/system/try"
 )
 
 var (

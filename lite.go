@@ -129,17 +129,15 @@ func Run(address string, waitTime ...time.Duration) {
 	go func() {
 		if err := run(address); err != nil {
 			log.
-				Namespace("handler").
 				Error().
 				Err(err).
-				Send()
+				Msg("Run server")
 			life.Cancel()
 		}
 	}()
 
 	life.GracefulLog(func() {
 		log.
-			Namespace("lite").
 			Info().
 			Msg("Graceful shutdown...")
 	})

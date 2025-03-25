@@ -2,12 +2,13 @@ package worker
 
 import (
 	"context"
+	"time"
+
 	"github.com/boostgo/lite/errs"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/life"
 	"github.com/boostgo/lite/system/trace"
 	"github.com/boostgo/lite/system/try"
-	"time"
 )
 
 // Worker is job/cron based structure.
@@ -36,8 +37,8 @@ func New(name string, duration time.Duration, action func(ctx context.Context) e
 }
 
 // FromStart sets flag for starting worker from start.
-func (worker *Worker) FromStart() *Worker {
-	worker.fromStart = true
+func (worker *Worker) FromStart(fromStart bool) *Worker {
+	worker.fromStart = fromStart
 	return worker
 }
 
@@ -101,16 +102,26 @@ func (worker *Worker) Run() {
 		for {
 			select {
 			case <-life.Context().Done():
-				logger.Info().Str("worker", worker.name).Msg("Stop worker by context")
+				logger.
+					Info().
+					Str("worker", worker.name).
+					Msg("Stop worker by context")
 				worker.done <- struct{}{}
 				return
 			case <-worker.stopper:
-				logger.Info().Str("worker", worker.name).Msg("Stop worker by stopper")
+				logger.
+					Info().
+					Str("worker", worker.name).
+					Msg("Stop worker by stopper")
 				worker.done <- struct{}{}
 				return
 			case <-ticker.C:
 				if err := worker.runAction(); err != nil {
-					logger.Error().Str("worker", worker.name).Err(err).Msg("Ticker worker action")
+					logger.
+						Error().
+						Str("worker", worker.name).
+						Err(err).
+						Msg("Ticker worker action")
 
 					if errs.IsType(err, "Panic") {
 						worker.stopper <- true
@@ -132,8 +143,8 @@ func (worker *Worker) Run() {
 // Run created worker object and runs by itself. It is like "short" version of using [Worker]
 func Run(name string, duration time.Duration, action func(ctx context.Context) error, fromStart ...bool) {
 	worker := New(name, duration, action)
-	if len(fromStart) > 0 && fromStart[0] {
-		worker.FromStart()
+	if len(fromStart) > 0 {
+		worker.FromStart(fromStart[0])
 	}
 	worker.Run()
 }

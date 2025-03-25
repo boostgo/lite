@@ -8,6 +8,7 @@ import (
 	"github.com/boostgo/lite/system/health"
 	"github.com/jmoiron/sqlx"
 	"golang.org/x/sync/errgroup"
+	"time"
 )
 
 func New(connectionStrings ...string) health.Checker {
@@ -36,7 +37,7 @@ func New(connectionStrings ...string) health.Checker {
 
 func checkConnect(ctx context.Context, connectionString string) (err error) {
 	var conn *sqlx.DB
-	conn, err = sql.Connect(connectionString)
+	conn, err = sql.Connect(sql.PgxDriver, connectionString, time.Second*5)
 	if err != nil {
 		return errs.
 			New("Health check failed on connecting").

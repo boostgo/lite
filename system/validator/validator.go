@@ -139,6 +139,10 @@ func validateUndefined(fl baseValidator.FieldLevel) (isValid bool) {
 	case string:
 		return val != undefined
 	case *string:
+		if val == nil {
+			return true
+		}
+
 		value := *val
 		return value != undefined
 	}
