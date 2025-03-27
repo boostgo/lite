@@ -3,7 +3,7 @@ package sql
 import (
 	"context"
 	"errors"
-	"github.com/boostgo/lite/errs"
+	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/log"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
@@ -18,7 +18,7 @@ import (
 // Use by default ./migrations directory in the root of project.
 func Migrate(ctx context.Context, conn *sqlx.DB, databaseName string, migrationsDir ...string) (err error) {
 	const errType = "Storage Migrate"
-	defer errs.Wrap(errType, &err, "Migrate")
+	defer errorx.Wrap(errType, &err, "Migrate")
 
 	nativeConn, err := conn.Conn(ctx)
 	if err != nil {

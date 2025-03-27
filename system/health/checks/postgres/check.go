@@ -3,7 +3,7 @@ package postgres
 import (
 	"context"
 	"errors"
-	"github.com/boostgo/lite/errs"
+	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/storage/sql"
 	"github.com/boostgo/lite/system/health"
 	"github.com/jmoiron/sqlx"
@@ -39,7 +39,7 @@ func checkConnect(ctx context.Context, connectionString string) (err error) {
 	var conn *sqlx.DB
 	conn, err = sql.Connect(sql.PgxDriver, connectionString, time.Second*5)
 	if err != nil {
-		return errs.
+		return errorx.
 			New("Health check failed on connecting").
 			SetError(err).
 			AddContext("connection_string", connectionString)
@@ -48,7 +48,7 @@ func checkConnect(ctx context.Context, connectionString string) (err error) {
 	defer conn.Close()
 
 	if err = conn.PingContext(ctx); err != nil {
-		return errs.
+		return errorx.
 			New("Health check failed on ping").
 			SetError(err).
 			AddContext("connection_string", connectionString)
@@ -57,14 +57,14 @@ func checkConnect(ctx context.Context, connectionString string) (err error) {
 	var rows *sqlx.Rows
 	rows, err = conn.QueryxContext(ctx, "SELECT VERSION()")
 	if err != nil {
-		return errs.
+		return errorx.
 			New("Health check failed on SELECT").
 			SetError(err).
 			AddContext("connection_string", connectionString)
 	}
 	defer func() {
 		if err = rows.Close(); err != nil {
-			err = errs.
+			err = errorx.
 				New("Health check failed on rows closing").
 				SetError(err).
 				AddContext("connection_string", connectionString)

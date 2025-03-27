@@ -1,7 +1,7 @@
 package rabbit
 
 import (
-	"github.com/boostgo/lite/errs"
+	"github.com/boostgo/errorx"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -39,7 +39,7 @@ func (broker *Broker) Consume(queue string, cfg ...ConsumerConfig) (<-chan amqp.
 		config.Args,
 	)
 	if err != nil {
-		return nil, errs.
+		return nil, errorx.
 			New("Consume queue error").
 			SetError(err).
 			AddContext("queue", queue)

@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/boostgo/convert"
-	"github.com/boostgo/lite/errs"
+	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/trace"
 	"github.com/boostgo/lite/types/flex"
@@ -252,7 +252,7 @@ func (request *Request) Cookies(cookies map[string]any) *Request {
 //
 // body - request body. If provide body as FormDataWriter interface - will be used form-data body. Optional
 func (request *Request) Do(method, url string, body ...any) (response *Response, err error) {
-	defer errs.Wrap(request.errType, &err, "Do")
+	defer errorx.Wrap(request.errType, &err, "Do")
 	return request.retryDo(method, url, body...)
 }
 
@@ -262,7 +262,7 @@ func (request *Request) Do(method, url string, body ...any) (response *Response,
 //
 // body - request body. If provide body as FormDataWriter interface - will be used form-data body. Optional
 func (request *Request) GET(url string, body ...any) (response *Response, err error) {
-	defer errs.Wrap(request.errType, &err, "GET")
+	defer errorx.Wrap(request.errType, &err, "GET")
 	return request.retryDo(http.MethodGet, url, body...)
 }
 
@@ -272,7 +272,7 @@ func (request *Request) GET(url string, body ...any) (response *Response, err er
 //
 // body - request body. If provide body as FormDataWriter interface - will be used form-data body. Optional
 func (request *Request) POST(url string, body ...any) (response *Response, err error) {
-	defer errs.Wrap(request.errType, &err, "POST")
+	defer errorx.Wrap(request.errType, &err, "POST")
 	return request.retryDo(http.MethodPost, url, body...)
 }
 
@@ -282,7 +282,7 @@ func (request *Request) POST(url string, body ...any) (response *Response, err e
 //
 // body - request body. If provide body as FormDataWriter interface - will be used form-data body. Optional
 func (request *Request) PUT(url string, body ...any) (response *Response, err error) {
-	defer errs.Wrap(request.errType, &err, "PUT")
+	defer errorx.Wrap(request.errType, &err, "PUT")
 	return request.retryDo(http.MethodPut, url, body...)
 }
 
@@ -292,7 +292,7 @@ func (request *Request) PUT(url string, body ...any) (response *Response, err er
 //
 // body - request body. If provide body as FormDataWriter interface - will be used form-data body. Optional
 func (request *Request) PATCH(url string, body ...any) (response *Response, err error) {
-	defer errs.Wrap(request.errType, &err, "PATCH")
+	defer errorx.Wrap(request.errType, &err, "PATCH")
 	return request.retryDo(http.MethodPatch, url, body...)
 }
 
@@ -302,7 +302,7 @@ func (request *Request) PATCH(url string, body ...any) (response *Response, err 
 //
 // body - request body. If provide body as FormDataWriter interface - will be used form-data body. Optional
 func (request *Request) DELETE(url string, body ...any) (response *Response, err error) {
-	defer errs.Wrap(request.errType, &err, "DELETE")
+	defer errorx.Wrap(request.errType, &err, "DELETE")
 	return request.retryDo(http.MethodDelete, url, body...)
 }
 
@@ -312,7 +312,7 @@ func (request *Request) DELETE(url string, body ...any) (response *Response, err
 //
 // body - request body. If provide body as FormDataWriter interface - will be used form-data body. Optional
 func (request *Request) OPTIONS(url string, body ...any) (response *Response, err error) {
-	defer errs.Wrap(request.errType, &err, "OPTIONS")
+	defer errorx.Wrap(request.errType, &err, "OPTIONS")
 	return request.retryDo(http.MethodOptions, url, body...)
 }
 
@@ -322,7 +322,7 @@ func (request *Request) OPTIONS(url string, body ...any) (response *Response, er
 //
 // body - request body. If provide body as FormDataWriter interface - will be used form-data body. Optional
 func (request *Request) HEAD(url string, body ...any) (response *Response, err error) {
-	defer errs.Wrap(request.errType, &err, "HEAD")
+	defer errorx.Wrap(request.errType, &err, "HEAD")
 	return request.retryDo(http.MethodHead, url, body...)
 }
 
@@ -397,7 +397,7 @@ func (request *Request) initRequest(method, url string, body ...any) error {
 }
 
 func (request *Request) retryDo(method, url string, body ...any) (_ *Response, err error) {
-	defer errs.Wrap(request.errType, &err, "retryDo", map[string]any{
+	defer errorx.Wrap(request.errType, &err, "retryDo", map[string]any{
 		"method": method,
 		"url":    url,
 		"body":   len(body) > 0 && body[0] != nil,
@@ -411,7 +411,7 @@ func (request *Request) retryDo(method, url string, body ...any) (_ *Response, e
 	select {
 	case <-request.ctx.Done():
 		if err = request.ctx.Err(); err != nil {
-			return nil, errs.
+			return nil, errorx.
 				New("Context is done and has error").
 				SetError(err)
 		}

@@ -115,7 +115,7 @@ func main() {
 ```
 
 ### Logging
-Logger uses "zerolog". If use errs.Error logger will print all custom error fields<br>
+Logger uses "zerolog". If use errorx.Error logger will print all custom error fields<br>
 Ref: [zerolog](https://github.com/rs/zerolog) <br>
 Import:
 ```go
@@ -128,7 +128,7 @@ package main
 
 import (
 	"errors"
-	"github.com/boostgo/lite/errs"
+	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/log"
 	"net/http"
 )
@@ -138,7 +138,7 @@ func main() {
 	// print:
 	// {"level":"info","namespace":"main","time":"2024-06-26T15:01:24+05:00","message":"Hello world"}
 
-	log.Error().Err(errs.New("Custom error").SetHttpCode(http.StatusNotFound).SetError(errors.New("inner error")))
+	log.Error().Err(errorx.New("Custom error").SetHttpCode(http.StatusNotFound).SetError(errors.New("inner error")))
 	// print:
 	// {"level":"error","innerError":"inner error","statusCode":404,"time":"2024-06-26T15:05:29+05:00","message":"Custom error"}
 }
@@ -161,7 +161,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/boostgo/lite/errs"
+	"github.com/boostgo/errorx"
 	"net/http"
 )
 
@@ -170,7 +170,7 @@ var (
 )
 
 func main() {
-	fmt.Println(errs.
+	fmt.Println(errorx.
 		New("Not found").
 		SetHttpCode(http.StatusNotFound).
 		SetError(ErrNotFound).
@@ -186,7 +186,7 @@ func main() {
 }
 
 func getNotFoundError() error {
-    return errs.
+    return errorx.
 		New("Not found").
 		SetHttpCode(http.StatusNotFound).
 		SetError(ErrNotFound).
@@ -417,7 +417,7 @@ import (
 	"fmt"
 	"github.com/boostgo/lite/system/life"
 	"github.com/boostgo/lite/system/trace"
-	"github.com/boostgo/lite/system/try"
+	"github.com/boostgo/errorx"
 	"github.com/google/uuid"
 )
 
@@ -439,7 +439,7 @@ func main() {
 			fmt.Println("Catch panic:", err)	
         }
     }()
-	if err := try.Try(func() error {
+	if err := errorx.Try(func() error {
 		return connectToResource()
 	}); err != nil {
 		panic(err)

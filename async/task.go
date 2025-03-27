@@ -1,7 +1,7 @@
 package async
 
 import (
-	"github.com/boostgo/lite/system/try"
+	"github.com/boostgo/errorx"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -10,7 +10,7 @@ type Task func() error
 // Go run provided function in goroutine and if panic catch recover it and convert to error
 func Go(fn func()) {
 	go func() {
-		_ = try.Try(func() error {
+		_ = errorx.Try(func() error {
 			fn()
 			return nil
 		})
@@ -26,7 +26,7 @@ func WaitAll(tasks ...Task) error {
 	wg := errgroup.Group{}
 	for _, task := range tasks {
 		wg.Go(func() error {
-			return try.Try(task)
+			return errorx.Try(task)
 		})
 	}
 

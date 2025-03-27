@@ -6,7 +6,7 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/boostgo/collection/slicex"
-	"github.com/boostgo/lite/errs"
+	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/system/life"
 	"github.com/boostgo/lite/system/trace"
 )
@@ -117,7 +117,7 @@ func (producer *SyncProducer) Produce(ctx context.Context, messages ...*sarama.P
 	if err := producer.producer.SendMessages(messages); err != nil {
 		var pErrs sarama.ProducerErrors
 		if ok := errors.As(err, &pErrs); ok {
-			return errs.
+			return errorx.
 				New("Send Messages").
 				AddContext("size", len(pErrs)).
 				SetError(slicex.Map(pErrs, func(pErr *sarama.ProducerError) error {

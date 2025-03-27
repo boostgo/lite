@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/boostgo/collection/slicex"
-	"github.com/boostgo/lite/errs"
+	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/storage"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/sync/errgroup"
@@ -60,7 +60,7 @@ func (client *shardClient) TxPipeline(ctx context.Context) (redis.Pipeliner, err
 }
 
 func (client *shardClient) Keys(ctx context.Context, pattern string) (keys []string, err error) {
-	defer errs.Wrap(errType, &err, "Keys")
+	defer errorx.Wrap(errType, &err, "Keys")
 
 	raw, err := client.clients.Get(ctx)
 	if err != nil {
@@ -80,7 +80,7 @@ func (client *shardClient) Delete(ctx context.Context, keys ...string) (err erro
 		return nil
 	}
 
-	defer errs.Wrap(errType, &err, "Delete")
+	defer errorx.Wrap(errType, &err, "Delete")
 
 	raw, err := client.clients.Get(ctx)
 	if err != nil {
@@ -105,7 +105,7 @@ func (client *shardClient) Delete(ctx context.Context, keys ...string) (err erro
 }
 
 func (client *shardClient) Dump(ctx context.Context, key string) (result string, err error) {
-	defer errs.Wrap(errType, &err, "Dump")
+	defer errorx.Wrap(errType, &err, "Dump")
 
 	if err = validateKey(key); err != nil {
 		return result, err
@@ -125,16 +125,16 @@ func (client *shardClient) Dump(ctx context.Context, key string) (result string,
 }
 
 func (client *shardClient) Rename(ctx context.Context, oldKey, newKey string) (err error) {
-	defer errs.Wrap(errType, &err, "Rename")
+	defer errorx.Wrap(errType, &err, "Rename")
 
 	if err = validateKey(oldKey); err != nil {
-		return errs.
+		return errorx.
 			New("Old key is invalid").
 			SetError(err)
 	}
 
 	if err = validateKey(newKey); err != nil {
-		return errs.
+		return errorx.
 			New("New key is invalid").
 			SetError(err)
 	}
@@ -153,7 +153,7 @@ func (client *shardClient) Rename(ctx context.Context, oldKey, newKey string) (e
 }
 
 func (client *shardClient) Refresh(ctx context.Context, key string, ttl time.Duration) (err error) {
-	defer errs.Wrap(errType, &err, "Refresh")
+	defer errorx.Wrap(errType, &err, "Refresh")
 
 	if err = validateKey(key); err != nil {
 		return err
@@ -173,7 +173,7 @@ func (client *shardClient) Refresh(ctx context.Context, key string, ttl time.Dur
 }
 
 func (client *shardClient) RefreshAt(ctx context.Context, key string, at time.Time) (err error) {
-	defer errs.Wrap(errType, &err, "RefreshAt")
+	defer errorx.Wrap(errType, &err, "RefreshAt")
 
 	if err = validateKey(key); err != nil {
 		return err
@@ -193,7 +193,7 @@ func (client *shardClient) RefreshAt(ctx context.Context, key string, at time.Ti
 }
 
 func (client *shardClient) TTL(ctx context.Context, key string) (ttl time.Duration, err error) {
-	defer errs.Wrap(errType, &err, "TTL")
+	defer errorx.Wrap(errType, &err, "TTL")
 
 	if err = validateKey(key); err != nil {
 		return ttl, err
@@ -216,14 +216,14 @@ func (client *shardClient) TTL(ctx context.Context, key string) (ttl time.Durati
 
 	const notExistKey = -2
 	if ttl == notExistKey {
-		return ttl, errs.ErrNotFound
+		return ttl, errorx.ErrNotFound
 	}
 
 	return ttl, nil
 }
 
 func (client *shardClient) Set(ctx context.Context, key string, value any, ttl ...time.Duration) (err error) {
-	defer errs.Wrap(errType, &err, "Set")
+	defer errorx.Wrap(errType, &err, "Set")
 
 	if err = validateKey(key); err != nil {
 		return err
@@ -248,7 +248,7 @@ func (client *shardClient) Set(ctx context.Context, key string, value any, ttl .
 }
 
 func (client *shardClient) Get(ctx context.Context, key string) (result string, err error) {
-	defer errs.Wrap(errType, &err, "Get")
+	defer errorx.Wrap(errType, &err, "Get")
 
 	if err = validateKey(key); err != nil {
 		return result, err
@@ -267,9 +267,9 @@ func (client *shardClient) Get(ctx context.Context, key string) (result string, 
 	}
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
-			return result, errs.
+			return result, errorx.
 				New("Redis key not found").
-				SetError(errs.ErrNotFound).
+				SetError(errorx.ErrNotFound).
 				AddContext("key", key)
 		}
 
@@ -280,7 +280,7 @@ func (client *shardClient) Get(ctx context.Context, key string) (result string, 
 }
 
 func (client *shardClient) MGet(ctx context.Context, keys []string) (result []any, err error) {
-	defer errs.Wrap(errType, &err, "MGet")
+	defer errorx.Wrap(errType, &err, "MGet")
 
 	validateKeys(keys)
 
@@ -303,7 +303,7 @@ func (client *shardClient) MGet(ctx context.Context, keys []string) (result []an
 }
 
 func (client *shardClient) Exist(ctx context.Context, key string) (result int64, err error) {
-	defer errs.Wrap(errType, &err, "Exist")
+	defer errorx.Wrap(errType, &err, "Exist")
 
 	if err = validateKey(key); err != nil {
 		return result, err
@@ -323,7 +323,7 @@ func (client *shardClient) Exist(ctx context.Context, key string) (result int64,
 }
 
 func (client *shardClient) GetBytes(ctx context.Context, key string) (result []byte, err error) {
-	defer errs.Wrap(errType, &err, "Get")
+	defer errorx.Wrap(errType, &err, "Get")
 
 	if err = validateKey(key); err != nil {
 		return result, err
@@ -342,9 +342,9 @@ func (client *shardClient) GetBytes(ctx context.Context, key string) (result []b
 	}
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
-			return result, errs.
+			return result, errorx.
 				New("Redis key not found").
-				SetError(errs.ErrNotFound).
+				SetError(errorx.ErrNotFound).
 				AddContext("key", key)
 		}
 
@@ -355,7 +355,7 @@ func (client *shardClient) GetBytes(ctx context.Context, key string) (result []b
 }
 
 func (client *shardClient) GetInt(ctx context.Context, key string) (result int, err error) {
-	defer errs.Wrap(errType, &err, "GetInt")
+	defer errorx.Wrap(errType, &err, "GetInt")
 
 	if err = validateKey(key); err != nil {
 		return result, err
@@ -374,9 +374,9 @@ func (client *shardClient) GetInt(ctx context.Context, key string) (result int, 
 	}
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
-			return result, errs.
+			return result, errorx.
 				New("Redis key not found").
-				SetError(errs.ErrNotFound).
+				SetError(errorx.ErrNotFound).
 				AddContext("key", key)
 		}
 
@@ -387,7 +387,7 @@ func (client *shardClient) GetInt(ctx context.Context, key string) (result int, 
 }
 
 func (client *shardClient) Parse(ctx context.Context, key string, export any) (err error) {
-	defer errs.Wrap(errType, &err, "Parse")
+	defer errorx.Wrap(errType, &err, "Parse")
 
 	if err = validateKey(key); err != nil {
 		return err
@@ -407,9 +407,9 @@ func (client *shardClient) Parse(ctx context.Context, key string, export any) (e
 	}
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
-			return errs.
+			return errorx.
 				New("Redis key not found").
-				SetError(errs.ErrNotFound).
+				SetError(errorx.ErrNotFound).
 				AddContext("key", key)
 		}
 
@@ -420,7 +420,7 @@ func (client *shardClient) Parse(ctx context.Context, key string, export any) (e
 }
 
 func (client *shardClient) HSet(ctx context.Context, key string, value map[string]any) (err error) {
-	defer errs.Wrap(errType, &err, "HSet")
+	defer errorx.Wrap(errType, &err, "HSet")
 
 	if err = validateKey(key); err != nil {
 		return err
@@ -440,7 +440,7 @@ func (client *shardClient) HSet(ctx context.Context, key string, value map[strin
 }
 
 func (client *shardClient) HGetAll(ctx context.Context, key string) (result map[string]string, err error) {
-	defer errs.Wrap(errType, &err, "HGetAll")
+	defer errorx.Wrap(errType, &err, "HGetAll")
 
 	if err = validateKey(key); err != nil {
 		return result, err
@@ -460,7 +460,7 @@ func (client *shardClient) HGetAll(ctx context.Context, key string) (result map[
 }
 
 func (client *shardClient) HGet(ctx context.Context, key, field string) (result string, err error) {
-	defer errs.Wrap(errType, &err, "HGet")
+	defer errorx.Wrap(errType, &err, "HGet")
 
 	if err = validateKey(key); err != nil {
 		return result, err
@@ -480,7 +480,7 @@ func (client *shardClient) HGet(ctx context.Context, key, field string) (result 
 }
 
 func (client *shardClient) HGetInt(ctx context.Context, key, field string) (result int, err error) {
-	defer errs.Wrap(errType, &err, "HGet")
+	defer errorx.Wrap(errType, &err, "HGet")
 
 	if err = validateKey(key); err != nil {
 		return result, err
@@ -500,7 +500,7 @@ func (client *shardClient) HGetInt(ctx context.Context, key, field string) (resu
 }
 
 func (client *shardClient) HGetBool(ctx context.Context, key, field string) (result bool, err error) {
-	defer errs.Wrap(errType, &err, "HGet")
+	defer errorx.Wrap(errType, &err, "HGet")
 
 	if err = validateKey(key); err != nil {
 		return result, err
@@ -520,7 +520,7 @@ func (client *shardClient) HGetBool(ctx context.Context, key, field string) (res
 }
 
 func (client *shardClient) HExist(ctx context.Context, key, field string) (exist bool, err error) {
-	defer errs.Wrap(errType, &err, "HExist")
+	defer errorx.Wrap(errType, &err, "HExist")
 
 	if err = validateKey(key); err != nil {
 		return exist, err
@@ -540,7 +540,7 @@ func (client *shardClient) HExist(ctx context.Context, key, field string) (exist
 }
 
 func (client *shardClient) HDelete(ctx context.Context, key string, fields ...string) (err error) {
-	defer errs.Wrap(errType, &err, "HDelete")
+	defer errorx.Wrap(errType, &err, "HDelete")
 
 	if err = validateKey(key); err != nil {
 		return err
@@ -560,7 +560,7 @@ func (client *shardClient) HDelete(ctx context.Context, key string, fields ...st
 }
 
 func (client *shardClient) HScan(ctx context.Context, key string, cursor uint64, pattern string, count int64) (keys []string, nextCursor uint64, err error) {
-	defer errs.Wrap(errType, &err, "HScan")
+	defer errorx.Wrap(errType, &err, "HScan")
 
 	if err = validateKey(key); err != nil {
 		return keys, nextCursor, err
@@ -580,7 +580,7 @@ func (client *shardClient) HScan(ctx context.Context, key string, cursor uint64,
 }
 
 func (client *shardClient) Scan(ctx context.Context, cursor uint64, pattern string, count int64) (keys []string, nextCursor uint64, err error) {
-	defer errs.Wrap(errType, &err, "Scan")
+	defer errorx.Wrap(errType, &err, "Scan")
 
 	raw, err := client.clients.Get(ctx)
 	if err != nil {
@@ -596,7 +596,7 @@ func (client *shardClient) Scan(ctx context.Context, cursor uint64, pattern stri
 }
 
 func (client *shardClient) HIncrBy(ctx context.Context, key, field string, incr int64) (value int64, err error) {
-	defer errs.Wrap(errType, &err, "HIncrBy")
+	defer errorx.Wrap(errType, &err, "HIncrBy")
 
 	if err = validateKey(key); err != nil {
 		return value, err
@@ -616,7 +616,7 @@ func (client *shardClient) HIncrBy(ctx context.Context, key, field string, incr 
 }
 
 func (client *shardClient) HIncrByFloat(ctx context.Context, key, field string, incr float64) (value float64, err error) {
-	defer errs.Wrap(errType, &err, "HIncrByFloat")
+	defer errorx.Wrap(errType, &err, "HIncrByFloat")
 
 	if err = validateKey(key); err != nil {
 		return value, err
@@ -636,7 +636,7 @@ func (client *shardClient) HIncrByFloat(ctx context.Context, key, field string, 
 }
 
 func (client *shardClient) HKeys(ctx context.Context, key string) (keys []string, err error) {
-	defer errs.Wrap(errType, &err, "HKeys")
+	defer errorx.Wrap(errType, &err, "HKeys")
 
 	if err = validateKey(key); err != nil {
 		return keys, err
@@ -656,7 +656,7 @@ func (client *shardClient) HKeys(ctx context.Context, key string) (keys []string
 }
 
 func (client *shardClient) HLen(ctx context.Context, key string) (length int64, err error) {
-	defer errs.Wrap(errType, &err, "HLen")
+	defer errorx.Wrap(errType, &err, "HLen")
 
 	if err = validateKey(key); err != nil {
 		return length, err
@@ -676,7 +676,7 @@ func (client *shardClient) HLen(ctx context.Context, key string) (length int64, 
 }
 
 func (client *shardClient) HMGet(ctx context.Context, key string, fields ...string) (result []any, err error) {
-	defer errs.Wrap(errType, &err, "HMGet")
+	defer errorx.Wrap(errType, &err, "HMGet")
 
 	if len(fields) == 0 {
 		return []any{}, nil
@@ -700,7 +700,7 @@ func (client *shardClient) HMGet(ctx context.Context, key string, fields ...stri
 }
 
 func (client *shardClient) HMSet(ctx context.Context, key string, values ...any) (err error) {
-	defer errs.Wrap(errType, &err, "HMSet")
+	defer errorx.Wrap(errType, &err, "HMSet")
 
 	if len(values) == 0 {
 		return nil
@@ -724,7 +724,7 @@ func (client *shardClient) HMSet(ctx context.Context, key string, values ...any)
 }
 
 func (client *shardClient) HSetNX(ctx context.Context, key, field string, value any) (err error) {
-	defer errs.Wrap(errType, &err, "HSetNX")
+	defer errorx.Wrap(errType, &err, "HSetNX")
 
 	if err = validateKey(key); err != nil {
 		return err
@@ -744,7 +744,7 @@ func (client *shardClient) HSetNX(ctx context.Context, key, field string, value 
 }
 
 func (client *shardClient) HScanNoValues(ctx context.Context, key string, cursor uint64, pattern string, count int64) (keys []string, nextCursor uint64, err error) {
-	defer errs.Wrap(errType, &err, "HScaNoValues")
+	defer errorx.Wrap(errType, &err, "HScaNoValues")
 
 	if err = validateKey(key); err != nil {
 		return keys, cursor, err
@@ -764,7 +764,7 @@ func (client *shardClient) HScanNoValues(ctx context.Context, key string, cursor
 }
 
 func (client *shardClient) HVals(ctx context.Context, key string) (values []string, err error) {
-	defer errs.Wrap(errType, &err, "HVals")
+	defer errorx.Wrap(errType, &err, "HVals")
 
 	if err = validateKey(key); err != nil {
 		return values, err
@@ -784,7 +784,7 @@ func (client *shardClient) HVals(ctx context.Context, key string) (values []stri
 }
 
 func (client *shardClient) HRandField(ctx context.Context, key string, count int) (keys []string, err error) {
-	defer errs.Wrap(errType, &err, "HRandField")
+	defer errorx.Wrap(errType, &err, "HRandField")
 
 	if err = validateKey(key); err != nil {
 		return keys, err
@@ -804,7 +804,7 @@ func (client *shardClient) HRandField(ctx context.Context, key string, count int
 }
 
 func (client *shardClient) HRandFieldWithValues(ctx context.Context, key string, count int) (values []redis.KeyValue, err error) {
-	defer errs.Wrap(errType, &err, "HRandFieldWithValues")
+	defer errorx.Wrap(errType, &err, "HRandFieldWithValues")
 
 	if err = validateKey(key); err != nil {
 		return values, err
@@ -824,7 +824,7 @@ func (client *shardClient) HRandFieldWithValues(ctx context.Context, key string,
 }
 
 func (client *shardClient) HExpire(ctx context.Context, key string, expiration time.Duration, fields ...string) (states []int64, err error) {
-	defer errs.Wrap(errType, &err, "HExpire")
+	defer errorx.Wrap(errType, &err, "HExpire")
 
 	if len(fields) == 0 {
 		return states, nil
@@ -848,7 +848,7 @@ func (client *shardClient) HExpire(ctx context.Context, key string, expiration t
 }
 
 func (client *shardClient) HTTL(ctx context.Context, key string, fields ...string) (ttls []int64, err error) {
-	defer errs.Wrap(errType, &err, "HTTL")
+	defer errorx.Wrap(errType, &err, "HTTL")
 
 	if len(fields) == 0 {
 		return ttls, nil

@@ -4,11 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/boostgo/lite/errs"
+	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/life"
 	"github.com/boostgo/lite/system/trace"
-	"github.com/boostgo/lite/system/try"
 )
 
 // Worker is job/cron based structure.
@@ -72,7 +71,7 @@ func (worker *Worker) runAction() error {
 		defer cancel()
 	}
 
-	return try.Ctx(ctx, worker.action)
+	return errorx.TryContext(ctx, worker.action)
 }
 
 // Run runs worker with provided duration
@@ -123,7 +122,7 @@ func (worker *Worker) Run() {
 						Err(err).
 						Msg("Ticker worker action")
 
-					if errs.IsType(err, "Panic") {
+					if errorx.IsType(err, "Panic") {
 						worker.stopper <- true
 						continue
 					}

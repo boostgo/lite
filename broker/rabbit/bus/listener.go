@@ -2,12 +2,12 @@ package bus
 
 import (
 	"context"
+	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/broker/rabbit"
 	"github.com/boostgo/lite/broker/rabbit/exchanges"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/life"
 	"github.com/boostgo/lite/system/trace"
-	"github.com/boostgo/lite/system/try"
 	"github.com/boostgo/lite/system/validator"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"time"
@@ -139,7 +139,7 @@ func (l *listener) listenQueue(queue rabbit.MessagesQueue, event Event) {
 				return
 			}
 
-			if err := try.Try(func() error {
+			if err := errorx.Try(func() error {
 				return l.callEventAction(&message, &event)
 			}); err != nil {
 				l.logger.Error().Err(err).Msg("Event action")

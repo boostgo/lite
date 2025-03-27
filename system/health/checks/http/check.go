@@ -2,7 +2,7 @@ package http
 
 import (
 	"context"
-	"github.com/boostgo/lite/errs"
+	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/system/health"
 	"github.com/boostgo/lite/web"
 	"net/http"
@@ -20,7 +20,7 @@ func New(serviceName, url string, timeout ...time.Duration) health.Checker {
 
 		response, err := request.GET(url)
 		if err != nil {
-			return status, errs.
+			return status, errorx.
 				New("Check failed on calling request").
 				SetError(err).
 				AddContext("url", url).
@@ -28,7 +28,7 @@ func New(serviceName, url string, timeout ...time.Duration) health.Checker {
 		}
 
 		if response.StatusCode() >= http.StatusInternalServerError {
-			return status, errs.
+			return status, errorx.
 				New("Check failed on response status code").
 				AddContext("url", url).
 				AddContext("service_name", serviceName).

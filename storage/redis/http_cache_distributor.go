@@ -3,11 +3,12 @@ package redis
 import (
 	"context"
 	"errors"
-	"github.com/boostgo/lite/api"
-	"github.com/boostgo/lite/errs"
-	"github.com/boostgo/lite/types/str"
 	"net/http"
 	"time"
+
+	"github.com/boostgo/errorx"
+	"github.com/boostgo/lite/api"
+	"github.com/boostgo/lite/types/str"
 )
 
 type httpCacheDistributor struct {
@@ -25,11 +26,11 @@ func NewHttpCacheDistributor(client Client, prefix string) api.HttpCacheDistribu
 }
 
 func (distributor *httpCacheDistributor) Get(ctx context.Context, request *http.Request) (responseBody []byte, ok bool, err error) {
-	defer errs.Wrap(distributor.errType, &err, "Get")
+	defer errorx.Wrap(distributor.errType, &err, "Get")
 
 	responseBody, err = distributor.client.GetBytes(ctx, distributor.generateKey(request))
 	if err != nil {
-		if errors.Is(err, errs.ErrNotFound) {
+		if errors.Is(err, errorx.ErrNotFound) {
 			return nil, false, nil
 		}
 
@@ -40,7 +41,7 @@ func (distributor *httpCacheDistributor) Get(ctx context.Context, request *http.
 }
 
 func (distributor *httpCacheDistributor) Set(ctx context.Context, request *http.Request, responseBody []byte, ttl time.Duration) (err error) {
-	defer errs.Wrap(distributor.errType, &err, "Set")
+	defer errorx.Wrap(distributor.errType, &err, "Set")
 	return distributor.client.Set(ctx, distributor.generateKey(request), responseBody, ttl)
 }
 

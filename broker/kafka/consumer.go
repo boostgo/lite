@@ -1,11 +1,12 @@
 package kafka
 
 import (
+	"time"
+
 	"github.com/IBM/sarama"
+	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/life"
-	"github.com/boostgo/lite/system/try"
-	"time"
 )
 
 type ConsumeHandler func(message *sarama.ConsumerMessage) error
@@ -117,18 +118,28 @@ func (consumer *Consumer) Consume(topic string, handler ConsumeHandler) error {
 			for {
 				select {
 				case <-life.Context().Done():
-					logger.Info().Int32("partition", partition).Msg("Stop consumer by context")
+					logger.
+						Info().
+						Int32("partition", partition).
+						Msg("Stop consumer by context")
 					return
 				case msg, ok := <-partitionConsumer.Messages():
 					if !ok {
-						logger.Info().Int32("partition", partition).Msg("Stop consumer by closing channel")
+						logger.
+							Info().
+							Int32("partition", partition).
+							Msg("Stop consumer by closing channel")
 						return
 					}
 
-					if err = try.Try(func() error {
+					if err = errorx.Try(func() error {
 						return handler(msg)
 					}); err != nil {
-						logger.Error().Err(err).Msg("Handle message error")
+						logger.
+							Error().
+							Err(err).
+							Msg("Handle message error")
+
 						if consumer.errorHandler != nil {
 							consumer.errorHandler(err)
 						}

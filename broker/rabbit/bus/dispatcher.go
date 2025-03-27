@@ -2,8 +2,8 @@ package bus
 
 import (
 	"context"
+	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/broker/rabbit"
-	"github.com/boostgo/lite/errs"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/life"
 	"github.com/boostgo/lite/system/validator"
@@ -55,7 +55,7 @@ func (d *dispatcher) Dispatch(ctx context.Context, event any) (err error) {
 	}
 
 	if err = d.broker.Publish(ctx, eventName, event); err != nil {
-		return errs.New("Dispatch message").SetError(err)
+		return errorx.New("Dispatch message").SetError(err)
 	}
 
 	return nil

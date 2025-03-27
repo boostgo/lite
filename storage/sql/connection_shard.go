@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"time"
-	
-	"github.com/boostgo/lite/errs"
+
+	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/storage"
 	"github.com/jmoiron/sqlx"
 	"golang.org/x/sync/errgroup"
@@ -62,17 +62,17 @@ func ConnectShards(
 	keys := make(map[string]struct{}, len(connectionStrings))
 	for _, cs := range connectionStrings {
 		if cs.Key == "" {
-			return nil, errs.New("Connection key is empty")
+			return nil, errorx.New("Connection key is empty")
 		}
 
 		if cs.ConnectionString == "" {
-			return nil, errs.
+			return nil, errorx.
 				New("Connection string is empty").
 				AddContext("key", cs.Key)
 		}
 
 		if _, ok := keys[cs.Key]; ok {
-			return nil, errs.
+			return nil, errorx.
 				New("Connection keys cannot duplicate").
 				AddContext("key", cs.Key)
 		}

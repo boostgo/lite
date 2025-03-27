@@ -3,9 +3,9 @@ package redis
 import (
 	"context"
 	"fmt"
-	"github.com/boostgo/lite/errs"
 	"time"
 
+	"github.com/boostgo/errorx"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -110,23 +110,23 @@ func ConnectShards(connectionStrings []ShardConnectConfig, selector ClientSelect
 	keys := make(map[string]struct{}, len(connectionStrings))
 	for _, cs := range connectionStrings {
 		if cs.Key == "" {
-			return nil, errs.New("Client key is empty")
+			return nil, errorx.New("Client key is empty")
 		}
 
 		if cs.Address == "" {
-			return nil, errs.
+			return nil, errorx.
 				New("Client address is empty").
 				AddContext("key", cs.Key)
 		}
 
 		if cs.Port == 0 {
-			return nil, errs.
+			return nil, errorx.
 				New("Client port is zero").
 				AddContext("key", cs.Key)
 		}
 
 		if _, ok := keys[cs.Key]; ok {
-			return nil, errs.
+			return nil, errorx.
 				New("Connection keys cannot duplicate").
 				AddContext("key", cs.Key)
 		}

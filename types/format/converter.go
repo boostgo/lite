@@ -2,12 +2,12 @@ package format
 
 import (
 	"errors"
-	"github.com/boostgo/lite/errs"
-	"github.com/boostgo/lite/system/try"
-	"github.com/boostgo/lite/types/flex"
 	"math"
 	"reflect"
 	"strings"
+
+	"github.com/boostgo/errorx"
+	"github.com/boostgo/lite/types/flex"
 )
 
 type StringFormatter func(string) string
@@ -87,10 +87,10 @@ func (converter *Converter) RegisterFloat(name string, formatter FloatFormatter)
 }
 
 func (converter *Converter) Convert(input any) (err error) {
-	defer errs.Wrap("Format", &err, "Convert")
+	defer errorx.Wrap("Format", &err, "Convert")
 	defer func() {
 		if r := recover(); r != nil {
-			err = try.CatchPanic(r)
+			err = errorx.CatchPanic(r)
 		}
 	}()
 

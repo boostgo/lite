@@ -4,7 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"github.com/boostgo/lite/errs"
+
+	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/storage"
 	"github.com/jmoiron/sqlx"
@@ -38,7 +39,7 @@ func (c *clientShard) Connection() *sqlx.DB {
 }
 
 func (c *clientShard) ExecContext(ctx context.Context, query string, args ...interface{}) (result sql.Result, err error) {
-	defer errs.Wrap(errType, &err, "ExecContext")
+	defer errorx.Wrap(errType, &err, "ExecContext")
 
 	raw, err := c.selectConnect(ctx)
 	if err != nil {
@@ -55,7 +56,7 @@ func (c *clientShard) ExecContext(ctx context.Context, query string, args ...int
 }
 
 func (c *clientShard) QueryContext(ctx context.Context, query string, args ...interface{}) (rows *sql.Rows, err error) {
-	defer errs.Wrap(errType, &err, "QueryContext")
+	defer errorx.Wrap(errType, &err, "QueryContext")
 
 	raw, err := c.selectConnect(ctx)
 	if err != nil {
@@ -72,7 +73,7 @@ func (c *clientShard) QueryContext(ctx context.Context, query string, args ...in
 }
 
 func (c *clientShard) QueryxContext(ctx context.Context, query string, args ...interface{}) (rows *sqlx.Rows, err error) {
-	defer errs.Wrap(errType, &err, "QueryxContext")
+	defer errorx.Wrap(errType, &err, "QueryxContext")
 
 	raw, err := c.selectConnect(ctx)
 	if err != nil {
@@ -105,7 +106,7 @@ func (c *clientShard) QueryRowxContext(ctx context.Context, query string, args .
 }
 
 func (c *clientShard) PrepareContext(ctx context.Context, query string) (statement *sql.Stmt, err error) {
-	defer errs.Wrap(errType, &err, "PrepareContext")
+	defer errorx.Wrap(errType, &err, "PrepareContext")
 
 	raw, err := c.selectConnect(ctx)
 	if err != nil {
@@ -122,7 +123,7 @@ func (c *clientShard) PrepareContext(ctx context.Context, query string) (stateme
 }
 
 func (c *clientShard) NamedExecContext(ctx context.Context, query string, arg interface{}) (result sql.Result, err error) {
-	defer errs.Wrap(errType, &err, "NamedExecContext")
+	defer errorx.Wrap(errType, &err, "NamedExecContext")
 
 	raw, err := c.selectConnect(ctx)
 	if err != nil {
@@ -139,7 +140,7 @@ func (c *clientShard) NamedExecContext(ctx context.Context, query string, arg in
 }
 
 func (c *clientShard) SelectContext(ctx context.Context, dest interface{}, query string, args ...interface{}) (err error) {
-	defer errs.Wrap(errType, &err, "SelectContext")
+	defer errorx.Wrap(errType, &err, "SelectContext")
 
 	raw, err := c.selectConnect(ctx)
 	if err != nil {
@@ -156,7 +157,7 @@ func (c *clientShard) SelectContext(ctx context.Context, dest interface{}, query
 }
 
 func (c *clientShard) GetContext(ctx context.Context, dest interface{}, query string, args ...interface{}) (err error) {
-	defer errs.Wrap(errType, &err, "GetContext")
+	defer errorx.Wrap(errType, &err, "GetContext")
 
 	raw, err := c.selectConnect(ctx)
 	if err != nil {
@@ -173,7 +174,7 @@ func (c *clientShard) GetContext(ctx context.Context, dest interface{}, query st
 }
 
 func (c *clientShard) PrepareNamedContext(ctx context.Context, query string) (statement *sqlx.NamedStmt, err error) {
-	defer errs.Wrap(errType, &err, "PrepareNamedContext")
+	defer errorx.Wrap(errType, &err, "PrepareNamedContext")
 
 	raw, err := c.selectConnect(ctx)
 	if err != nil {

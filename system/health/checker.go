@@ -2,7 +2,8 @@ package health
 
 import (
 	"context"
-	"github.com/boostgo/lite/system/try"
+
+	"github.com/boostgo/errorx"
 )
 
 type Status struct {
@@ -33,7 +34,7 @@ func NewChecker(name string, fn StatusFunc) Checker {
 }
 
 func (checker *healthChecker) Status(ctx context.Context) (status Status, err error) {
-	if err = try.Try(func() error {
+	if err = errorx.Try(func() error {
 		status, err = checker.getStatus(ctx)
 		if err != nil {
 			return err

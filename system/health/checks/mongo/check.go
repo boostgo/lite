@@ -2,7 +2,7 @@ package mongo
 
 import (
 	"context"
-	"github.com/boostgo/lite/errs"
+	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/storage/mongo"
 	"github.com/boostgo/lite/system/health"
 	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
@@ -16,7 +16,7 @@ func New(username, password, host string, port int) health.Checker {
 
 		client, err := mongo.Connect(ctx, username, password, host, port)
 		if err != nil {
-			return status, errs.
+			return status, errorx.
 				New("Health check failed on connect").
 				SetError(err).
 				AddContext("host", host).
@@ -25,7 +25,7 @@ func New(username, password, host string, port int) health.Checker {
 		}
 
 		if err = client.Ping(ctx, readpref.Primary()); err != nil {
-			return status, errs.
+			return status, errorx.
 				New("Health check failed on ping").
 				SetError(err).
 				AddContext("host", host).

@@ -2,7 +2,8 @@ package validator
 
 import (
 	"errors"
-	"github.com/boostgo/lite/errs"
+
+	"github.com/boostgo/errorx"
 	baseValidator "github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 )
@@ -48,10 +49,10 @@ func (validator *Validator) Struct(object any) error {
 		return nil
 	}
 
-	err := errs.
+	err := errorx.
 		New("Model validation error").
 		SetType(errorType).
-		SetError(errs.ErrUnprocessableEntity)
+		SetError(errorx.ErrUnprocessableEntity)
 
 	var validationErrors baseValidator.ValidationErrors
 	ok := errors.As(validateError, &validationErrors)
@@ -76,10 +77,10 @@ func (validator *Validator) Var(variable any, tag string) error {
 		return nil
 	}
 
-	err := errs.
+	err := errorx.
 		New("Variable validation error").
 		SetType(errorType).
-		SetError(errs.ErrUnprocessableEntity)
+		SetError(errorx.ErrUnprocessableEntity)
 
 	validateError := validator.Validate.Var(variable, tag)
 	if err == nil {

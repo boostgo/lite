@@ -1,7 +1,7 @@
 package rabbit
 
 import (
-	"github.com/boostgo/lite/errs"
+	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/system/trace"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -28,7 +28,7 @@ func (broker *Broker) Close() error {
 // Ack acquires read message by delivery tag
 func (broker *Broker) Ack(deliveryTag uint64, multiple bool) error {
 	if err := broker.channel.Ack(deliveryTag, multiple); err != nil {
-		return errs.
+		return errorx.
 			New("Ack message error").
 			SetError(err).
 			SetContext(map[string]any{
@@ -49,7 +49,7 @@ func (broker *Broker) Bind(exchange, queue string) error {
 		false,
 		nil,
 	); err != nil {
-		return errs.
+		return errorx.
 			New("Bind exchange and queue error").
 			SetError(err).
 			SetContext(map[string]any{

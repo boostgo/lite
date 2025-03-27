@@ -1,7 +1,7 @@
 package rabbit
 
 import (
-	"github.com/boostgo/lite/errs"
+	"github.com/boostgo/errorx"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -35,10 +35,12 @@ func (broker *Broker) NewExchange(name, exchangeType string, cfg ...ExchangeConf
 		config.NoWait,
 		config.Args,
 	); err != nil {
-		return errs.New("Create new exchange error").SetError(err).SetContext(map[string]any{
-			"exchange-name": name,
-			"exchange-type": exchangeType,
-		})
+		return errorx.New("Create new exchange error").
+			SetError(err).
+			SetContext(map[string]any{
+				"exchange-name": name,
+				"exchange-type": exchangeType,
+			})
 	}
 
 	return nil

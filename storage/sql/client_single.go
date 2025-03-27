@@ -4,7 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"github.com/boostgo/lite/errs"
+
+	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/storage"
 	"github.com/jmoiron/sqlx"
@@ -33,7 +34,7 @@ func (c *clientSingle) Connection() *sqlx.DB {
 }
 
 func (c *clientSingle) ExecContext(ctx context.Context, query string, args ...interface{}) (result sql.Result, err error) {
-	defer errs.Wrap(errType, &err, "ExecContext")
+	defer errorx.Wrap(errType, &err, "ExecContext")
 
 	c.printLog(ctx, "ExecContext", query, args...)
 
@@ -46,7 +47,7 @@ func (c *clientSingle) ExecContext(ctx context.Context, query string, args ...in
 }
 
 func (c *clientSingle) QueryContext(ctx context.Context, query string, args ...interface{}) (rows *sql.Rows, err error) {
-	defer errs.Wrap(errType, &err, "QueryContext")
+	defer errorx.Wrap(errType, &err, "QueryContext")
 
 	c.printLog(ctx, "QueryContext", query, args...)
 
@@ -59,7 +60,7 @@ func (c *clientSingle) QueryContext(ctx context.Context, query string, args ...i
 }
 
 func (c *clientSingle) QueryxContext(ctx context.Context, query string, args ...interface{}) (rows *sqlx.Rows, err error) {
-	defer errs.Wrap(errType, &err, "QueryxContext")
+	defer errorx.Wrap(errType, &err, "QueryxContext")
 
 	c.printLog(ctx, "QueryxContext", query, args...)
 
@@ -83,7 +84,7 @@ func (c *clientSingle) QueryRowxContext(ctx context.Context, query string, args 
 }
 
 func (c *clientSingle) PrepareContext(ctx context.Context, query string) (statement *sql.Stmt, err error) {
-	defer errs.Wrap(errType, &err, "PrepareContext")
+	defer errorx.Wrap(errType, &err, "PrepareContext")
 
 	c.printLog(ctx, "PrepareContext", query)
 
@@ -96,7 +97,7 @@ func (c *clientSingle) PrepareContext(ctx context.Context, query string) (statem
 }
 
 func (c *clientSingle) NamedExecContext(ctx context.Context, query string, arg interface{}) (result sql.Result, err error) {
-	defer errs.Wrap(errType, &err, "NamedExecContext")
+	defer errorx.Wrap(errType, &err, "NamedExecContext")
 
 	c.printLog(ctx, "NamedExecContext", query, arg)
 
@@ -109,7 +110,7 @@ func (c *clientSingle) NamedExecContext(ctx context.Context, query string, arg i
 }
 
 func (c *clientSingle) SelectContext(ctx context.Context, dest interface{}, query string, args ...interface{}) (err error) {
-	defer errs.Wrap(errType, &err, "SelectContext")
+	defer errorx.Wrap(errType, &err, "SelectContext")
 
 	c.printLog(ctx, "SelectContext", query, args...)
 
@@ -122,7 +123,7 @@ func (c *clientSingle) SelectContext(ctx context.Context, dest interface{}, quer
 }
 
 func (c *clientSingle) GetContext(ctx context.Context, dest interface{}, query string, args ...interface{}) (err error) {
-	defer errs.Wrap(errType, &err, "GetContext")
+	defer errorx.Wrap(errType, &err, "GetContext")
 
 	c.printLog(ctx, "GetContext", query, args...)
 
@@ -135,7 +136,7 @@ func (c *clientSingle) GetContext(ctx context.Context, dest interface{}, query s
 }
 
 func (c *clientSingle) PrepareNamedContext(ctx context.Context, query string) (statement *sqlx.NamedStmt, err error) {
-	defer errs.Wrap(errType, &err, "PrepareNamedContext")
+	defer errorx.Wrap(errType, &err, "PrepareNamedContext")
 
 	c.printLog(ctx, "PrepareNamedContext", query)
 

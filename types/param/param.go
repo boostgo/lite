@@ -6,31 +6,31 @@ import (
 	"strings"
 
 	"github.com/boostgo/convert"
-	"github.com/boostgo/lite/errs"
+	"github.com/boostgo/errorx"
 	"github.com/google/uuid"
 )
 
 func ErrorParseIntParam(err error, value string) error {
-	return errs.
+	return errorx.
 		New("Parse int param error").
 		SetType("ParseIntParamError").
-		SetError(err, errs.ErrUnprocessableEntity).
+		SetError(err, errorx.ErrUnprocessableEntity).
 		AddContext("value", value)
 }
 
 func ErrorParseFloatParam(err error, value string) error {
-	return errs.
+	return errorx.
 		New("Parse float param error").
 		SetType("ParseFloatParamError").
-		SetError(err, errs.ErrUnprocessableEntity).
+		SetError(err, errorx.ErrUnprocessableEntity).
 		AddContext("value", value)
 }
 
 func ErrorParseUUIDParam(err error, value string) error {
-	return errs.
+	return errorx.
 		New("Parse UUID param error").
 		SetType("ParseUUIDParamError").
-		SetError(err, errs.ErrUnprocessableEntity).
+		SetError(err, errorx.ErrUnprocessableEntity).
 		AddContext("value", value)
 }
 

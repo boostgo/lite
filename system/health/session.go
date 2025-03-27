@@ -2,7 +2,7 @@ package health
 
 import (
 	"context"
-	"github.com/boostgo/lite/errs"
+	"github.com/boostgo/errorx"
 	"golang.org/x/sync/errgroup"
 	"time"
 )
@@ -49,7 +49,7 @@ func (s *session) Check() []Status {
 
 			select {
 			case <-time.After(s.timeout):
-				return errs.ErrTimeout
+				return errorx.ErrTimeout
 			case status := <-checker.StatusAsync(ctx):
 				statusesChan <- status
 				return nil

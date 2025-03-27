@@ -2,18 +2,18 @@ package lite
 
 import (
 	"errors"
-	"github.com/boostgo/lite/api"
-	"github.com/boostgo/lite/errs"
-	"github.com/boostgo/lite/log"
-	"github.com/boostgo/lite/system/life"
-	"github.com/boostgo/lite/system/trace"
-	"github.com/boostgo/lite/system/try"
-	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"net/http"
 	"sync/atomic"
 	"time"
+
+	"github.com/boostgo/errorx"
+	"github.com/boostgo/lite/api"
+	"github.com/boostgo/lite/log"
+	"github.com/boostgo/lite/system/life"
+	"github.com/boostgo/lite/system/trace"
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 var (
@@ -44,9 +44,9 @@ func init() {
 	}
 
 	handler.RouteNotFound("*", func(ctx echo.Context) error {
-		return api.Error(ctx, errs.
+		return api.Error(ctx, errorx.
 			New("Route not found").
-			SetError(errs.ErrNotFound).
+			SetError(errorx.ErrNotFound).
 			AddContext("url", ctx.Request().RequestURI))
 	})
 }
@@ -57,9 +57,9 @@ func TimeoutMiddleware(duration time.Duration) echo.MiddlewareFunc {
 		ErrorHandler: func(err error, ctx echo.Context) error {
 			return api.Error(
 				ctx,
-				errs.
+				errorx.
 					New("Request reached timeout").
-					SetError(err, errs.ErrTimeout),
+					SetError(err, errorx.ErrTimeout),
 			)
 		},
 		Timeout: duration,
@@ -69,7 +69,7 @@ func TimeoutMiddleware(duration time.Duration) echo.MiddlewareFunc {
 func RecoverMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {
-			if err := try.Try(func() error {
+			if err := errorx.Try(func() error {
 				return next(ctx)
 			}); err != nil {
 				return api.Error(ctx, err)
@@ -115,7 +115,7 @@ func run(address string) error {
 			return nil
 		}
 
-		return errs.New("Start server").SetError(err)
+		return errorx.New("Start server").SetError(err)
 	}
 
 	return nil

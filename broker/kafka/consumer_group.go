@@ -7,11 +7,10 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/boostgo/collection/slicex"
-	"github.com/boostgo/lite/errs"
+	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/life"
 	"github.com/boostgo/lite/system/trace"
-	"github.com/boostgo/lite/system/try"
 )
 
 type GroupHandler sarama.ConsumerGroupHandler
@@ -277,7 +276,7 @@ func (handler *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSe
 		select {
 		case message, ok := <-claim.Messages():
 			if !ok {
-				return errs.
+				return errorx.
 					New("Kafka Consumer Group Handler channel closed").
 					AddContext("name", handler.name)
 			}
@@ -293,7 +292,7 @@ func (handler *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSe
 
 				ctx = trace.GetKafkaCtx(ctx, message)
 
-				if err := try.Try(func() error {
+				if err := errorx.Try(func() error {
 					return handler.claim(ctx, session, claim, message)
 				}); err != nil {
 					logger.

@@ -3,7 +3,7 @@ package redis
 import (
 	"context"
 	"errors"
-	"github.com/boostgo/lite/errs"
+	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/storage/redis"
 	"github.com/boostgo/lite/system/health"
 	"golang.org/x/sync/errgroup"
@@ -36,7 +36,7 @@ func New(cfg ...redis.ConnectionConfig) health.Checker {
 func checkConnect(ctx context.Context, cfg redis.ConnectionConfig) (err error) {
 	client, err := redis.Connect(cfg.Address, cfg.Port, cfg.DB, cfg.Password)
 	if err != nil {
-		return errs.
+		return errorx.
 			New("Health check failed on connect client").
 			SetError(err)
 	}
@@ -44,13 +44,13 @@ func checkConnect(ctx context.Context, cfg redis.ConnectionConfig) (err error) {
 
 	result, err := client.Ping(ctx).Result()
 	if err != nil {
-		return errs.
+		return errorx.
 			New("Health check failed on ping/pong").
 			SetError(err)
 	}
 
 	if result != "PONG" {
-		return errs.
+		return errorx.
 			New("Health check failed on ping/pong result compare").
 			AddContext("result", result)
 	}

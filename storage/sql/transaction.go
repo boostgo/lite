@@ -2,7 +2,8 @@ package sql
 
 import (
 	"context"
-	"github.com/boostgo/lite/system/try"
+
+	"github.com/boostgo/errorx"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -48,7 +49,7 @@ func Atomic(ctx context.Context, conn *sqlx.DB, fn func(ctx context.Context) err
 
 	tx, ok = GetTx(ctx)
 	if ok {
-		return try.Try(func() error {
+		return errorx.Try(func() error {
 			return fn(ctx)
 		})
 	}
@@ -67,7 +68,7 @@ func Atomic(ctx context.Context, conn *sqlx.DB, fn func(ctx context.Context) err
 		_ = tx.Commit()
 	}()
 
-	return try.Try(func() error {
+	return errorx.Try(func() error {
 		return fn(context.WithValue(ctx, transactionKey, tx))
 	})
 }

@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/boostgo/lite/errs"
+	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/system/trace"
 	"github.com/boostgo/lite/types/flex"
 	"net/http"
@@ -49,7 +49,7 @@ func (response *Response) Parse(export any) error {
 	}
 
 	if err := json.Unmarshal(response.bodyBlob, export); err != nil {
-		return errs.
+		return errorx.
 			New("Unmarshal response body").
 			SetError(err).
 			AddContext("url", response.request.req.RequestURI).

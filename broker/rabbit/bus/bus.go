@@ -2,8 +2,8 @@ package bus
 
 import (
 	"context"
+	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/broker/rabbit/connector"
-	"github.com/boostgo/lite/errs"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/validator"
 	"reflect"
@@ -94,7 +94,7 @@ func (bus *Bus) Listener(ctx context.Context, connectionString string) (Listener
 func nameOfEvent(event any) (string, error) {
 	reflectValue := reflect.TypeOf(event)
 	if reflectValue.Kind() != reflect.Struct {
-		return "", errs.
+		return "", errorx.
 			New("Provided argument is not struct").
 			AddContext("actual-type", reflectValue.Kind())
 	}

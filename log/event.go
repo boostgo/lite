@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/boostgo/convert"
-	"github.com/boostgo/lite/errs"
+	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/system/trace"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
@@ -120,7 +120,7 @@ func (e *event) Err(err error) Event {
 		return e
 	}
 
-	custom, ok := errs.TryGet(err)
+	custom, ok := errorx.TryGet(err)
 	if !ok {
 		e.inner.Err(err)
 	} else {

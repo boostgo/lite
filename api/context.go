@@ -2,16 +2,17 @@ package api
 
 import (
 	"context"
-	"github.com/boostgo/lite/errs"
-	"github.com/boostgo/lite/system/validator"
-	"github.com/boostgo/lite/types/format"
-	"github.com/boostgo/lite/types/param"
-	"github.com/labstack/echo/v4"
 	"io"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/boostgo/errorx"
+	"github.com/boostgo/lite/system/validator"
+	"github.com/boostgo/lite/types/format"
+	"github.com/boostgo/lite/types/param"
+	"github.com/labstack/echo/v4"
 )
 
 var (
@@ -29,9 +30,9 @@ func init() {
 func Param(ctx echo.Context, paramName string) (param.Param, error) {
 	value := ctx.Param(paramName)
 	if value == "" {
-		return param.Param{}, errs.
+		return param.Param{}, errorx.
 			New("Path param is empty").
-			SetError(errs.ErrUnprocessableEntity).
+			SetError(errorx.ErrUnprocessableEntity).
 			AddContext("param-name", paramName)
 	}
 
@@ -55,9 +56,9 @@ func QueryParam(ctx echo.Context, queryParamName string) param.Param {
 // After success format converting, run structure validation (for "validate" tags)
 func Parse(ctx echo.Context, export any) error {
 	if err := ctx.Bind(export); err != nil {
-		return errs.
+		return errorx.
 			New("Parse request body").
-			SetError(err, errs.ErrUnprocessableEntity)
+			SetError(err, errorx.ErrUnprocessableEntity)
 	}
 
 	if err := format.Convert(export); err != nil {
@@ -75,7 +76,7 @@ func Body(ctx echo.Context) (body []byte, err error) {
 
 	body, err = io.ReadAll(ctx.Request().Body)
 	if err != nil {
-		return nil, errs.
+		return nil, errorx.
 			New("Parse request body").
 			SetType("API").
 			SetError(err)
@@ -98,7 +99,7 @@ func SetContext(ctx echo.Context, native context.Context) {
 //
 // Request body must be form data
 func File(ctx echo.Context, name string) (content []byte, err error) {
-	defer errs.Wrap("API", &err, "Read form file error")
+	defer errorx.Wrap("API", &err, "Read form file error")
 
 	header, err := ctx.FormFile(name)
 	if err != nil {

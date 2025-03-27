@@ -2,7 +2,8 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/boostgo/lite/errs"
+
+	"github.com/boostgo/errorx"
 )
 
 type createdID struct {
@@ -35,7 +36,7 @@ func WrapErrorBlob(err error) []byte {
 	output.Status = statusFailure
 
 	// build/collect error output
-	custom, ok := errs.TryGet(err)
+	custom, ok := errorx.TryGet(err)
 	if ok {
 		output.Message = custom.Message()
 		output.Type = custom.Type()

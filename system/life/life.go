@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/boostgo/collection/slicex"
-	"github.com/boostgo/lite/system/try"
+	"github.com/boostgo/errorx"
 )
 
 var (
@@ -90,7 +90,7 @@ func Wait(waitTime ...time.Duration) {
 	}
 
 	for _, tear := range slicex.Reverse(l.tears) {
-		try.Must(tear)
+		errorx.TryMust(tear)
 	}
 
 	if len(waitTime) > 0 {

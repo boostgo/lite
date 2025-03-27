@@ -2,7 +2,7 @@ package web
 
 import (
 	"bytes"
-	"github.com/boostgo/lite/errs"
+	"github.com/boostgo/errorx"
 	"io"
 )
 
@@ -40,7 +40,7 @@ func NewBytesWriter() BytesWriter {
 }
 
 func (writer *bytesBuffer) Write(bytes []byte) (n int, err error) {
-	defer errs.Wrap(writer.errType, &err, "Write")
+	defer errorx.Wrap(writer.errType, &err, "Write")
 	return writer.buffer.Write(bytes)
 }
 

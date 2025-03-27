@@ -3,7 +3,8 @@ package rabbit
 import (
 	"context"
 	"encoding/json"
-	"github.com/boostgo/lite/errs"
+
+	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/system/trace"
 	"github.com/boostgo/lite/types/content"
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -28,7 +29,9 @@ func defaultPublishConfig() PublishConfig {
 func (broker *Broker) Publish(ctx context.Context, queue string, body any, cfg ...PublishConfig) error {
 	bodyInBytes, err := json.Marshal(body)
 	if err != nil {
-		return errs.New("Parse message body for publish").SetError(err)
+		return errorx.
+			New("Parse message body for publish").
+			SetError(err)
 	}
 
 	var config PublishConfig
@@ -57,7 +60,7 @@ func (broker *Broker) Publish(ctx context.Context, queue string, body any, cfg .
 			Body:        bodyInBytes,
 			Headers:     headers,
 		}); err != nil {
-		return errs.
+		return errorx.
 			New("Publish message error").
 			SetError(err).
 			AddContext("queue", queue)

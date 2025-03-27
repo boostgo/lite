@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/boostgo/collection/slicex"
-	"github.com/boostgo/lite/errs"
+	"github.com/boostgo/errorx"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -58,7 +58,7 @@ func (client *singleClient) TxPipeline(_ context.Context) (redis.Pipeliner, erro
 }
 
 func (client *singleClient) Keys(ctx context.Context, pattern string) (keys []string, err error) {
-	defer errs.Wrap(errType, &err, "Keys")
+	defer errorx.Wrap(errType, &err, "Keys")
 
 	tx, ok := GetTx(ctx)
 	if ok {
@@ -73,7 +73,7 @@ func (client *singleClient) Delete(ctx context.Context, keys ...string) (err err
 		return nil
 	}
 
-	defer errs.Wrap(errType, &err, "Delete")
+	defer errorx.Wrap(errType, &err, "Delete")
 
 	// clean up keys from empty
 	keys = slicex.Filter(keys, func(key string) bool {
@@ -93,7 +93,7 @@ func (client *singleClient) Delete(ctx context.Context, keys ...string) (err err
 }
 
 func (client *singleClient) Dump(ctx context.Context, key string) (result string, err error) {
-	defer errs.Wrap(errType, &err, "Dump")
+	defer errorx.Wrap(errType, &err, "Dump")
 
 	if err = validateKey(key); err != nil {
 		return result, err
@@ -108,16 +108,16 @@ func (client *singleClient) Dump(ctx context.Context, key string) (result string
 }
 
 func (client *singleClient) Rename(ctx context.Context, oldKey, newKey string) (err error) {
-	defer errs.Wrap(errType, &err, "Rename")
+	defer errorx.Wrap(errType, &err, "Rename")
 
 	if err = validateKey(oldKey); err != nil {
-		return errs.
+		return errorx.
 			New("Old key is invalid").
 			SetError(err)
 	}
 
 	if err = validateKey(newKey); err != nil {
-		return errs.
+		return errorx.
 			New("New key is invalid").
 			SetError(err)
 	}
@@ -131,7 +131,7 @@ func (client *singleClient) Rename(ctx context.Context, oldKey, newKey string) (
 }
 
 func (client *singleClient) Refresh(ctx context.Context, key string, ttl time.Duration) (err error) {
-	defer errs.Wrap(errType, &err, "Refresh")
+	defer errorx.Wrap(errType, &err, "Refresh")
 
 	if err = validateKey(key); err != nil {
 		return err
@@ -146,7 +146,7 @@ func (client *singleClient) Refresh(ctx context.Context, key string, ttl time.Du
 }
 
 func (client *singleClient) RefreshAt(ctx context.Context, key string, at time.Time) (err error) {
-	defer errs.Wrap(errType, &err, "RefreshAt")
+	defer errorx.Wrap(errType, &err, "RefreshAt")
 
 	if err = validateKey(key); err != nil {
 		return err
@@ -161,7 +161,7 @@ func (client *singleClient) RefreshAt(ctx context.Context, key string, at time.T
 }
 
 func (client *singleClient) TTL(ctx context.Context, key string) (ttl time.Duration, err error) {
-	defer errs.Wrap(errType, &err, "TTL")
+	defer errorx.Wrap(errType, &err, "TTL")
 
 	if err = validateKey(key); err != nil {
 		return ttl, err
@@ -179,14 +179,14 @@ func (client *singleClient) TTL(ctx context.Context, key string) (ttl time.Durat
 
 	const notExistKey = -2
 	if ttl == notExistKey {
-		return ttl, errs.ErrNotFound
+		return ttl, errorx.ErrNotFound
 	}
 
 	return ttl, nil
 }
 
 func (client *singleClient) Set(ctx context.Context, key string, value any, ttl ...time.Duration) (err error) {
-	defer errs.Wrap(errType, &err, "Set")
+	defer errorx.Wrap(errType, &err, "Set")
 
 	if err = validateKey(key); err != nil {
 		return err
@@ -206,7 +206,7 @@ func (client *singleClient) Set(ctx context.Context, key string, value any, ttl 
 }
 
 func (client *singleClient) Get(ctx context.Context, key string) (result string, err error) {
-	defer errs.Wrap(errType, &err, "Get")
+	defer errorx.Wrap(errType, &err, "Get")
 
 	if err = validateKey(key); err != nil {
 		return result, err
@@ -220,9 +220,9 @@ func (client *singleClient) Get(ctx context.Context, key string) (result string,
 	}
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
-			return result, errs.
+			return result, errorx.
 				New("Redis key not found").
-				SetError(errs.ErrNotFound).
+				SetError(errorx.ErrNotFound).
 				AddContext("key", key)
 		}
 
@@ -233,12 +233,12 @@ func (client *singleClient) Get(ctx context.Context, key string) (result string,
 }
 
 func (client *singleClient) MGet(ctx context.Context, keys []string) (result []any, err error) {
-	defer errs.Wrap(errType, &err, "MGet")
+	defer errorx.Wrap(errType, &err, "MGet")
 	return client.client.MGet(ctx, keys...).Result()
 }
 
 func (client *singleClient) Exist(ctx context.Context, key string) (result int64, err error) {
-	defer errs.Wrap(errType, &err, "Exist")
+	defer errorx.Wrap(errType, &err, "Exist")
 
 	if err = validateKey(key); err != nil {
 		return result, err
@@ -253,7 +253,7 @@ func (client *singleClient) Exist(ctx context.Context, key string) (result int64
 }
 
 func (client *singleClient) GetBytes(ctx context.Context, key string) (result []byte, err error) {
-	defer errs.Wrap(errType, &err, "Get")
+	defer errorx.Wrap(errType, &err, "Get")
 
 	if err = validateKey(key); err != nil {
 		return result, err
@@ -267,9 +267,9 @@ func (client *singleClient) GetBytes(ctx context.Context, key string) (result []
 	}
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
-			return result, errs.
+			return result, errorx.
 				New("Redis key not found").
-				SetError(errs.ErrNotFound).
+				SetError(errorx.ErrNotFound).
 				AddContext("key", key)
 		}
 
@@ -280,7 +280,7 @@ func (client *singleClient) GetBytes(ctx context.Context, key string) (result []
 }
 
 func (client *singleClient) GetInt(ctx context.Context, key string) (result int, err error) {
-	defer errs.Wrap(errType, &err, "GetInt")
+	defer errorx.Wrap(errType, &err, "GetInt")
 
 	if err = validateKey(key); err != nil {
 		return result, err
@@ -294,9 +294,9 @@ func (client *singleClient) GetInt(ctx context.Context, key string) (result int,
 	}
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
-			return result, errs.
+			return result, errorx.
 				New("Redis key not found").
-				SetError(errs.ErrNotFound).
+				SetError(errorx.ErrNotFound).
 				AddContext("key", key)
 		}
 
@@ -307,7 +307,7 @@ func (client *singleClient) GetInt(ctx context.Context, key string) (result int,
 }
 
 func (client *singleClient) Parse(ctx context.Context, key string, export any) (err error) {
-	defer errs.Wrap(errType, &err, "Parse")
+	defer errorx.Wrap(errType, &err, "Parse")
 
 	if err = validateKey(key); err != nil {
 		return err
@@ -322,9 +322,9 @@ func (client *singleClient) Parse(ctx context.Context, key string, export any) (
 	}
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
-			return errs.
+			return errorx.
 				New("Redis key not found").
-				SetError(errs.ErrNotFound).
+				SetError(errorx.ErrNotFound).
 				AddContext("key", key)
 		}
 
@@ -335,7 +335,7 @@ func (client *singleClient) Parse(ctx context.Context, key string, export any) (
 }
 
 func (client *singleClient) HSet(ctx context.Context, key string, value map[string]any) (err error) {
-	defer errs.Wrap(errType, &err, "HSet")
+	defer errorx.Wrap(errType, &err, "HSet")
 
 	if err = validateKey(key); err != nil {
 		return err
@@ -350,7 +350,7 @@ func (client *singleClient) HSet(ctx context.Context, key string, value map[stri
 }
 
 func (client *singleClient) HGetAll(ctx context.Context, key string) (result map[string]string, err error) {
-	defer errs.Wrap(errType, &err, "HGetAll")
+	defer errorx.Wrap(errType, &err, "HGetAll")
 
 	if err = validateKey(key); err != nil {
 		return result, err
@@ -365,7 +365,7 @@ func (client *singleClient) HGetAll(ctx context.Context, key string) (result map
 }
 
 func (client *singleClient) HGet(ctx context.Context, key, field string) (result string, err error) {
-	defer errs.Wrap(errType, &err, "HGet")
+	defer errorx.Wrap(errType, &err, "HGet")
 
 	if err = validateKey(key); err != nil {
 		return result, err
@@ -380,7 +380,7 @@ func (client *singleClient) HGet(ctx context.Context, key, field string) (result
 }
 
 func (client *singleClient) HGetInt(ctx context.Context, key, field string) (result int, err error) {
-	defer errs.Wrap(errType, &err, "HGet")
+	defer errorx.Wrap(errType, &err, "HGet")
 
 	if err = validateKey(key); err != nil {
 		return result, err
@@ -395,7 +395,7 @@ func (client *singleClient) HGetInt(ctx context.Context, key, field string) (res
 }
 
 func (client *singleClient) HGetBool(ctx context.Context, key, field string) (result bool, err error) {
-	defer errs.Wrap(errType, &err, "HGet")
+	defer errorx.Wrap(errType, &err, "HGet")
 
 	if err = validateKey(key); err != nil {
 		return result, err
@@ -410,7 +410,7 @@ func (client *singleClient) HGetBool(ctx context.Context, key, field string) (re
 }
 
 func (client *singleClient) HExist(ctx context.Context, key, field string) (exist bool, err error) {
-	defer errs.Wrap(errType, &err, "HExist")
+	defer errorx.Wrap(errType, &err, "HExist")
 
 	if err = validateKey(key); err != nil {
 		return exist, err
@@ -425,7 +425,7 @@ func (client *singleClient) HExist(ctx context.Context, key, field string) (exis
 }
 
 func (client *singleClient) HScan(ctx context.Context, key string, cursor uint64, pattern string, count int64) (keys []string, nextCursor uint64, err error) {
-	defer errs.Wrap(errType, &err, "HScan")
+	defer errorx.Wrap(errType, &err, "HScan")
 
 	if err = validateKey(key); err != nil {
 		return keys, nextCursor, err
@@ -440,7 +440,7 @@ func (client *singleClient) HScan(ctx context.Context, key string, cursor uint64
 }
 
 func (client *singleClient) HIncrBy(ctx context.Context, key, field string, incr int64) (value int64, err error) {
-	defer errs.Wrap(errType, &err, "HIncrBy")
+	defer errorx.Wrap(errType, &err, "HIncrBy")
 
 	if err = validateKey(key); err != nil {
 		return value, err
@@ -455,7 +455,7 @@ func (client *singleClient) HIncrBy(ctx context.Context, key, field string, incr
 }
 
 func (client *singleClient) HIncrByFloat(ctx context.Context, key, field string, incr float64) (value float64, err error) {
-	defer errs.Wrap(errType, &err, "HIncrByFloat")
+	defer errorx.Wrap(errType, &err, "HIncrByFloat")
 
 	if err = validateKey(key); err != nil {
 		return value, err
@@ -470,7 +470,7 @@ func (client *singleClient) HIncrByFloat(ctx context.Context, key, field string,
 }
 
 func (client *singleClient) HDelete(ctx context.Context, key string, fields ...string) (err error) {
-	defer errs.Wrap(errType, &err, "HDelete")
+	defer errorx.Wrap(errType, &err, "HDelete")
 
 	if err = validateKey(key); err != nil {
 		return err
@@ -485,7 +485,7 @@ func (client *singleClient) HDelete(ctx context.Context, key string, fields ...s
 }
 
 func (client *singleClient) HKeys(ctx context.Context, key string) (keys []string, err error) {
-	defer errs.Wrap(errType, &err, "HKeys")
+	defer errorx.Wrap(errType, &err, "HKeys")
 
 	if err = validateKey(key); err != nil {
 		return keys, err
@@ -500,7 +500,7 @@ func (client *singleClient) HKeys(ctx context.Context, key string) (keys []strin
 }
 
 func (client *singleClient) HLen(ctx context.Context, key string) (length int64, err error) {
-	defer errs.Wrap(errType, &err, "HLen")
+	defer errorx.Wrap(errType, &err, "HLen")
 
 	if err = validateKey(key); err != nil {
 		return length, err
@@ -515,7 +515,7 @@ func (client *singleClient) HLen(ctx context.Context, key string) (length int64,
 }
 
 func (client *singleClient) HMGet(ctx context.Context, key string, fields ...string) (result []any, err error) {
-	defer errs.Wrap(errType, &err, "HMGet")
+	defer errorx.Wrap(errType, &err, "HMGet")
 
 	if len(fields) == 0 {
 		return []any{}, nil
@@ -534,7 +534,7 @@ func (client *singleClient) HMGet(ctx context.Context, key string, fields ...str
 }
 
 func (client *singleClient) HMSet(ctx context.Context, key string, values ...any) (err error) {
-	defer errs.Wrap(errType, &err, "HMSet")
+	defer errorx.Wrap(errType, &err, "HMSet")
 
 	if len(values) == 0 {
 		return nil
@@ -553,7 +553,7 @@ func (client *singleClient) HMSet(ctx context.Context, key string, values ...any
 }
 
 func (client *singleClient) HSetNX(ctx context.Context, key, field string, value any) (err error) {
-	defer errs.Wrap(errType, &err, "HSetNX")
+	defer errorx.Wrap(errType, &err, "HSetNX")
 
 	if err = validateKey(key); err != nil {
 		return err
@@ -568,7 +568,7 @@ func (client *singleClient) HSetNX(ctx context.Context, key, field string, value
 }
 
 func (client *singleClient) Scan(ctx context.Context, cursor uint64, pattern string, count int64) (keys []string, nextCursor uint64, err error) {
-	defer errs.Wrap(errType, &err, "Scan")
+	defer errorx.Wrap(errType, &err, "Scan")
 
 	tx, ok := GetTx(ctx)
 	if ok {
@@ -579,7 +579,7 @@ func (client *singleClient) Scan(ctx context.Context, cursor uint64, pattern str
 }
 
 func (client *singleClient) HScanNoValues(ctx context.Context, key string, cursor uint64, pattern string, count int64) (keys []string, nextCursor uint64, err error) {
-	defer errs.Wrap(errType, &err, "HScaNoValues")
+	defer errorx.Wrap(errType, &err, "HScaNoValues")
 
 	if err = validateKey(key); err != nil {
 		return keys, cursor, err
@@ -594,7 +594,7 @@ func (client *singleClient) HScanNoValues(ctx context.Context, key string, curso
 }
 
 func (client *singleClient) HVals(ctx context.Context, key string) (values []string, err error) {
-	defer errs.Wrap(errType, &err, "HVals")
+	defer errorx.Wrap(errType, &err, "HVals")
 
 	if err = validateKey(key); err != nil {
 		return values, err
@@ -609,7 +609,7 @@ func (client *singleClient) HVals(ctx context.Context, key string) (values []str
 }
 
 func (client *singleClient) HRandField(ctx context.Context, key string, count int) (keys []string, err error) {
-	defer errs.Wrap(errType, &err, "HRandField")
+	defer errorx.Wrap(errType, &err, "HRandField")
 
 	if err = validateKey(key); err != nil {
 		return keys, err
@@ -624,7 +624,7 @@ func (client *singleClient) HRandField(ctx context.Context, key string, count in
 }
 
 func (client *singleClient) HRandFieldWithValues(ctx context.Context, key string, count int) (values []redis.KeyValue, err error) {
-	defer errs.Wrap(errType, &err, "HRandFieldWithValues")
+	defer errorx.Wrap(errType, &err, "HRandFieldWithValues")
 
 	if err = validateKey(key); err != nil {
 		return values, err
@@ -640,7 +640,7 @@ func (client *singleClient) HRandFieldWithValues(ctx context.Context, key string
 }
 
 func (client *singleClient) HExpire(ctx context.Context, key string, expiration time.Duration, fields ...string) (states []int64, err error) {
-	defer errs.Wrap(errType, &err, "HExpire")
+	defer errorx.Wrap(errType, &err, "HExpire")
 
 	if len(fields) == 0 {
 		return states, nil
@@ -659,7 +659,7 @@ func (client *singleClient) HExpire(ctx context.Context, key string, expiration 
 }
 
 func (client *singleClient) HTTL(ctx context.Context, key string, fields ...string) (ttls []int64, err error) {
-	defer errs.Wrap(errType, &err, "HTTL")
+	defer errorx.Wrap(errType, &err, "HTTL")
 
 	if len(fields) == 0 {
 		return ttls, nil
