@@ -4,11 +4,13 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 	"time"
+
+	"github.com/boostgo/lite/internal/stringx"
 
 	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/api"
-	"github.com/boostgo/lite/types/str"
 )
 
 type httpCacheDistributor struct {
@@ -51,10 +53,10 @@ func (distributor *httpCacheDistributor) generateKey(request *http.Request) stri
 		url = url[1:]
 	}
 
-	return str.String(distributor.prefix, str.Replace(url, map[string]string{
+	return strings.Join([]string{distributor.prefix, stringx.Replace(url, map[string]string{
 		"/": "_",
 		"?": "-",
 		"=": "_",
 		"&": "-",
-	}))
+	})}, "")
 }

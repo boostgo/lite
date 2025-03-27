@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/boostgo/lite/internal/reflectx"
 	"sync"
+
+	"github.com/boostgo/lite/internal/reflectx"
 
 	"github.com/IBM/sarama"
 	"github.com/boostgo/convert"

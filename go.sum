@@ -20,6 +20,8 @@ github.com/boostgo/convert v1.0.0 h1:gRbQsnAKRS1yeUHPwVJN/0lmLtwGdvT0Eu6DWnXwSMw
 github.com/boostgo/convert v1.0.0/go.mod h1:Ayj4flaIro53vCcGLRxGsdn4N5+zS+AI1kdTpdVoWE8=
 github.com/boostgo/errorx v1.0.0 h1:nULUv9diE6DVAuBhX7JXBTTBtXHr+hTf2L3j8edB9Tk=
 github.com/boostgo/errorx v1.0.0/go.mod h1:Pg8sOGtlSG/32ARtIGOz57/F4R5xmpwQ0S9HpVwR/aU=
+github.com/boostgo/stringx v0.0.1 h1:NvJPXgO4uvZKHU8JWHEj9bYLLTSfMdRWJWsAxOrSiwg=
+github.com/boostgo/stringx v0.0.1/go.mod h1:ZI+0/xTjn3mb/aQJ/o49weddJix707+tVOAHLQKgaWA=
 github.com/bsm/ginkgo/v2 v2.12.0 h1:Ny8MWAHyOepLGlLKYmXG4IEkioBysk6GpaRTLC8zwWs=
 github.com/bsm/ginkgo/v2 v2.12.0/go.mod h1:SwYbGRRDovPVboqFv0tPTcG1sN61LM1Z4ARdbAV9g4c=
 github.com/bsm/gomega v1.27.10 h1:yeMWxP2pV2fG3FgAODIY8EiRE3dy0aeFYt4l7wh6yKA=
@@ -175,8 +177,6 @@ github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWE
 github.com/mattn/go-isatty v0.0.20/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
 github.com/mattn/go-sqlite3 v1.14.22 h1:2gZY6PC6kBnID23Tichd1K+Z0oS6nE/XwU+Vz/5o4kU=
 github.com/mattn/go-sqlite3 v1.14.22/go.mod h1:Uh1q+B4BYcTPb+yiD3kU8Ct7aC0hY9fxUwlHK0RXw+Y=
-github.com/mehanizm/iuliia-go v1.0.2 h1:bHfZZ+ymdt/m0deo0jcDgfWFSqxgV5aAgGeuecX6/oE=
-github.com/mehanizm/iuliia-go v1.0.2/go.mod h1:DwW+0FacfxBaTkMmy9RsxIsxmQzFEunORXw/QppQ1TY=
 github.com/moby/docker-image-spec v1.3.1 h1:jMKff3w6PgbfSa69GfNg+zN/XLhfXJGnEx3Nl2EsFP0=
 github.com/moby/docker-image-spec v1.3.1/go.mod h1:eKmb5VW8vQEh/BAr2yvVNvuiJuY6UIocYsFu/DxxRpo=
 github.com/moby/term v0.5.0 h1:xt8Q1nalod/v7BqbG21f8mQPqH+xAaC9C3N3wfWbVP0=
