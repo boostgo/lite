@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"slices"
 	"time"
 
-	"github.com/boostgo/collection/slicex"
 	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/storage"
 	"github.com/redis/go-redis/v9"
@@ -88,8 +88,8 @@ func (client *shardClient) Delete(ctx context.Context, keys ...string) (err erro
 	}
 
 	// clean up keys from empty
-	keys = slicex.Filter(keys, func(key string) bool {
-		return key != ""
+	keys = slices.DeleteFunc(keys, func(key string) bool {
+		return key == ""
 	})
 
 	if len(keys) == 0 {

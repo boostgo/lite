@@ -3,8 +3,7 @@ package mongo
 import (
 	"context"
 	"fmt"
-	"time"
-
+	
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
@@ -12,10 +11,6 @@ import (
 
 const (
 	BuildTest = "test"
-)
-
-var (
-	Teardown func(fn func() error) = func(fn func() error) {}
 )
 
 func Connect(ctx context.Context, username, password, host string, port int, opts ...options.Lister[options.ClientOptions]) (*mongo.Client, error) {
@@ -48,11 +43,5 @@ func Must(ctx context.Context, username, password, host string, port int, opts .
 		panic(err)
 	}
 
-	Teardown(func() error {
-		tearCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-
-		return client.Disconnect(tearCtx)
-	})
 	return client
 }

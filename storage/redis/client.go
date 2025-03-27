@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"io"
+	"slices"
 	"time"
 
-	"github.com/boostgo/collection/slicex"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -71,7 +71,7 @@ func validateKey(key string) error {
 }
 
 func validateKeys(keys []string) {
-	keys = slicex.Filter(keys, func(s string) bool {
-		return validateKey(s) != nil
+	keys = slices.DeleteFunc(keys, func(key string) bool {
+		return validateKey(key) != nil
 	})
 }

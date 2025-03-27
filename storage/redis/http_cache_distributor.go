@@ -7,8 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/boostgo/lite/internal/stringx"
-
 	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/api"
 )
@@ -53,10 +51,18 @@ func (distributor *httpCacheDistributor) generateKey(request *http.Request) stri
 		url = url[1:]
 	}
 
-	return strings.Join([]string{distributor.prefix, stringx.Replace(url, map[string]string{
+	return strings.Join([]string{distributor.prefix, replaceString(url, map[string]string{
 		"/": "_",
 		"?": "-",
 		"=": "_",
 		"&": "-",
 	})}, "")
+}
+
+func replaceString(input string, replacers map[string]string) string {
+	for oldValue, newValue := range replacers {
+		input = strings.ReplaceAll(input, oldValue, newValue)
+	}
+
+	return input
 }

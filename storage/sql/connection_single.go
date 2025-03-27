@@ -5,13 +5,13 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
-	"github.com/jackc/pgx/v5/stdlib"
-	"github.com/lib/pq"
-	"github.com/mailru/go-clickhouse"
 	"time"
 
 	"github.com/boostgo/lite/log"
+	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
+	"github.com/mailru/go-clickhouse"
 )
 
 func init() {
