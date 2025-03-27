@@ -10,6 +10,7 @@ require (
 	github.com/boostgo/collection v1.0.0
 	github.com/boostgo/convert v1.0.0
 	github.com/boostgo/errorx v1.0.0
+	github.com/boostgo/httpx v0.0.2
 	github.com/go-playground/validator/v10 v10.22.0
 	github.com/go-redsync/redsync/v4 v4.13.0
 	github.com/golang-migrate/migrate/v4 v4.18.1

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/boostgo/errorx"
-	"github.com/boostgo/lite/api"
+	"github.com/boostgo/httpx"
 )
 
 type httpCacheDistributor struct {
@@ -17,7 +17,7 @@ type httpCacheDistributor struct {
 	errType string
 }
 
-func NewHttpCacheDistributor(client Client, prefix string) api.HttpCacheDistributor {
+func NewHttpCacheDistributor(client Client, prefix string) httpx.HttpCacheDistributor {
 	return &httpCacheDistributor{
 		client:  client,
 		prefix:  prefix,

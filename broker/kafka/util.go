@@ -11,7 +11,6 @@ import (
 	"github.com/IBM/sarama"
 	"github.com/boostgo/convert"
 	"github.com/boostgo/lite/system/validator"
-	"github.com/boostgo/lite/types/param"
 )
 
 var (
@@ -42,23 +41,23 @@ func Parse(message *sarama.ConsumerMessage, export any) error {
 }
 
 // Header search header in provided message by header name.
-func Header(message *sarama.ConsumerMessage, name string) param.Param {
+func Header(message *sarama.ConsumerMessage, name string) string {
 	nameBlob := convert.BytesFromString(name)
 
 	for _, header := range message.Headers {
 		if bytes.Equal(header.Key, nameBlob) {
-			return param.New(convert.StringFromBytes(header.Value))
+			return convert.StringFromBytes(header.Value)
 		}
 	}
 
-	return param.Empty()
+	return ""
 }
 
 // Headers returns all headers from message as map and [param.Param] object
-func Headers(message *sarama.ConsumerMessage) map[string]param.Param {
-	headers := make(map[string]param.Param, len(message.Headers))
+func Headers(message *sarama.ConsumerMessage) map[string]string {
+	headers := make(map[string]string, len(message.Headers))
 	for _, header := range message.Headers {
-		headers[string(header.Key)] = param.New(convert.StringFromBytes(header.Value))
+		headers[string(header.Key)] = convert.StringFromBytes(header.Value)
 	}
 	return headers
 }

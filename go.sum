@@ -20,6 +20,8 @@ github.com/boostgo/convert v1.0.0 h1:gRbQsnAKRS1yeUHPwVJN/0lmLtwGdvT0Eu6DWnXwSMw
 github.com/boostgo/convert v1.0.0/go.mod h1:Ayj4flaIro53vCcGLRxGsdn4N5+zS+AI1kdTpdVoWE8=
 github.com/boostgo/errorx v1.0.0 h1:nULUv9diE6DVAuBhX7JXBTTBtXHr+hTf2L3j8edB9Tk=
 github.com/boostgo/errorx v1.0.0/go.mod h1:Pg8sOGtlSG/32ARtIGOz57/F4R5xmpwQ0S9HpVwR/aU=
+github.com/boostgo/httpx v0.0.2 h1:JC/zSph1r3EQisg5G7nok/BkXZPXlaV01aJuk8LkDTs=
+github.com/boostgo/httpx v0.0.2/go.mod h1:IeATVbb49sLwc/ZYFg9PEqRoIzQLowX94qJREie97Gk=
 github.com/bsm/ginkgo/v2 v2.12.0 h1:Ny8MWAHyOepLGlLKYmXG4IEkioBysk6GpaRTLC8zwWs=
 github.com/bsm/ginkgo/v2 v2.12.0/go.mod h1:SwYbGRRDovPVboqFv0tPTcG1sN61LM1Z4ARdbAV9g4c=
 github.com/bsm/gomega v1.27.10 h1:yeMWxP2pV2fG3FgAODIY8EiRE3dy0aeFYt4l7wh6yKA=

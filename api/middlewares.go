@@ -3,13 +3,13 @@ package api
 import (
 	"bytes"
 	"context"
-	"github.com/boostgo/convert"
 	"io"
 	"net/http"
 	"time"
 
+	"github.com/boostgo/convert"
+	"github.com/boostgo/httpx"
 	"github.com/boostgo/lite/log"
-	"github.com/boostgo/lite/types/content"
 	"github.com/labstack/echo/v4"
 )
 
@@ -29,7 +29,7 @@ func Raw() echo.MiddlewareFunc {
 	}
 }
 
-func Cache(ttl time.Duration, distributor HttpCacheDistributor) echo.MiddlewareFunc {
+func Cache(ttl time.Duration, distributor httpx.HttpCacheDistributor) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {
 			// try load response from cache
@@ -45,14 +45,14 @@ func Cache(ttl time.Duration, distributor HttpCacheDistributor) echo.MiddlewareF
 
 			// return cached response
 			if cacheOk {
-				return SuccessRaw(ctx, http.StatusOK, responseBody, content.JSON)
+				return SuccessRaw(ctx, http.StatusOK, responseBody, httpx.ContentTypeJSON)
 			}
 
 			// call handler method to generate response
 			response := ctx.Response()
 			var responseBuffer bytes.Buffer
 			mw := io.MultiWriter(&responseBuffer, response.Writer)
-			response.Writer = newCacheResponseWriter(response.Writer, mw)
+			response.Writer = httpx.NewCacheResponseWriter(response.Writer, mw)
 
 			if err = next(ctx); err != nil {
 				return err

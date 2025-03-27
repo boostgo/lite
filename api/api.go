@@ -1,12 +1,13 @@
 package api
 
 import (
+	"encoding/json"
 	"net/http"
 	"reflect"
 
 	"github.com/boostgo/convert"
+	"github.com/boostgo/httpx"
 	"github.com/boostgo/lite/system/trace"
-	"github.com/boostgo/lite/types/content"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
@@ -27,15 +28,18 @@ func Failure(ctx echo.Context, status int, err error) error {
 		ctx.Response().Header().Set("X-Request-ID", traceID)
 	}
 
+	response := httpx.NewFailureResponse(err)
+	blob, _ := json.Marshal(response)
+
 	// convert output object to bytes
-	return ctx.JSONBlob(status, WrapErrorBlob(err))
+	return ctx.JSONBlob(status, blob)
 }
 
 // Error is wrap function above [Failure] function with auto defining status code by provided error.
 //
 // There is a list of errors in "errs" packages and if provided error is one of them, it has own code representation
 func Error(ctx echo.Context, err error) error {
-	return Failure(ctx, errStatusCode(err), err)
+	return Failure(ctx, httpx.StatusCodeByError(err), err)
 }
 
 // Success returns response with success code & successOutput object and convert it to JSON response.
@@ -68,12 +72,12 @@ func Success(ctx echo.Context, status int, body ...any) error {
 		return ctx.JSON(status, body[0])
 	}
 
-	return ctx.JSON(status, newSuccess(body[0]))
+	return ctx.JSON(status, httpx.NewSuccessResponse(body[0]))
 }
 
 // SuccessRaw returns response in "raw" way
 func SuccessRaw(ctx echo.Context, status int, body []byte, contentType ...string) error {
-	cType := content.Bytes
+	cType := httpx.ContentTypeBytes
 	if len(contentType) > 0 && contentType[0] != "" {
 		cType = contentType[0]
 	}
@@ -84,7 +88,7 @@ func SuccessRaw(ctx echo.Context, status int, body []byte, contentType ...string
 // ReturnExcel returns response with Excel file content type
 func ReturnExcel(ctx echo.Context, name string, file []byte) error {
 	ctx.Response().Header().Set("Content-Disposition", "attachment; filename="+name)
-	return ctx.Blob(http.StatusOK, content.Excel, file)
+	return ctx.Blob(http.StatusOK, httpx.ContentTypeExcel, file)
 }
 
 // Ok is wrap function over [Success] function.
@@ -111,7 +115,7 @@ func Created(ctx echo.Context, body ...any) error {
 
 	switch value := body[0].(type) {
 	case string, uuid.UUID, int, int64, int32: // provided id
-		return Success(ctx, http.StatusCreated, newCreatedID(value))
+		return Success(ctx, http.StatusCreated, httpx.NewCreatedResponse(value))
 	default: // provided body
 		return Success(ctx, http.StatusCreated, value)
 	}

@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/boostgo/errorx"
+	"github.com/boostgo/httpx"
 	"github.com/boostgo/lite/system/validator"
-	"github.com/boostgo/lite/types/param"
 	"github.com/labstack/echo/v4"
 )
 
@@ -26,26 +26,26 @@ func init() {
 }
 
 // Param returns [param.Param] object got from named path variable or not found param error.
-func Param(ctx echo.Context, paramName string) (param.Param, error) {
+func Param(ctx echo.Context, paramName string) (httpx.Param, error) {
 	value := ctx.Param(paramName)
 	if value == "" {
-		return param.Param{}, errorx.
+		return httpx.Param{}, errorx.
 			New("Path param is empty").
 			SetError(errorx.ErrUnprocessableEntity).
 			AddContext("param-name", paramName)
 	}
 
-	return param.New(value), nil
+	return httpx.NewParam(value), nil
 }
 
 // QueryParam returns query param variable as [param.Param] object or empty [param.Param] object if query param is not found.
-func QueryParam(ctx echo.Context, queryParamName string) param.Param {
+func QueryParam(ctx echo.Context, queryParamName string) httpx.Param {
 	value := ctx.QueryParam(queryParamName)
 	if value == "" {
-		return param.Empty()
+		return httpx.EmptyParam()
 	}
 
-	return param.New(value)
+	return httpx.NewParam(value)
 }
 
 // Parse try to parse request body to provided export object (must be pointer to structure object).
@@ -115,19 +115,19 @@ func File(ctx echo.Context, name string) (content []byte, err error) {
 // ParseForm get all form data object and convert them to map with [param.Param] objects.
 //
 // Notice: in this map no any files. Parse them by [File] function
-func ParseForm(ctx echo.Context) (map[string]param.Param, error) {
+func ParseForm(ctx echo.Context) (map[string]httpx.Param, error) {
 	form, err := ctx.MultipartForm()
 	if err != nil {
 		return nil, err
 	}
 
-	exportMap := make(map[string]param.Param)
+	exportMap := make(map[string]httpx.Param)
 	for key, values := range form.Value {
 		if len(values) == 0 {
 			continue
 		}
 
-		exportMap[key] = param.New(values[0])
+		exportMap[key] = httpx.NewParam(values[0])
 	}
 
 	return exportMap, nil

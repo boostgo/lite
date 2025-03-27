@@ -6,7 +6,6 @@ import (
 
 	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/system/trace"
-	"github.com/boostgo/lite/types/content"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -19,7 +18,7 @@ type PublishConfig struct {
 
 func defaultPublishConfig() PublishConfig {
 	return PublishConfig{
-		ContentType: content.JSON,
+		ContentType: "application/json",
 	}
 }
 

@@ -6,7 +6,6 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
-	"github.com/boostgo/lite/internal/reflectx"
 	"io"
 	"net/http"
 	"sync"
@@ -14,6 +13,7 @@ import (
 
 	"github.com/boostgo/convert"
 	"github.com/boostgo/errorx"
+	"github.com/boostgo/lite/internal/reflectx"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/trace"
 )
