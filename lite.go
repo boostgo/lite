@@ -6,10 +6,10 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/boostgo/appx"
 	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/api"
 	"github.com/boostgo/lite/log"
-	"github.com/boostgo/lite/system/life"
 	"github.com/boostgo/lite/system/trace"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -106,8 +106,8 @@ func run(address string) error {
 		}))
 	}
 
-	life.Tear(func() error {
-		return handler.Shutdown(life.Context())
+	appx.Tear(func() error {
+		return handler.Shutdown(appx.Context())
 	})
 
 	if err := handler.Start(address); err != nil {
@@ -132,16 +132,16 @@ func Run(address string, waitTime ...time.Duration) {
 				Error().
 				Err(err).
 				Msg("Run server")
-			life.Cancel()
+			appx.Cancel()
 		}
 	}()
 
-	life.GracefulLog(func() {
+	appx.GracefulLog(func() {
 		log.
 			Info().
 			Msg("Graceful shutdown...")
 	})
-	life.Wait(waitTime...)
+	appx.Wait(waitTime...)
 }
 
 func PodID() string {

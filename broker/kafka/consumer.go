@@ -4,9 +4,9 @@ import (
 	"time"
 
 	"github.com/IBM/sarama"
+	"github.com/boostgo/appx"
 	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/log"
-	"github.com/boostgo/lite/system/life"
 )
 
 type ConsumeHandler func(message *sarama.ConsumerMessage) error
@@ -50,7 +50,7 @@ func NewConsumer(cfg Config, opts ...Option) (*Consumer, error) {
 	if err != nil {
 		return nil, err
 	}
-	life.Tear(consumer.Close)
+	appx.Tear(consumer.Close)
 
 	return &Consumer{
 		consumer: consumer,
@@ -63,7 +63,7 @@ func NewConsumerFromClient(client sarama.Client) (*Consumer, error) {
 	if err != nil {
 		return nil, err
 	}
-	life.Tear(consumer.Close)
+	appx.Tear(consumer.Close)
 
 	return &Consumer{
 		consumer: consumer,
@@ -112,12 +112,12 @@ func (consumer *Consumer) Consume(topic string, handler ConsumeHandler) error {
 			return err
 		}
 
-		life.Tear(partitionConsumer.Close)
+		appx.Tear(partitionConsumer.Close)
 
 		go func(partition int32) {
 			for {
 				select {
-				case <-life.Context().Done():
+				case <-appx.Context().Done():
 					logger.
 						Info().
 						Int32("partition", partition).

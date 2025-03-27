@@ -2,7 +2,7 @@ package kafka
 
 import (
 	"github.com/IBM/sarama"
-	"github.com/boostgo/lite/system/life"
+	"github.com/boostgo/appx"
 	"github.com/google/uuid"
 )
 
@@ -22,7 +22,7 @@ func NewClient(cfg Config, opts ...Option) (sarama.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	life.Tear(client.Close)
+	appx.Tear(client.Close)
 
 	return client, nil
 }

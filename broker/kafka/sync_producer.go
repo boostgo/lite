@@ -3,11 +3,11 @@ package kafka
 import (
 	"context"
 	"errors"
-
+	
+	"github.com/boostgo/appx"
 	"github.com/IBM/sarama"
 	"github.com/boostgo/collection/slicex"
 	"github.com/boostgo/errorx"
-	"github.com/boostgo/lite/system/life"
 	"github.com/boostgo/lite/system/trace"
 )
 
@@ -47,7 +47,7 @@ func NewSyncProducer(brokers []string, opts ...Option) (*SyncProducer, error) {
 	if err != nil {
 		return nil, err
 	}
-	life.Tear(producer.Close)
+	appx.Tear(producer.Close)
 
 	return &SyncProducer{
 		producer:  producer,
@@ -65,7 +65,7 @@ func NewSyncProducerFromClient(client sarama.Client) (*SyncProducer, error) {
 	if err != nil {
 		return nil, err
 	}
-	life.Tear(producer.Close)
+	appx.Tear(producer.Close)
 
 	return &SyncProducer{
 		producer:  producer,

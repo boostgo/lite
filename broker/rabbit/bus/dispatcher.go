@@ -2,10 +2,11 @@ package bus
 
 import (
 	"context"
+
+	"github.com/boostgo/appx"
 	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/broker/rabbit"
 	"github.com/boostgo/lite/log"
-	"github.com/boostgo/lite/system/life"
 	"github.com/boostgo/lite/system/validator"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -27,7 +28,7 @@ func newDispatcher(ctx context.Context, channel *amqp.Channel, validator *valida
 		validator: validator,
 	}
 
-	life.Tear(d.Close)
+	appx.Tear(d.Close)
 	return d
 }
 

@@ -6,6 +6,7 @@ toolchain go1.23.3
 
 require (
 	github.com/IBM/sarama v1.43.2
+	github.com/boostgo/appx v0.0.1
 	github.com/boostgo/collection v1.0.0
 	github.com/boostgo/convert v1.0.0
 	github.com/boostgo/errorx v1.0.0

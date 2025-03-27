@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/IBM/sarama"
+	"github.com/boostgo/appx"
 	"github.com/boostgo/collection/slicex"
 	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/log"
-	"github.com/boostgo/lite/system/life"
 	"github.com/boostgo/lite/system/trace"
 )
 
@@ -48,7 +48,7 @@ func NewConsumerGroup(cfg Config, opts ...Option) (*ConsumerGroup, error) {
 	if err != nil {
 		return nil, err
 	}
-	life.Tear(consumerGroup.Close)
+	appx.Tear(consumerGroup.Close)
 
 	return consumerGroup, nil
 }
@@ -59,7 +59,7 @@ func NewConsumerGroupFromClient(groupID string, client sarama.Client) (*Consumer
 	if err != nil {
 		return nil, err
 	}
-	life.Tear(consumerGroup.Close)
+	appx.Tear(consumerGroup.Close)
 
 	return consumerGroup, nil
 }
@@ -118,7 +118,7 @@ func (consumer *ConsumerGroup) Close() error {
 //
 // Catch consumer group errors and provided context done (for graceful shutdown).
 func (consumer *ConsumerGroup) Consume(name string, topics []string, handler GroupHandler) {
-	consumer.consume(life.Context(), name, topics, handler, life.Cancel)
+	consumer.consume(appx.Context(), name, topics, handler, appx.Cancel)
 }
 
 func (consumer *ConsumerGroup) consume(

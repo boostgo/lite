@@ -2,15 +2,16 @@ package bus
 
 import (
 	"context"
+	"github.com/boostgo/appx"
+	"time"
+
 	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/broker/rabbit"
 	"github.com/boostgo/lite/broker/rabbit/exchanges"
 	"github.com/boostgo/lite/log"
-	"github.com/boostgo/lite/system/life"
 	"github.com/boostgo/lite/system/trace"
 	"github.com/boostgo/lite/system/validator"
 	amqp "github.com/rabbitmq/amqp091-go"
-	"time"
 )
 
 type ListenerConfig struct {
@@ -76,7 +77,7 @@ func (l *listener) Run() error {
 		l.listenQueue(messages, event)
 	}
 
-	life.Tear(l.Close)
+	appx.Tear(l.Close)
 	return nil
 }
 

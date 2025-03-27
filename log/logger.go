@@ -2,11 +2,11 @@ package log
 
 import (
 	"context"
-	"github.com/boostgo/lite/config"
-	"github.com/boostgo/lite/system/life"
+	"github.com/boostgo/appx"
+	"os"
+
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"os"
 )
 
 var (
@@ -15,7 +15,12 @@ var (
 )
 
 func newLogger() zerolog.Logger {
-	if config.Get("PRETTY_LOGGER").Bool() || _prettyLog {
+	switch os.Getenv("PRETTY_LOGGER") {
+	case "true", "TRUE":
+		_prettyLog = true
+	}
+
+	if _prettyLog {
 		return log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	}
 
@@ -61,9 +66,9 @@ func Error(ctx ...context.Context) Event {
 // Fatal print log on error level but with bool fatal=true.
 // Provided context use trace id.
 //
-// Call life.Cancel() method which call graceful shutdown
+// Call AppCancel function
 func Fatal(ctx ...context.Context) Event {
-	defer life.Cancel()
+	defer appx.Cancel()
 	return newEvent(_logger.Error().Bool("fatal", true), ctx...)
 }
 

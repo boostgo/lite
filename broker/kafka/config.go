@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"errors"
+
 	"github.com/IBM/sarama"
 )
 

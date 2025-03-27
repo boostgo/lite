@@ -6,8 +6,12 @@ import (
 
 	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/log"
-	"github.com/boostgo/lite/system/life"
 	"github.com/boostgo/lite/system/trace"
+)
+
+var (
+	Teardown   func(fn func() error) = func(fn func() error) {}
+	AppContext context.Context       = context.Background()
 )
 
 // Worker is job/cron based structure.
@@ -92,7 +96,7 @@ func (worker *Worker) Run() {
 		ticker := time.NewTicker(worker.duration)
 		defer ticker.Stop()
 
-		life.Tear(func() error {
+		Teardown(func() error {
 			// teardown will make main goroutine wait till worker will not be done
 			<-worker.done
 			return nil
@@ -100,7 +104,7 @@ func (worker *Worker) Run() {
 
 		for {
 			select {
-			case <-life.Context().Done():
+			case <-AppContext.Done():
 				logger.
 					Info().
 					Str("worker", worker.name).
