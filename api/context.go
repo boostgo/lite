@@ -10,7 +10,6 @@ import (
 
 	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/system/validator"
-	"github.com/boostgo/lite/types/format"
 	"github.com/boostgo/lite/types/param"
 	"github.com/labstack/echo/v4"
 )
@@ -61,9 +60,7 @@ func Parse(ctx echo.Context, export any) error {
 			SetError(err, errorx.ErrUnprocessableEntity)
 	}
 
-	if err := format.Convert(export); err != nil {
-		return err
-	}
+	// todo: impl formatter
 
 	return _validator.Struct(export)
 }
