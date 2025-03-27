@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
+	"github.com/boostgo/lite/internal/reflectx"
 	"io"
 	"net/http"
 	"sync"
@@ -15,7 +16,6 @@ import (
 	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/trace"
-	"github.com/boostgo/lite/types/flex"
 )
 
 type RequestOption func(request *http.Request)
@@ -188,7 +188,7 @@ func (request *Request) Queries(queries map[string]any) *Request {
 //
 // Export object must be pointer
 func (request *Request) Result(export any) *Request {
-	if !flex.Type(export).IsPtr() {
+	if !reflectx.IsPointer(export) {
 		return request
 	}
 

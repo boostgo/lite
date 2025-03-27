@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/boostgo/errorx"
+	"github.com/boostgo/lite/internal/reflectx"
 	"github.com/boostgo/lite/system/trace"
-	"github.com/boostgo/lite/types/flex"
 	"net/http"
 )
 
@@ -44,7 +44,7 @@ func (response *Response) Parse(export any) error {
 		return nil
 	}
 
-	if !flex.Type(export).IsPtr() {
+	if !reflectx.IsPointer(export) {
 		return errors.New("provided export is not a pointer")
 	}
 

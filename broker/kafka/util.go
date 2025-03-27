@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"github.com/boostgo/lite/internal/reflectx"
 	"sync"
 
 	"github.com/IBM/sarama"
 	"github.com/boostgo/convert"
 	"github.com/boostgo/lite/system/validator"
-	"github.com/boostgo/lite/types/flex"
 	"github.com/boostgo/lite/types/param"
 )
 
@@ -27,7 +27,7 @@ func init() {
 // Parse message body to provided export object (which must be ptr) and validate for "validate" tags.
 func Parse(message *sarama.ConsumerMessage, export any) error {
 	// check export type
-	if !flex.Type(export).IsPtr() {
+	if !reflectx.IsPointer(export) {
 		return errors.New("export object must be pointer")
 	}
 
