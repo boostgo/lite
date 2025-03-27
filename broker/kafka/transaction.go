@@ -5,7 +5,7 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/boostgo/convert"
-	"github.com/boostgo/lite/storage"
+	"github.com/boostgo/storage"
 )
 
 var _ storage.Transaction = new(kafkaTransaction)
