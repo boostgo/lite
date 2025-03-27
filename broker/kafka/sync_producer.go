@@ -3,9 +3,10 @@ package kafka
 import (
 	"context"
 	"errors"
+
 	"github.com/IBM/sarama"
+	"github.com/boostgo/collection/slicex"
 	"github.com/boostgo/lite/errs"
-	"github.com/boostgo/lite/list"
 	"github.com/boostgo/lite/system/life"
 	"github.com/boostgo/lite/system/trace"
 )
@@ -119,7 +120,7 @@ func (producer *SyncProducer) Produce(ctx context.Context, messages ...*sarama.P
 			return errs.
 				New("Send Messages").
 				AddContext("size", len(pErrs)).
-				SetError(list.Map(pErrs, func(pErr *sarama.ProducerError) error {
+				SetError(slicex.Map(pErrs, func(pErr *sarama.ProducerError) error {
 					return pErr
 				})...)
 		}

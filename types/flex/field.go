@@ -2,9 +2,10 @@ package flex
 
 import (
 	"fmt"
-	"github.com/boostgo/lite/list"
 	"reflect"
 	"strings"
+
+	"github.com/boostgo/collection/slicex"
 )
 
 type ObjectField interface {
@@ -55,7 +56,9 @@ func (f *objectField) Tag(tagName string) []string {
 		return nil
 	}
 
-	return list.Of(strings.Split(tagValue, ",")).Map(strings.TrimSpace)
+	return slicex.
+		Of(strings.Split(tagValue, ",")).
+		Map(strings.TrimSpace)
 }
 
 func (f *objectField) String() string {

@@ -2,8 +2,9 @@ package storage
 
 import (
 	"context"
+
+	"github.com/boostgo/collection/slicex"
 	"github.com/boostgo/lite/async"
-	"github.com/boostgo/lite/list"
 )
 
 // Transactor is common representation of transactions for any type of database.
@@ -46,11 +47,12 @@ func NewTransactor(transactors ...Transactor) Transactor {
 }
 
 func (t *transactor) Key() string {
-	return list.JoinString(list.Map(t.transactors, func(t Transactor) string {
-		return t.Key()
-	}), func(s string) string {
-		return s
-	})
+	return slicex.
+		JoinString(slicex.Map(t.transactors, func(t Transactor) string {
+			return t.Key()
+		}), func(s string) string {
+			return s
+		})
 }
 
 func (t *transactor) IsTx(ctx context.Context) bool {

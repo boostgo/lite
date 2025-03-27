@@ -10,6 +10,10 @@ import (
 	"time"
 )
 
+const (
+	BuildTest = "test"
+)
+
 func Connect(ctx context.Context, username, password, host string, port int, opts ...options.Lister[options.ClientOptions]) (*mongo.Client, error) {
 	connectionOpt := options.
 		Client().

@@ -3,8 +3,9 @@ package trace
 import (
 	"bytes"
 	"context"
+
 	"github.com/IBM/sarama"
-	"github.com/boostgo/lite/list"
+	"github.com/boostgo/collection/slicex"
 	"github.com/boostgo/lite/types/to"
 )
 
@@ -48,7 +49,7 @@ func SetKafka(ctx context.Context, messages ...*sarama.ProducerMessage) {
 	traceIdBlob := to.Bytes(traceID)
 	blobKey := to.Bytes(_key)
 	for i := 0; i < len(messages); i++ {
-		_, exist := list.Single(messages[i].Headers, func(header sarama.RecordHeader) bool {
+		_, exist := slicex.Single(messages[i].Headers, func(header sarama.RecordHeader) bool {
 			return bytes.Equal(header.Key, blobKey)
 		})
 		if exist {

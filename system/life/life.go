@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/boostgo/lite/list"
+	"github.com/boostgo/collection/slicex"
 	"github.com/boostgo/lite/system/try"
 )
 
@@ -89,7 +89,7 @@ func Wait(waitTime ...time.Duration) {
 		l.gracefulLog()
 	}
 
-	for _, tear := range list.Reverse(l.tears) {
+	for _, tear := range slicex.Reverse(l.tears) {
 		try.Must(tear)
 	}
 

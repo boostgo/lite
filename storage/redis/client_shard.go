@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"time"
+
+	"github.com/boostgo/collection/slicex"
 	"github.com/boostgo/lite/errs"
-	"github.com/boostgo/lite/list"
 	"github.com/boostgo/lite/storage"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/sync/errgroup"
-	"time"
 )
 
 type ClientSelector func(ctx context.Context, clients []ShardClient) ShardClient
@@ -87,7 +88,7 @@ func (client *shardClient) Delete(ctx context.Context, keys ...string) (err erro
 	}
 
 	// clean up keys from empty
-	keys = list.Filter(keys, func(key string) bool {
+	keys = slicex.Filter(keys, func(key string) bool {
 		return key != ""
 	})
 

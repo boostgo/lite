@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/boostgo/lite/errs"
-	"github.com/boostgo/lite/list"
-	"github.com/redis/go-redis/v9"
 	"time"
+
+	"github.com/boostgo/collection/slicex"
+	"github.com/boostgo/lite/errs"
+	"github.com/redis/go-redis/v9"
 )
 
 type singleClient struct {
@@ -75,7 +76,7 @@ func (client *singleClient) Delete(ctx context.Context, keys ...string) (err err
 	defer errs.Wrap(errType, &err, "Delete")
 
 	// clean up keys from empty
-	keys = list.Filter(keys, func(key string) bool {
+	keys = slicex.Filter(keys, func(key string) bool {
 		return key != ""
 	})
 

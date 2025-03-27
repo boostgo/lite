@@ -1,8 +1,9 @@
 package flex
 
 import (
-	"github.com/boostgo/lite/list"
 	"reflect"
+
+	"github.com/boostgo/collection/slicex"
 )
 
 type ObjectType interface {
@@ -171,7 +172,9 @@ func (t *objectType) Type() reflect.Type {
 }
 
 func (t *objectType) compare(destinations ...reflect.Kind) bool {
-	return list.Of(destinations).Exist(func(kind reflect.Kind) bool {
-		return t.t.Kind() == kind
-	})
+	return slicex.
+		Of(destinations).
+		Exist(func(kind reflect.Kind) bool {
+			return t.t.Kind() == kind
+		})
 }

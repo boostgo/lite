@@ -3,8 +3,9 @@ package flex
 import (
 	"errors"
 	"fmt"
-	"github.com/boostgo/lite/list"
 	"reflect"
+
+	"github.com/boostgo/collection/slicex"
 )
 
 type ObjectFunc interface {
@@ -155,7 +156,7 @@ func (f *objectFunc) Call(arguments ...any) (returnValues []any, err error) {
 	values := f.funcValue().Call(in)
 
 	// convert result to any
-	return list.Map(values, func(v reflect.Value) any {
+	return slicex.Map(values, func(v reflect.Value) any {
 		return v.Interface()
 	}), nil
 }

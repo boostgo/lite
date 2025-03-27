@@ -2,10 +2,11 @@ package errs
 
 import (
 	"errors"
-	"github.com/boostgo/lite/list"
+	"strings"
+
+	"github.com/boostgo/collection/slicex"
 	"github.com/boostgo/lite/types/str"
 	"github.com/boostgo/lite/types/to"
-	"strings"
 )
 
 const (
@@ -74,7 +75,7 @@ func (err *Error) Copy(innerErrors ...error) error {
 // For example, there are messages: ["QueryxContext", "GetUser", "GetByID"]
 // it will be "QueryxContext - GetByID - GetUser"
 func (err *Error) Message() string {
-	return strings.Join(list.Reverse(err.message), " - ")
+	return strings.Join(slicex.Reverse(err.message), " - ")
 }
 
 // SetType append new type in chain of errors
@@ -88,7 +89,7 @@ func (err *Error) SetType(errorType string) *Error {
 // For example, there are types: ["SQL", "User Repository", "User Usecase"]
 // it will be "User Usecase - User Repository - SQL"
 func (err *Error) Type() string {
-	return strings.Join(list.Reverse(err.errorTypes), " - ")
+	return strings.Join(slicex.Reverse(err.errorTypes), " - ")
 }
 
 // Context returns current error context (map)
@@ -200,7 +201,7 @@ func (err *Error) String() string {
 					continue
 				}
 
-				builder.WriteString(list.Map(trace, func(line string) string {
+				builder.WriteString(slicex.Map(trace, func(line string) string {
 					return "\n\t" + line
 				})...)
 				continue

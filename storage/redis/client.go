@@ -3,10 +3,11 @@ package redis
 import (
 	"context"
 	"errors"
-	"github.com/boostgo/lite/list"
-	"github.com/redis/go-redis/v9"
 	"io"
 	"time"
+
+	"github.com/boostgo/collection/slicex"
+	"github.com/redis/go-redis/v9"
 )
 
 const errType = "Redis"
@@ -70,7 +71,7 @@ func validateKey(key string) error {
 }
 
 func validateKeys(keys []string) {
-	keys = list.Filter(keys, func(s string) bool {
+	keys = slicex.Filter(keys, func(s string) bool {
 		return validateKey(s) != nil
 	})
 }

@@ -3,14 +3,15 @@ package kafka
 import (
 	"context"
 	"errors"
+	"time"
+
 	"github.com/IBM/sarama"
+	"github.com/boostgo/collection/slicex"
 	"github.com/boostgo/lite/errs"
-	"github.com/boostgo/lite/list"
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/system/life"
 	"github.com/boostgo/lite/system/trace"
 	"github.com/boostgo/lite/system/try"
-	"time"
 )
 
 type GroupHandler sarama.ConsumerGroupHandler
@@ -35,7 +36,7 @@ func ConsumerGroupOption(offset ...int64) Option {
 
 		config.Consumer.Offsets.AutoCommit.Enable = true
 		config.Consumer.Offsets.AutoCommit.Interval = time.Second
-		
+
 		config.Consumer.Fetch.Default = 1 << 20 // 1MB
 		config.Consumer.Fetch.Max = 10 << 20    // 10MB
 		config.ChannelBufferSize = 256
@@ -85,7 +86,7 @@ func MustConsumerGroupFromClient(groupID string, client sarama.Client) *Consumer
 }
 
 func newConsumerGroup(cfg Config, opts ...Option) (*ConsumerGroup, error) {
-	client, err := NewClient(cfg, list.AddLeft(opts, ConsumerGroupOption())...)
+	client, err := NewClient(cfg, slicex.AddLeft(opts, ConsumerGroupOption())...)
 	if err != nil {
 		return nil, err
 	}

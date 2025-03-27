@@ -2,8 +2,9 @@ package str
 
 import (
 	"fmt"
-	"github.com/boostgo/lite/list"
 	"strings"
+
+	"github.com/boostgo/collection/slicex"
 )
 
 type Builder struct {
@@ -57,7 +58,7 @@ func (builder *Builder) WriteString(s ...string) *Builder {
 		return builder
 	}
 
-	s = list.Filter(s, func(s string) bool {
+	s = slicex.Filter(s, func(s string) bool {
 		return s != ""
 	})
 
