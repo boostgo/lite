@@ -2,13 +2,13 @@ package life
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"os"
 	"os/signal"
+	"slices"
 	"sync"
 	"time"
-
-	"github.com/boostgo/collection/slicex"
-	"github.com/boostgo/errorx"
 )
 
 var (
@@ -89,11 +89,25 @@ func Wait(waitTime ...time.Duration) {
 		l.gracefulLog()
 	}
 
-	for _, tear := range slicex.Reverse(l.tears) {
-		errorx.TryMust(tear)
+	tears := make([]func() error, len(l.tears))
+	copy(tears, l.tears)
+	slices.Reverse(tears)
+
+	for _, tear := range tears {
+		_ = try(tear)
 	}
 
 	if len(waitTime) > 0 {
 		time.Sleep(waitTime[0])
 	}
+}
+
+func try(fn func() error) (err error) {
+	defer func() {
+		if err == nil {
+			err = errors.New(fmt.Sprintf("%v", recover()))
+		}
+	}()
+
+	return fn()
 }
