@@ -2,9 +2,9 @@ package log
 
 import (
 	"context"
-	"github.com/boostgo/appx"
 	"os"
 
+	"github.com/boostgo/appx"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
