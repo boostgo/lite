@@ -6,15 +6,16 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
-	"github.com/boostgo/lite/errs"
-	"github.com/boostgo/lite/log"
-	"github.com/boostgo/lite/system/trace"
-	"github.com/boostgo/lite/types/flex"
-	"github.com/boostgo/lite/types/to"
 	"io"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/boostgo/convert"
+	"github.com/boostgo/lite/errs"
+	"github.com/boostgo/lite/log"
+	"github.com/boostgo/lite/system/trace"
+	"github.com/boostgo/lite/types/flex"
 )
 
 type RequestOption func(request *http.Request)
@@ -370,7 +371,7 @@ func (request *Request) initRequest(method, url string, body ...any) error {
 	// query variables
 	query := request.req.URL.Query()
 	for key, value := range request.queryVariables {
-		query.Set(key, to.String(value))
+		query.Set(key, convert.String(value))
 	}
 	request.req.URL.RawQuery = query.Encode()
 
@@ -379,12 +380,12 @@ func (request *Request) initRequest(method, url string, body ...any) error {
 
 	// headers
 	for key, value := range request.headers {
-		request.req.Header.Set(key, to.String(value))
+		request.req.Header.Set(key, convert.String(value))
 	}
 
 	// cookies
 	for key, value := range request.cookies {
-		request.req.AddCookie(&http.Cookie{Name: key, Value: to.String(value)})
+		request.req.AddCookie(&http.Cookie{Name: key, Value: convert.String(value)})
 	}
 
 	// options

@@ -3,11 +3,12 @@ package mongo
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/boostgo/lite/system/life"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
-	"time"
 )
 
 const (

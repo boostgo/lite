@@ -2,13 +2,14 @@ package health
 
 import (
 	"context"
-	api2 "github.com/boostgo/lite/api"
-	"github.com/boostgo/lite/system/trace"
-	"github.com/boostgo/lite/types/to"
-	"github.com/labstack/echo/v4"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/boostgo/convert"
+	"github.com/boostgo/lite/api"
+	"github.com/boostgo/lite/system/trace"
+	"github.com/labstack/echo/v4"
 )
 
 type Health struct {
@@ -56,20 +57,20 @@ func (health *Health) Handler() echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		status, statuses := health.StatusInfo()
 
-		pretty := api2.QueryParam(ctx, "pretty").Bool()
+		pretty := api.QueryParam(ctx, "pretty").Bool()
 		if pretty {
-			return api2.Ok(ctx, map[string]any{
+			return api.Ok(ctx, map[string]any{
 				"status":   status,
 				"statuses": statuses,
 			})
 		}
 
-		return api2.SuccessRaw(ctx, http.StatusOK, to.Bytes(status))
+		return api.SuccessRaw(ctx, http.StatusOK, convert.BytesFromString(status))
 	}
 }
 
 func (health *Health) RegisterHandler(router *echo.Echo, path string) *Health {
-	router.GET(path, health.Handler(), api2.Raw())
+	router.GET(path, health.Handler(), api.Raw())
 	return health
 }
 

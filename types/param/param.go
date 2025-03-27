@@ -2,11 +2,12 @@ package param
 
 import (
 	"encoding/json"
-	"github.com/boostgo/lite/errs"
-	"github.com/boostgo/lite/types/to"
-	"github.com/google/uuid"
 	"strconv"
 	"strings"
+
+	"github.com/boostgo/convert"
+	"github.com/boostgo/lite/errs"
+	"github.com/google/uuid"
 )
 
 func ErrorParseIntParam(err error, value string) error {
@@ -83,7 +84,7 @@ func (param Param) IntArray() []int {
 			continue
 		}
 
-		integers = append(integers, to.Int(value))
+		integers = append(integers, convert.Int(value))
 	}
 	return integers
 }
@@ -195,7 +196,7 @@ func (param Param) MustUUID() uuid.UUID {
 }
 
 func (param Param) Bytes() []byte {
-	return to.Bytes(param.value)
+	return convert.BytesFromString(param.value)
 }
 
 func (param Param) Parse(export any) error {

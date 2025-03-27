@@ -2,10 +2,11 @@ package web
 
 import (
 	"bytes"
-	"github.com/boostgo/lite/errs"
-	"github.com/boostgo/lite/types/to"
 	"io"
 	"mime/multipart"
+
+	"github.com/boostgo/convert"
+	"github.com/boostgo/lite/errs"
 )
 
 // FormDataWriter uses for sending form-data request body
@@ -45,7 +46,7 @@ func NewFormData(initial ...map[string]any) FormDataWriter {
 
 func (fd *formData) Add(key string, value any) (err error) {
 	defer errs.Wrap(fd.errType, &err, "Add")
-	return fd.writer.WriteField(key, to.String(value))
+	return fd.writer.WriteField(key, convert.String(value))
 }
 
 func (fd *formData) AddFile(name, fileName string, file []byte) (err error) {

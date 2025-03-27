@@ -2,14 +2,15 @@ package tsv
 
 import (
 	"errors"
-	"github.com/boostgo/lite/types/to"
 	"strings"
+
+	"github.com/boostgo/convert"
 )
 
 const split = "	"
 
 func Unmarshal(body []byte) ([]string, error) {
-	input := to.StringFromBytes(body)
+	input := convert.StringFromBytes(body)
 
 	records := strings.Split(input, split)
 

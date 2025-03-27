@@ -3,13 +3,13 @@ package api
 import (
 	"bytes"
 	"context"
+	"github.com/boostgo/convert"
 	"io"
 	"net/http"
 	"time"
 
 	"github.com/boostgo/lite/log"
 	"github.com/boostgo/lite/types/content"
-	"github.com/boostgo/lite/types/to"
 	"github.com/labstack/echo/v4"
 )
 
@@ -74,5 +74,5 @@ func Cache(ttl time.Duration, distributor HttpCacheDistributor) echo.MiddlewareF
 }
 
 func isRaw(ctx echo.Context) bool {
-	return to.Bool(Context(ctx).Value(rawResponseKey))
+	return convert.Bool(Context(ctx).Value(rawResponseKey))
 }

@@ -2,9 +2,10 @@ package web
 
 import (
 	"context"
-	"github.com/boostgo/lite/types/to"
 	"net/http"
 	"time"
+
+	"github.com/boostgo/convert"
 )
 
 // Client web client which allow to send HTTP requests.
@@ -132,7 +133,7 @@ func (client *Client) Options(opts ...RequestOption) *Client {
 //
 // If key already exist it rewrites existing key value
 func (client *Client) Header(key string, value any) *Client {
-	client.headers[key] = to.String(value)
+	client.headers[key] = convert.String(value)
 	return client
 }
 
@@ -164,7 +165,7 @@ func (client *Client) ContentType(contentType string) *Client {
 //
 // Existing key will be rewritten
 func (client *Client) Cookie(key string, value any) *Client {
-	client.cookies[key] = to.String(value)
+	client.cookies[key] = convert.String(value)
 	return client
 }
 

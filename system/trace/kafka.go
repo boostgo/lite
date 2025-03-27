@@ -6,17 +6,17 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/boostgo/collection/slicex"
-	"github.com/boostgo/lite/types/to"
+	"github.com/boostgo/convert"
 )
 
 // GetKafka return request id from kafka message
 func GetKafka(message *sarama.ConsumerMessage) string {
 	for _, header := range message.Headers {
-		if to.String(header.Key) != _key {
+		if convert.String(header.Key) != _key {
 			continue
 		}
 
-		return to.String(header.Value)
+		return convert.String(header.Value)
 	}
 
 	return ""
@@ -25,11 +25,11 @@ func GetKafka(message *sarama.ConsumerMessage) string {
 // GetKafkaCtx returns context with trace id from message
 func GetKafkaCtx(ctx context.Context, message *sarama.ConsumerMessage) context.Context {
 	for _, header := range message.Headers {
-		if to.String(header.Key) != _key {
+		if convert.String(header.Key) != _key {
 			continue
 		}
 
-		return Set(ctx, to.String(header.Value))
+		return Set(ctx, convert.String(header.Value))
 	}
 
 	return ctx
@@ -46,8 +46,8 @@ func SetKafka(ctx context.Context, messages ...*sarama.ProducerMessage) {
 		return
 	}
 
-	traceIdBlob := to.Bytes(traceID)
-	blobKey := to.Bytes(_key)
+	traceIdBlob := convert.BytesFromString(traceID)
+	blobKey := convert.BytesFromString(_key)
 	for i := 0; i < len(messages); i++ {
 		_, exist := slicex.Single(messages[i].Headers, func(header sarama.RecordHeader) bool {
 			return bytes.Equal(header.Key, blobKey)

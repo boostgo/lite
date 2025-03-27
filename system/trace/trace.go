@@ -2,9 +2,9 @@ package trace
 
 import (
 	"context"
-	"github.com/boostgo/lite/types/to"
-	"github.com/google/uuid"
 	"sync/atomic"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -111,5 +111,5 @@ func ID() uuid.UUID {
 
 // String generate new trace id as string
 func String() string {
-	return to.String(ID())
+	return uuid.NewString()
 }

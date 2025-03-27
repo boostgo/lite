@@ -3,9 +3,10 @@ package try
 import (
 	"context"
 	"errors"
-	"github.com/boostgo/lite/errs"
-	"github.com/boostgo/lite/types/to"
 	"runtime/debug"
+
+	"github.com/boostgo/convert"
+	"github.com/boostgo/lite/errs"
 )
 
 // Try recovers if panic was thrown.
@@ -45,6 +46,6 @@ func CatchPanic(err any) error {
 
 	return errs.
 		New("PANIC RECOVER").
-		SetError(errors.New(to.String(err))).
-		AddContext("trace", to.String(debug.Stack()))
+		SetError(errors.New(convert.String(err))).
+		AddContext("trace", convert.String(debug.Stack()))
 }

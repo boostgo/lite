@@ -2,9 +2,10 @@ package kafka
 
 import (
 	"context"
+
 	"github.com/IBM/sarama"
+	"github.com/boostgo/convert"
 	"github.com/boostgo/lite/storage"
-	"github.com/boostgo/lite/types/to"
 )
 
 var _ storage.Transaction = new(kafkaTransaction)
@@ -113,7 +114,7 @@ func NoTxContext(ctx context.Context) context.Context {
 
 func getTx(ctx context.Context) (storage.Transaction, bool) {
 	noTx := ctx.Value(noTxKey)
-	if noTx != nil && to.Bool(noTx) {
+	if noTx != nil && convert.Bool(noTx) {
 		return nil, false
 	}
 

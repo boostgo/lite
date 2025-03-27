@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/boostgo/collection/slicex"
+	"github.com/boostgo/convert"
 	"github.com/boostgo/lite/types/str"
-	"github.com/boostgo/lite/types/to"
 )
 
 const (
@@ -207,7 +207,7 @@ func (err *Error) String() string {
 				continue
 			}
 
-			builder.WriteString(key, "=", to.String(value), ";")
+			builder.WriteString(key, "=", convert.String(value), ";")
 		}
 	}
 
@@ -292,7 +292,7 @@ func (err *Error) grow() int {
 				continue
 			}
 
-			grow += len(key) + len(to.String(value)) + 2
+			grow += len(key) + len(convert.String(value)) + 2
 		}
 	}
 

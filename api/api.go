@@ -1,13 +1,14 @@
 package api
 
 import (
-	"github.com/boostgo/lite/system/trace"
-	"github.com/boostgo/lite/types/content"
-	"github.com/boostgo/lite/types/to"
-	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
 	"net/http"
 	"reflect"
+
+	"github.com/boostgo/convert"
+	"github.com/boostgo/lite/system/trace"
+	"github.com/boostgo/lite/types/content"
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 )
 
 // Failure returns response with some error status and convert provided error to
@@ -60,7 +61,7 @@ func Success(ctx echo.Context, status int, body ...any) error {
 	}
 
 	if isPrimitive(body[0]) {
-		return ctx.String(status, to.String(body[0]))
+		return ctx.String(status, convert.String(body[0]))
 	}
 
 	if isRaw(ctx) {

@@ -2,12 +2,13 @@ package log
 
 import (
 	"context"
+	"time"
+
+	"github.com/boostgo/convert"
 	"github.com/boostgo/lite/errs"
 	"github.com/boostgo/lite/system/trace"
-	"github.com/boostgo/lite/types/to"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
-	"time"
 )
 
 // Event represents a log event. It is instanced by one of the level method of
@@ -108,7 +109,7 @@ func (e *event) Arr(key string, args ...any) Event {
 
 	stringArgs := make([]string, len(args))
 	for i, arg := range args {
-		stringArgs[i] = to.String(arg)
+		stringArgs[i] = convert.String(arg)
 	}
 	e.inner.Strs(key, stringArgs)
 	return e
@@ -163,7 +164,7 @@ func (e *event) Str(key, value string) Event {
 }
 
 func (e *event) UUID(key string, id uuid.UUID) Event {
-	e.inner.Str(key, to.String(id))
+	e.inner.Str(key, id.String())
 	return e
 }
 
@@ -318,7 +319,7 @@ func (e *event) Durations(key string, value []time.Duration) Event {
 }
 
 func (e *event) Obj(key string, obj any) Event {
-	e.Any(key, to.String(obj))
+	e.Any(key, convert.String(obj))
 	return e
 }
 

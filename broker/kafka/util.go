@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"sync"
+
 	"github.com/IBM/sarama"
+	"github.com/boostgo/convert"
 	"github.com/boostgo/lite/system/validator"
 	"github.com/boostgo/lite/types/flex"
 	"github.com/boostgo/lite/types/param"
-	"github.com/boostgo/lite/types/to"
-	"sync"
 )
 
 var (
@@ -67,11 +68,11 @@ func Parse(message *sarama.ConsumerMessage, export any) error {
 
 // Header search header in provided message by header name.
 func Header(message *sarama.ConsumerMessage, name string) param.Param {
-	nameBlob := to.Bytes(name)
+	nameBlob := convert.BytesFromString(name)
 
 	for _, header := range message.Headers {
 		if bytes.Equal(header.Key, nameBlob) {
-			return param.New(to.String(header.Value))
+			return param.New(convert.StringFromBytes(header.Value))
 		}
 	}
 
@@ -82,7 +83,7 @@ func Header(message *sarama.ConsumerMessage, name string) param.Param {
 func Headers(message *sarama.ConsumerMessage) map[string]param.Param {
 	headers := make(map[string]param.Param, len(message.Headers))
 	for _, header := range message.Headers {
-		headers[string(header.Key)] = param.New(to.String(header.Value))
+		headers[string(header.Key)] = param.New(convert.StringFromBytes(header.Value))
 	}
 	return headers
 }
@@ -93,8 +94,8 @@ func SetHeaders(headers map[string]any) []sarama.RecordHeader {
 
 	for name, value := range headers {
 		messageHeaders = append(messageHeaders, sarama.RecordHeader{
-			Key:   to.Bytes(name),
-			Value: to.Bytes(value),
+			Key:   convert.BytesFromString(name),
+			Value: convert.Bytes(value),
 		})
 	}
 

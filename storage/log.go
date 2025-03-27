@@ -2,7 +2,8 @@ package storage
 
 import (
 	"context"
-	"github.com/boostgo/lite/types/to"
+
+	"github.com/boostgo/convert"
 )
 
 const noLogKey = "LITE_NO_LOG"
@@ -16,5 +17,5 @@ func NoLog(ctx context.Context) context.Context {
 
 // IsNoLog checks if context contain "no log" key
 func IsNoLog(ctx context.Context) bool {
-	return to.Bool(ctx.Value(noLogKey))
+	return convert.Bool(ctx.Value(noLogKey))
 }
