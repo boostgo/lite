@@ -11,7 +11,6 @@ require (
 	github.com/boostgo/httpx v0.0.2
 	github.com/go-playground/validator/v10 v10.22.0
 	github.com/labstack/echo/v4 v4.12.0
-	github.com/rabbitmq/amqp091-go v1.8.1
 	github.com/rs/zerolog v1.33.0
 	github.com/swaggo/echo-swagger v1.4.1
 )
