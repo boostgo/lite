@@ -1,6 +1,7 @@
 package lite
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"sync/atomic"
@@ -10,7 +11,7 @@ import (
 	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/api"
 	"github.com/boostgo/lite/log"
-	"github.com/boostgo/lite/system/trace"
+	"github.com/boostgo/trace"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -20,7 +21,12 @@ var (
 	handler *echo.Echo
 	_debug  = atomic.Bool{}
 	_podID  string
+	_tracer *trace.Tracer
 )
+
+func InitTracer(tracer *trace.Tracer) {
+	_tracer = tracer
+}
 
 func init() {
 	_podID = uuid.New().String()
@@ -33,15 +39,6 @@ func init() {
 		AllowCredentials: true,
 	}))
 	handler.Use(RecoverMiddleware())
-
-	if trace.AmIMaster() {
-		handler.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-			return func(ctx echo.Context) error {
-				trace.SetEchoCtx(ctx, trace.String())
-				return next(ctx)
-			}
-		})
-	}
 
 	handler.RouteNotFound("*", func(ctx echo.Context) error {
 		return api.Error(ctx, errorx.
@@ -98,11 +95,19 @@ func Use(middlewares ...echo.MiddlewareFunc) {
 }
 
 func run(address string) error {
-	if trace.AmIMaster() {
+	if _tracer.AmIMaster() {
 		handler.Use(middleware.RequestIDWithConfig(middleware.RequestIDConfig{
-			Generator:        uuid.NewString,
-			RequestIDHandler: trace.SetEchoCtx,
-			TargetHeader:     trace.Key(),
+			Generator: uuid.NewString,
+			RequestIDHandler: func(ctx echo.Context, traceID string) {
+				ctx.SetRequest(
+					ctx.Request().WithContext(
+						context.WithValue(
+							ctx.Request().Context(),
+							"bgo_trace_id",
+							traceID,
+						)))
+			},
+			TargetHeader: "X-Trace-ID",
 		}))
 	}
 

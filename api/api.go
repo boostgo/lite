@@ -7,9 +7,15 @@ import (
 
 	"github.com/boostgo/convert"
 	"github.com/boostgo/httpx"
-	"github.com/boostgo/lite/system/trace"
+	"github.com/boostgo/trace"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+)
+
+const (
+	traceKeySession = "bgo_trace_id"
+	traceKeyHeader  = "X-Trace-ID"
+	traceKeyCookie  = "trace_id"
 )
 
 // Failure returns response with some error status and convert provided error to
@@ -22,9 +28,9 @@ import (
 // If errors is custom and there is "trace" key in context, it will be ignored for outputError
 func Failure(ctx echo.Context, status int, err error) error {
 	// set trace ID
-	traceID := trace.Get(Context(ctx))
+	traceID := trace.Get(Context(ctx), traceKeySession)
 	if traceID != "" {
-		ctx.Response().Header().Set(trace.Key(), traceID)
+		ctx.Response().Header().Set(traceKeyHeader, traceID)
 		ctx.Response().Header().Set("X-Request-ID", traceID)
 	}
 
@@ -53,9 +59,9 @@ func Error(ctx echo.Context, err error) error {
 // If body is not provided, will be returned empty string
 func Success(ctx echo.Context, status int, body ...any) error {
 	// set trace ID
-	traceID := trace.Get(Context(ctx))
+	traceID := trace.Get(Context(ctx), traceKeySession)
 	if traceID != "" {
-		ctx.Response().Header().Set(trace.Key(), traceID)
+		ctx.Response().Header().Set(traceKeyHeader, traceID)
 		ctx.Response().Header().Set("X-Request-ID", traceID)
 	}
 

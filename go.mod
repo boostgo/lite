@@ -9,6 +9,7 @@ require (
 	github.com/boostgo/convert v1.0.1
 	github.com/boostgo/errorx v1.0.1
 	github.com/boostgo/httpx v0.0.2
+	github.com/boostgo/trace v0.0.3
 	github.com/go-playground/validator/v10 v10.22.0
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/rs/zerolog v1.33.0

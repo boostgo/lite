@@ -6,9 +6,13 @@ import (
 
 	"github.com/boostgo/convert"
 	"github.com/boostgo/errorx"
-	"github.com/boostgo/lite/system/trace"
+	"github.com/boostgo/trace"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
+)
+
+const (
+	traceKeySession = "bgo_trace_id"
 )
 
 // Event represents a log event. It is instanced by one of the level method of
@@ -89,7 +93,7 @@ func (e *event) Ctx(ctx context.Context) Event {
 
 	e.inner.Ctx(ctx)
 
-	traceID := trace.Get(ctx)
+	traceID := trace.Get(ctx, traceKeySession)
 	if traceID != "" {
 		e.Str("trace_id", traceID)
 	}
