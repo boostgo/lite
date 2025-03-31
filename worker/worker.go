@@ -9,13 +9,10 @@ import (
 	"github.com/boostgo/lite/system/trace"
 )
 
-var (
-	Teardown   func(fn func() error) = func(fn func() error) {}
-	AppContext context.Context       = context.Background()
-)
-
 // Worker is job/cron based structure.
 type Worker struct {
+	ctx          context.Context
+	teardown     func(fn func() error)
 	name         string
 	fromStart    bool
 	duration     time.Duration
@@ -28,8 +25,14 @@ type Worker struct {
 }
 
 // New creates [Worker] object
-func New(name string, duration time.Duration, action func(ctx context.Context) error) *Worker {
+func New(
+	ctx context.Context,
+	name string,
+	duration time.Duration,
+	action func(ctx context.Context) error,
+) *Worker {
 	return &Worker{
+		ctx:         ctx,
 		name:        name,
 		duration:    duration,
 		action:      action,
@@ -96,7 +99,7 @@ func (worker *Worker) Run() {
 		ticker := time.NewTicker(worker.duration)
 		defer ticker.Stop()
 
-		Teardown(func() error {
+		worker.teardown(func() error {
 			// teardown will make main goroutine wait till worker will not be done
 			<-worker.done
 			return nil
@@ -104,7 +107,7 @@ func (worker *Worker) Run() {
 
 		for {
 			select {
-			case <-AppContext.Done():
+			case <-worker.ctx.Done():
 				logger.
 					Info().
 					Str("worker", worker.name).
@@ -144,8 +147,14 @@ func (worker *Worker) Run() {
 }
 
 // Run created worker object and runs by itself. It is like "short" version of using [Worker]
-func Run(name string, duration time.Duration, action func(ctx context.Context) error, fromStart ...bool) {
-	worker := New(name, duration, action)
+func Run(
+	ctx context.Context,
+	name string,
+	duration time.Duration,
+	action func(ctx context.Context) error,
+	fromStart ...bool,
+) {
+	worker := New(ctx, name, duration, action)
 	if len(fromStart) > 0 {
 		worker.FromStart(fromStart[0])
 	}
