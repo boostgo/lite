@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"github.com/boostgo/lite/api/validator"
 	"io"
 	"net/http"
 	"strings"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/boostgo/errorx"
 	"github.com/boostgo/httpx"
-	"github.com/boostgo/lite/system/validator"
 	"github.com/labstack/echo/v4"
 )
 

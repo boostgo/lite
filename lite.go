@@ -10,7 +10,7 @@ import (
 	"github.com/boostgo/appx"
 	"github.com/boostgo/errorx"
 	"github.com/boostgo/lite/api"
-	"github.com/boostgo/lite/log"
+	"github.com/boostgo/log"
 	"github.com/boostgo/trace"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"

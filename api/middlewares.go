@@ -9,7 +9,7 @@ import (
 
 	"github.com/boostgo/convert"
 	"github.com/boostgo/httpx"
-	"github.com/boostgo/lite/log"
+	"github.com/boostgo/log"
 	"github.com/labstack/echo/v4"
 )
 
