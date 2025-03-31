@@ -6,10 +6,10 @@ github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 h1:d+Bc7a5rLufV
 github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578/go.mod h1:uGdkoq3SwY9Y+13GIhn11/XLaGBb4BfwItxLd5jeuXE=
 github.com/boostgo/appx v0.0.1 h1:L/PGr9owMRwCht+WB89tNIMS6h3ajQrq1LlHW/mzfwg=
 github.com/boostgo/appx v0.0.1/go.mod h1:562jq2YjvselrqtmlTXJD04zPOUjLTzAVPbxb1NNJK4=
-github.com/boostgo/convert v1.0.0 h1:gRbQsnAKRS1yeUHPwVJN/0lmLtwGdvT0Eu6DWnXwSMw=
-github.com/boostgo/convert v1.0.0/go.mod h1:Ayj4flaIro53vCcGLRxGsdn4N5+zS+AI1kdTpdVoWE8=
-github.com/boostgo/errorx v1.0.0 h1:nULUv9diE6DVAuBhX7JXBTTBtXHr+hTf2L3j8edB9Tk=
-github.com/boostgo/errorx v1.0.0/go.mod h1:Pg8sOGtlSG/32ARtIGOz57/F4R5xmpwQ0S9HpVwR/aU=
+github.com/boostgo/convert v1.0.1 h1:kAjdulGgoEIEszybSMxGjZPVCqhDGET3FeS2oWaqvkU=
+github.com/boostgo/convert v1.0.1/go.mod h1:KVjvc+yiCbfbIbJpzYOVJ1VPaa2ayPcT6wwD3QggSeI=
+github.com/boostgo/errorx v1.0.1 h1:yUdd61im/odzRkv2eWHBBsPtypW7gtZpgAEbkHdL9ps=
+github.com/boostgo/errorx v1.0.1/go.mod h1:8DeXx9oMR2ieS1PCeJsfbVDIZZaua0XZJgTgU4nuUP4=
 github.com/boostgo/httpx v0.0.2 h1:JC/zSph1r3EQisg5G7nok/BkXZPXlaV01aJuk8LkDTs=
 github.com/boostgo/httpx v0.0.2/go.mod h1:IeATVbb49sLwc/ZYFg9PEqRoIzQLowX94qJREie97Gk=
 github.com/coreos/go-systemd/v22 v22.5.0/go.mod h1:Y58oyj3AT4RCenI/lSvhwexgC+NSVTIJ3seZv2GcEnc=
